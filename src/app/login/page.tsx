@@ -2,7 +2,7 @@ import { login, signup, signupWithGoogle } from "./actions";
 
 export default function LoginPage() {
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl m-auto lg:my-50">
+    <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl m-auto my-15 lg:my-50">
       <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
       <form>
         <div className="space-y-4">
