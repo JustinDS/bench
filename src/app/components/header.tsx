@@ -31,7 +31,11 @@ export default function Header() {
             About
           </Link>
           {user ? (
-            <Link href="/" className="hover:underline" onClick={handleLogout}>
+            <Link
+              href="/"
+              className="hover:underline"
+              onClick={() => handleLogout()}
+            >
               Logout
             </Link>
           ) : (
