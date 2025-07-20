@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ url: result.data.authorization_url });
-  } catch (err: any) {
-    console.error("Paystack initialization error:", err.message);
+  } catch (err: unknown) {
+    console.error("Paystack initialization error:", err);
     return NextResponse.json({ error: "Transaction failed" }, { status: 500 });
   }
 }
