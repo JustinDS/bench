@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         amount: 800 * 100,
         plan: process.env.SUBSCRIPTION_PLANS,
         metadata: { userId },
-        callback_url: `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/paystack/webhook`,
+        callback_url: `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/dashboard/verify`,
       }),
     });
 
