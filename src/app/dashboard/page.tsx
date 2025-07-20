@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
-import { signUpForFree, signUpForPremium } from "./actions";
+import { signUpForFree } from "./actions";
 import { UserRole } from "@/lib/enums";
+import Premium from "../components/subscribe/premium";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -32,14 +33,10 @@ export default async function Dashboard() {
           >
             Sign up for free
           </button>
-          <button
-            formAction={signUpForPremium}
-            className="p-4 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition cursor-pointer"
-          >
-            Sign up for premium
-          </button>
         </div>
       </form>
+
+      <Premium email={user?.email} userId={user.id} />
 
       <div>
         {profile?.role === UserRole.Free ? (

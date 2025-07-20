@@ -1,0 +1,35 @@
+// app/api/paystack/initialize/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { email, userId } = body;
+
+  try {
+    const res = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        amount: 800 * 100,
+        plan: process.env.SUBSCRIPTION_PLANS,
+        metadata: { userId },
+        callback_url: `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/paystack/webhook`,
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.data?.authorization_url) {
+      throw new Error(result.message || "Failed to initialize transaction");
+    }
+
+    return NextResponse.json({ url: result.data.authorization_url });
+  } catch (err: any) {
+    console.error("Paystack initialization error:", err.message);
+    return NextResponse.json({ error: "Transaction failed" }, { status: 500 });
+  }
+}
