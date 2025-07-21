@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 import { signUpForFree } from "./actions";
-import { UserRole } from "@/lib/enums";
+import { SubscriptionStatus, UserRole } from "@/lib/enums";
 import Premium from "../components/subscribe/premium";
+import Cancel from "../components/subscribe/cancel";
+import ReActivate from "../components/subscribe/reActivate";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -18,7 +20,7 @@ export default async function Dashboard() {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role,subscription_status")
     .eq("id", user?.id)
     .single();
 
@@ -36,7 +38,20 @@ export default async function Dashboard() {
         </div>
       </form>
 
-      <Premium email={user?.email} userId={user?.id} />
+      {profile?.subscription_status === SubscriptionStatus.inactive ? (
+        <Premium email={user?.email} userId={user?.id} />
+      ) : null}
+
+      {profile?.subscription_status === SubscriptionStatus.active ? (
+        <Cancel />
+      ) : null}
+
+      {profile?.subscription_status === SubscriptionStatus.cancelled ||
+      profile?.subscription_status === SubscriptionStatus.expired ||
+      profile?.subscription_status === SubscriptionStatus.grace ||
+      profile?.subscription_status === SubscriptionStatus.paused ? (
+        <ReActivate />
+      ) : null}
 
       <div>
         {profile?.role === UserRole.Free ? (
