@@ -27,19 +27,10 @@ export async function POST(req: NextRequest) {
 
   console.log("event", event);
 
-  console.error("event", event);
-
-  console.error("event.event", event.event);
-
-  console.error("event.data", event.data);
-
-  console.error("event.data.metadata", event.data.metadata);
-
-  console.error("event.data.metadata?.userId", event.data.metadata?.userId);
-
   if (
     event.event === "subscription.create" ||
-    event.event === "invoice.payment_success"
+    event.event === "invoice.payment_success" ||
+    event.event === "charge.success"
   ) {
     const userId = event.data.metadata?.userId;
 
