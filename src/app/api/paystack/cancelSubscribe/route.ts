@@ -44,11 +44,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.message }, { status: res.status });
   }
 
-  // Optional: update status in DB
-  await (await supabase)
-    .from("profiles")
-    .update({ subscription_status: "cancelled" })
-    .eq("id", user.id);
-
   return NextResponse.json({ success: true });
 }

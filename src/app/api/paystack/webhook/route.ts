@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
 
   console.log("event", event);
 
+  const userId = event.data.metadata?.userId;
+
   if (
     event.event === "subscription.create" ||
     event.event === "invoice.payment_success" ||
     event.event === "charge.success"
   ) {
-    const userId = event.data.metadata?.userId;
-
     const subscriptionStartedAt = new Date(
       event.data.paid_at || event.data.createdAt
     );
@@ -57,6 +57,13 @@ export async function POST(req: NextRequest) {
 
       console.log(`✅ Subscription activated for user: ${userId}`);
     }
+  } else if (event.event === "subscription.not_renew") {
+    await adminSupabase
+      .from("profiles")
+      .update({ subscription_status: "cancelled" })
+      .eq("id", userId);
+
+    console.log(`✅ Subscription cancelled for user: ${userId}`);
   }
 
   return NextResponse.json({ received: true });
