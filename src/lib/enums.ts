@@ -7,8 +7,8 @@ export enum UserRole {
 export enum SubscriptionStatus {
   inactive = "inactive",
   active = "active",
-  grace = "grace",
-  expired = "expired",
+  nonRenewing = "non-renewing",
+  attention = "attention",
+  completed = "completed",
   cancelled = "cancelled",
-  paused = "paused",
 }

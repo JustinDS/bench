@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
-import { signUpForFree } from "./actions";
 import { SubscriptionStatus, UserRole } from "@/lib/enums";
 import Premium from "../components/subscribe/premium";
 import Cancel from "../components/subscribe/cancel";
-import ReActivate from "../components/subscribe/reActivate";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -20,26 +18,36 @@ export default async function Dashboard() {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("role,subscription_status")
+    .select("role,subscription_code")
     .eq("id", user?.id)
     .single();
 
+  let status = SubscriptionStatus.inactive;
+  if (profile) {
+    const paystackRes = await fetch(
+      `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/paystack/subscription/${profile?.subscription_code}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+        cache: "no-store",
+      }
+    );
+
+    const data = await paystackRes.json();
+
+    status = data?.status;
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      {profile?.subscription_status === SubscriptionStatus.inactive ? (
+      {status !== SubscriptionStatus.active ? (
         <Premium email={user?.email} userId={user?.id} />
       ) : null}
 
-      {profile?.subscription_status === SubscriptionStatus.active ? (
-        <Cancel />
-      ) : null}
-
-      {profile?.subscription_status === SubscriptionStatus.cancelled ||
-      profile?.subscription_status === SubscriptionStatus.expired ||
-      profile?.subscription_status === SubscriptionStatus.grace ||
-      profile?.subscription_status === SubscriptionStatus.paused ? (
-        <ReActivate />
-      ) : null}
+      {status === SubscriptionStatus.active ? <Cancel /> : null}
 
       <div>
         {profile?.role === UserRole.Free ? (

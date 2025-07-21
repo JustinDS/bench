@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   } else if (event.event === "subscription.not_renew") {
     await adminSupabase
       .from("profiles")
-      .update({ subscription_status: "cancelled" })
+      .update({ subscription_status: SubscriptionStatus.nonRenewing })
       .eq("id", userId);
 
     console.log(`✅ Subscription cancelled for user: ${userId}`);
