@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id_or_code: string } }
-) {
-  const subscriptionCode = params.id_or_code;
-
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { subscriptionCode } = body;
   try {
     const paystackRes = await fetch(
       `https://api.paystack.co/subscription/${subscriptionCode}`,
@@ -27,6 +24,8 @@ export async function GET(
         { status: paystackRes.status }
       );
     }
+
+    console.log("data", data);
 
     return NextResponse.json(data.data); // You can wrap it if needed
   } catch (err) {

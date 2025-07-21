@@ -25,13 +25,16 @@ export default async function Dashboard() {
   let status = SubscriptionStatus.inactive;
   if (profile) {
     const paystackRes = await fetch(
-      `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/paystack/subscription/${profile?.subscription_code}`,
+      `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/paystack/subscription`,
       {
         headers: {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-        method: "GET",
+        method: "POST",
+        body: JSON.stringify({
+          subscriptionCode: profile?.subscription_code,
+        }),
         cache: "no-store",
       }
     );
