@@ -2,10 +2,13 @@
 
 export default function cancelSubscribe() {
   const handleCancelSubscribe = async () => {
-    const res = await fetch("/api/paystack/cancelSubscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/paystack/cancelSubscribe`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     const data = await res.json();
     if (data.url) {
