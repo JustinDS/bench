@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         email,
         amount: 800 * 100,
         plan: process.env.SUBSCRIPTION_PLANS,
-        metadata: { userId },
+        metadata: { userId: userId },
         callback_url: `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/dashboard/verify`,
       }),
     });
