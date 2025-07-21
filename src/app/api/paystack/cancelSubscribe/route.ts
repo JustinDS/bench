@@ -12,13 +12,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Get subscription_code from DB
-  const { data: subscription_code, error } = await (await supabase)
+  const { data: profile, error } = await (await supabase)
     .from("profiles")
-    .select("subscription_code")
+    .select("subscription_code, email_token")
     .eq("id", user.id)
     .single();
 
-  if (error || !subscription_code) {
+  if (error || !profile.subscription_code || !profile.email_token) {
     return NextResponse.json(
       { error: "Subscription not found" },
       { status: 404 }
@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      code: subscription_code,
+      code: profile.subscription_code,
+      token: profile.email_token,
     }),
   });
 

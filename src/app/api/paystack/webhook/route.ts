@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
 
   console.log("event", event);
 
-  if (event.event === "charge.success") {
+  if (
+    event.event === "subscription.create" ||
+    event.event === "invoice.payment_success" ||
+    event.event === "charge.success"
+  ) {
     const userId = event.data.metadata?.userId;
 
     const subscriptionStartedAt = new Date(
