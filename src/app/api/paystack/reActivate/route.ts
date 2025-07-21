@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
 
   const { data: profile, error } = await (await supabase)
     .from("profiles")
-    .select("subscription_code, subscription_token")
+    .select("subscription_code, email_token")
     .eq("id", user.id)
     .single();
 
-  if (error || !profile?.subscription_code || !profile?.subscription_token) {
+  if (error || !profile?.subscription_code || !profile?.email_token) {
     return NextResponse.json(
       { error: "Subscription info missing" },
       { status: 400 }
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       code: profile.subscription_code,
-      token: profile.subscription_token,
+      token: profile.email_token,
     }),
   });
 
