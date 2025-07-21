@@ -5,6 +5,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { email, userId } = body;
 
+  console.log("email", email);
+  console.log("userId", userId);
+
   try {
     const res = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",

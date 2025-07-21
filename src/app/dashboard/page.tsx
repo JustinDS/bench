@@ -36,7 +36,7 @@ export default async function Dashboard() {
         </div>
       </form>
 
-      <Premium email={user?.email} userId={user.id} />
+      <Premium email={user?.email} userId={user?.id} />
 
       <div>
         {profile?.role === UserRole.Free ? (

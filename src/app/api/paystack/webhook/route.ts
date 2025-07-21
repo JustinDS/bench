@@ -25,15 +25,23 @@ export async function POST(req: NextRequest) {
   // Parse the event after signature check
   const event = JSON.parse(rawBody);
 
+  console.log("event", event);
+
+  console.error("event", event);
+
+  console.error("event.event", event.event);
+
+  console.error("event.data", event.data);
+
+  console.error("event.data.metadata", event.data.metadata);
+
+  console.error("event.data.metadata?.userId", event.data.metadata?.userId);
+
   if (
     event.event === "subscription.create" ||
     event.event === "invoice.payment_success"
   ) {
     const userId = event.data.metadata?.userId;
-
-    // if(user?.id !== userId) {
-    //     //do something
-    // }
 
     if (userId) {
       await adminSupabase
