@@ -43,21 +43,19 @@ export async function POST(req: NextRequest) {
     const graceDays = 3; // Or fetch from DB if user-specific
     const subscriptionExpiresAt = add(baseExpiry, { days: graceDays });
 
-    if (userId) {
-      await adminSupabase
-        .from("profiles")
-        .update({
-          role: UserRole.Premium,
-          subscription_code: event.data.subscription_code,
-          subscription_started_at: subscriptionStartedAt,
-          subscription_expires_at: subscriptionExpiresAt,
-          email_token: event.data.email_token,
-          subscription_status: SubscriptionStatus.active,
-        })
-        .eq("customer_code", customerCode);
+    await adminSupabase
+      .from("profiles")
+      .update({
+        role: UserRole.Premium,
+        subscription_code: event.data.subscription_code,
+        subscription_started_at: subscriptionStartedAt,
+        subscription_expires_at: subscriptionExpiresAt,
+        email_token: event.data.email_token,
+        subscription_status: SubscriptionStatus.active,
+      })
+      .eq("customer_code", customerCode);
 
-      console.log(`✅ Subscription activated for user: ${userId}`);
-    }
+    console.log(`✅ Subscription activated for customerCode: ${customerCode}`);
   } else if (PaystackEvents.PAYMENT_SUCCESSFUL) {
     if (userId) {
       await adminSupabase
