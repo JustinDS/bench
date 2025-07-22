@@ -1,9 +1,14 @@
+import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
+
 import { login, signup, signupWithGoogle } from "./actions";
 
 export default function LoginPage() {
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl m-auto my-15 lg:my-50">
-      <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">Sign In</h1>
+      <h1 className="text-lg text-gray-700 mb-8 text-center">
+        Enter your email and password to sign in
+      </h1>
       <form>
         <div className="space-y-4">
           <input
@@ -12,7 +17,7 @@ export default function LoginPage() {
             required
             type="email"
             placeholder="Email"
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-800 ease-in-out transition-all duration-200"
           />
           <input
             id="password"
@@ -20,23 +25,28 @@ export default function LoginPage() {
             type="password"
             placeholder="Password"
             required
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-800 transition-all ease-in-out duration-200"
           />
           <button
             formAction={login}
-            className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition cursor-pointer"
+            className="w-full bg-gray-700 text-white py-3 rounded-lg hover:bg-gray-700 transition cursor-pointer"
           >
-            Login
+            Sign In
           </button>
-          <button
+          {/* <button
             formAction={signup}
             className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition cursor-pointer"
           >
             Sign up
-          </button>
+          </button> */}
         </div>
       </form>
-      <div className="my-6 text-center text-gray-400">or</div>
+      <form className="text-end py-4">
+        <button type="submit" className="cursor-pointer text-gray-500">
+          Forgot Password
+        </button>
+      </form>
+      {/* <div className="my-6 text-center text-gray-400">or</div> */}
 
       <form action={signupWithGoogle}>
         <button
@@ -51,6 +61,17 @@ export default function LoginPage() {
           </svg>
           <span>Sign in with Google</span>
         </button>
+      </form>
+
+      <form action={signup} className="text-center">
+        <p className="pt-4">
+          not registered?{" "}
+          <span className="font-semibold">
+            <button type="submit" className="cursor-pointer">
+              Create account
+            </button>
+          </span>
+        </p>
       </form>
     </div>
   );

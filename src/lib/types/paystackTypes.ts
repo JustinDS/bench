@@ -1,4 +1,4 @@
-import { PaystackEvents } from "@/lib/enums";
+import { PaystackEvents, SubscriptionStatus } from "@/lib/enums";
 
 export type PaystackPaymentResponseData = {
   authorization_url: string;
@@ -20,7 +20,7 @@ export interface SubscriptionData {
   authorization: PaystackAuthorization;
   domain: string;
   start: number;
-  status: string;
+  status: SubscriptionStatus;
   quantity: number;
   amount: number;
   subscription_code: string;

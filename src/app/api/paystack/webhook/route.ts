@@ -31,10 +31,6 @@ export async function POST(req: NextRequest) {
   const userId = event.data.metadata?.userId;
   const customerCode = event.data.customer?.customer_code;
 
-  //comes in with charge.success first which has the metadata - update customer code here
-  //then comes in with subscription.create which has all the items in to update, but does not have
-  //meta data - look for customercode here and update
-  //test
   if (event.event === PaystackEvents.SUBSCRIPTION_CREATE) {
     const subscriptionStartedAt = new Date(
       event.data.paid_at || event.data.createdAt
@@ -67,13 +63,13 @@ export async function POST(req: NextRequest) {
 
       console.log(`✅ Payment successful: ${userId}`);
     }
-  } else if (event.event === "subscription.not_renew") {
+  } else if (event.event === PaystackEvents.SUBSCRIPTION_NOT_RENEW) {
     await adminSupabase
       .from("profiles")
       .update({ subscription_status: SubscriptionStatus.nonRenewing })
       .eq("customer_code", customerCode);
 
-    console.log(`✅ Subscription cancelled for user: ${userId}`);
+    console.log(`✅ Subscription cancelled for customerCode: ${customerCode}`);
   }
 
   return NextResponse.json({ received: true });
