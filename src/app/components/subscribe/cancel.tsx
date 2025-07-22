@@ -1,5 +1,7 @@
 "use client";
 
+import { getURL } from "@/utils/functions/urlHelper";
+
 export default function cancelSubscribe() {
   const handleCancelSubscribe = async () => {
     const res = await fetch("/api/paystack/cancelSubscribe", {
@@ -11,7 +13,7 @@ export default function cancelSubscribe() {
 
     console.log("cancel data", data);
     if (data) {
-      window.location.href = `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/dashboard`;
+      window.location.href = `${getURL()}/dashboard`;
     } else {
       alert("Failed to cancel subscription");
     }

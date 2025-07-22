@@ -1,4 +1,5 @@
 // app/api/paystack/initialize/route.ts
+import { getURL } from "@/utils/functions/urlHelper";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
         amount: 800 * 100,
         plan: process.env.SUBSCRIPTION_PLANS,
         metadata: { userId: userId },
-        callback_url: `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/dashboard/verify`,
+        callback_url: `${getURL()}/dashboard/verify`,
       }),
     });
 
