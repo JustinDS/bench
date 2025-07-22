@@ -38,9 +38,9 @@ export default function LoginPage() {
       </form>
       <div className="my-6 text-center text-gray-400">or</div>
 
-      <form>
+      <form action={signupWithGoogle}>
         <button
-          formAction={signupWithGoogle}
+          type="submit"
           className="w-full border py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 48 48">

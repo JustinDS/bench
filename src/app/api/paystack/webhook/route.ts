@@ -1,4 +1,4 @@
-import { SubscriptionStatus, UserRole } from "@/lib/enums";
+import { PaystackEvents, SubscriptionStatus, UserRole } from "@/lib/enums";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
@@ -29,8 +29,13 @@ export async function POST(req: NextRequest) {
   console.log("event", event);
 
   const userId = event.data.metadata?.userId;
+  const customerCode = event.data.customer?.customer_code;
 
-  if (event.event === "subscription.create") {
+  //comes in with charge.success first which has the metadata - update customer code here
+  //then comes in with subscription.create which has all the items in to update, but does not have
+  //meta data - look for customercode here and update
+  //test
+  if (event.event === PaystackEvents.SUBSCRIPTION_CREATE) {
     const subscriptionStartedAt = new Date(
       event.data.paid_at || event.data.createdAt
     );
@@ -46,18 +51,29 @@ export async function POST(req: NextRequest) {
           subscription_code: event.data.subscription_code,
           subscription_started_at: subscriptionStartedAt,
           subscription_expires_at: subscriptionExpiresAt,
-          email_token: event.data.authorization?.email_token,
+          email_token: event.data.email_token,
           subscription_status: SubscriptionStatus.active,
+        })
+        .eq("customer_code", customerCode);
+
+      console.log(`✅ Subscription activated for user: ${userId}`);
+    }
+  } else if (PaystackEvents.PAYMENT_SUCCESSFUL) {
+    if (userId) {
+      await adminSupabase
+        .from("profiles")
+        .update({
+          customer_code: customerCode,
         })
         .eq("id", userId);
 
-      console.log(`✅ Subscription activated for user: ${userId}`);
+      console.log(`✅ Payment successful: ${userId}`);
     }
   } else if (event.event === "subscription.not_renew") {
     await adminSupabase
       .from("profiles")
       .update({ subscription_status: SubscriptionStatus.nonRenewing })
-      .eq("id", userId);
+      .eq("customer_code", customerCode);
 
     console.log(`✅ Subscription cancelled for user: ${userId}`);
   }
