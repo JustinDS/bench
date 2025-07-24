@@ -7,14 +7,15 @@ interface BarChartProps {
   chartWidth?: number;
   barHeight?: number;
   barSpacing?: number;
+  showindexSettings: (index: number) => void;
 }
 
 export const BarChart: React.FC<BarChartProps> = ({
   data,
-  showLabelInside = true,
   chartWidth = 600,
   barHeight = 30,
   barSpacing = 15,
+  showindexSettings,
 }) => {
   const chartHeight = data.length * (barHeight + barSpacing);
   const max = Math.max(...data.map((d) => d.value), 1); // prevent divide-by-zero
@@ -36,28 +37,49 @@ export const BarChart: React.FC<BarChartProps> = ({
   };
 
   return (
-    <div>
+    <div className="relative">
       <button onClick={handleExportSvg}>export SVG</button>
+      <div
+        style={{
+          width: chartWidth,
+          height: chartHeight,
+          position: "absolute",
+        }}
+      >
+        {data.map((d, i) => {
+          return (
+            <div
+              key={i}
+              style={{
+                width: chartWidth,
+                height: barHeight,
+                marginBottom: `${barSpacing}px`,
+              }}
+              className="hover:border-2 hover:border-black rounded-lg"
+              onClick={() => showindexSettings(i)}
+            />
+          );
+        })}
+      </div>
       <svg
         ref={svgRef}
         width={chartWidth}
         height={chartHeight}
-        type="image/svg+xml;charset=utf-8"
+        // type="image/svg+xml;charset=utf-8"
       >
         {data.map((d, i) => {
           const barWidth = (d.value / max) * chartWidth;
           const y = i * (barHeight + barSpacing);
-          const labelX = showLabelInside ? 10 : barWidth + 10;
 
           let hasSubLabel = false;
 
-          let labelPosition = barHeight / 2 + 5;
-          let sublabelPosition = barHeight / 2 + 12;
+          let labelPosition = barHeight / 2 + (d.labelPositionY ?? 5);
+          let sublabelPosition = barHeight / 2 + (d?.sublabelPositionY ?? 12);
 
           if (d.sublabel) {
             hasSubLabel = true;
-            labelPosition = barHeight / 2.5 + 5;
-            sublabelPosition = barHeight / 2 + 12;
+            labelPosition = barHeight / 2.5 + (d.labelPositionY ?? 5);
+            sublabelPosition = barHeight / 2 + (d?.sublabelPositionY ?? 12);
           }
 
           return (
@@ -81,29 +103,32 @@ export const BarChart: React.FC<BarChartProps> = ({
                 ry={10}
               />
               <text
-                x={labelX}
+                x={d.labelPositionX ?? 10}
                 y={y + labelPosition}
-                fontSize={14}
+                fontSize={d?.labelFontSize ?? 14}
                 fill={d.labelColour}
+                style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               >
                 {d.label}
               </text>
               {hasSubLabel && (
                 <text
-                  x={labelX}
+                  x={d.sublabelPositionX ?? 10}
                   y={y + sublabelPosition}
-                  fontSize={12}
+                  fontSize={d?.sublabelFontSize ?? 12}
                   fill={d.sublabelColour}
                   opacity={0.8}
+                  style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
                 >
                   {d.sublabel}
                 </text>
               )}
               <text
-                x={chartWidth - 30}
-                y={y + barHeight / 2 + 5}
-                fontSize={14}
+                x={chartWidth - Math.abs(d?.valuePositionX ?? 30)}
+                y={y + barHeight / 2 + (d.valuePositionY ?? 5)}
+                fontSize={d?.valueFontSize ?? 14}
                 fill={d.valueColour}
+                style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               >
                 {d.value}
               </text>

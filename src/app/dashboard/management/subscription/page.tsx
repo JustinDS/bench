@@ -25,7 +25,7 @@ export default async function Dashboard() {
     .eq("id", user?.id)
     .single();
 
-  const paystackRes = await fetch(`${getURL()}api/paystack/subscription`, {
+  const paystackRes = await fetch(`${getURL()}/api/paystack/subscription`, {
     headers: {
       Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
       "Content-Type": "application/json",
