@@ -3,7 +3,6 @@ import { Entry } from "../../chartInputManager/chartInputManager";
 
 interface BarChartProps {
   data: Entry[];
-  showLabelInside?: boolean;
   chartWidth?: number;
   barHeight?: number;
   barSpacing?: number;
@@ -38,7 +37,6 @@ export const BarChart: React.FC<BarChartProps> = ({
 
   return (
     <div className="relative">
-      <button onClick={handleExportSvg}>export SVG</button>
       <div
         style={{
           width: chartWidth,
@@ -109,7 +107,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 fill={d.labelColour}
                 style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               >
-                {d.label}
+                {d?.label}
               </text>
               {hasSubLabel && (
                 <text
@@ -136,6 +134,12 @@ export const BarChart: React.FC<BarChartProps> = ({
           );
         })}
       </svg>
+      <button
+        className="bg-gray-700 text-white py-2 px-2 rounded-lg hover:bg-gray-700 transition cursor-pointer mt-4 mb-4"
+        onClick={handleExportSvg}
+      >
+        Export Chart
+      </button>
     </div>
   );
 };

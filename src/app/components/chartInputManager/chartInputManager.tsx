@@ -75,7 +75,6 @@ export const ChartInputManager = () => {
     key: keyof Entry,
     val: string | number
   ) => {
-    debugger;
     const newEntries = [...entries];
     newEntries[index] = {
       ...newEntries[index],
@@ -114,11 +113,56 @@ export const ChartInputManager = () => {
 
   return (
     <div>
+      {/* Settings */}
+      <div className="flex flex-col gap-4 max-w-7xl mx-auto">
+        <div className="border border-gray-300 p-4 rounded-2xl hover:border-gray-400 transition-all ease-in-out duration-300 bg-gray-200 mt-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-2">
+              <label htmlFor="chart-width" className="w-24">
+                Chart width
+              </label>
+              <input
+                id="chart-width"
+                type="number"
+                value={chartWidth}
+                onChange={(e) => setChartWidth(Number(e.target.value))}
+                className="border rounded px-2 py-1 w-24"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="bar-height" className="w-24">
+                Bar height
+              </label>
+              <input
+                id="bar-height"
+                type="number"
+                value={barHeight}
+                onChange={(e) => setBarHeight(Number(e.target.value))}
+                className="border rounded px-2 py-1 w-24"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="bar-spacing" className="w-24">
+                Bar spacing
+              </label>
+              <input
+                id="bar-spacing"
+                type="number"
+                value={barSpacing}
+                onChange={(e) => setBarSpacing(Number(e.target.value))}
+                className="border rounded px-2 py-1 w-24"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="justify-items-center">
         {/* Chart */}
         <BarChart
           data={entries}
-          showLabelInside={showLabelInside}
           chartWidth={chartWidth}
           barHeight={barHeight}
           barSpacing={barSpacing}
@@ -127,36 +171,47 @@ export const ChartInputManager = () => {
       </div>
 
       <div className="flex flex-col gap-4 max-w-7xl mx-auto">
+        <button
+          onClick={addEntry}
+          className="px-3 py-1 rounded mt-2 flex w-full border border-gray-300 hover:border-gray-500 justify-center cursor-pointer"
+        >
+          <Plus />
+        </button>
+
         {/* Input Fields */}
-        {/* <div className="flex flex-col gap-2">
-          {entries.map((entry, i) => (
-            <div
-              key={i}
-              className="border border-gray-300 p-4 rounded-2xl hover:border-gray-400 transition-all ease-in-out duration-300 bg-gray-200"
-            >
+        {entries[showindexSettings] ? (
+          <div className="flex flex-col gap-2">
+            <div className="border border-gray-300 p-4 rounded-2xl hover:border-gray-400 transition-all ease-in-out duration-300 bg-gray-200">
               <div className="flex">
                 <button
                   type="button"
-                  onClick={() => handleDelete(i)}
+                  onClick={() => handleDelete(showindexSettings)}
                   className="cursor-pointer ml-auto pb-4"
                 >
                   <X className="stroke-gray-500 hover:stroke-gray-800 transition-all ease-in-out duration-300" />
                 </button>
               </div>
-              <div className="flex gap-2 flex-wrap flex-col">
-                <div className="border-b pb-6">
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="border-gray-500 border-b pb-6 pt-6 md:pt-0 md:pb-0 md:border-b-0 md:border-r md:pr-3">
                   <input
                     type="text"
-                    value={entry.label}
-                    onChange={(e) => handleChange(i, "label", e.target.value)}
+                    value={entries[showindexSettings]?.label}
+                    onChange={(e) =>
+                      handleChange(showindexSettings, "label", e.target.value)
+                    }
                     placeholder="Label"
                     className="border rounded px-2 py-1 flex-1 min-w-[150px]"
                   />
                   <input
                     type="color"
-                    value={entry.labelColour || "#000000"}
+                    value={entries[showindexSettings]?.labelColour || "#000000"}
                     onChange={(e) =>
-                      handleChange(i, "labelColour", e.target.value)
+                      handleChange(
+                        showindexSettings,
+                        "labelColour",
+                        e.target.value
+                      )
                     }
                     className="ml-2"
                   />
@@ -164,7 +219,7 @@ export const ChartInputManager = () => {
                     label="Font Size"
                     value={labelFontSize}
                     onChange={(val) => {
-                      handleChange(i, "labelFontSize", val);
+                      handleChange(showindexSettings, "labelFontSize", val);
                       setLabelFontSize(val);
                     }}
                   />
@@ -172,7 +227,7 @@ export const ChartInputManager = () => {
                     label="Label Position X"
                     value={labelPositionX}
                     onChange={(val) => {
-                      handleChange(i, "labelPositionX", val);
+                      handleChange(showindexSettings, "labelPositionX", val);
                       setLabelPositionX(val);
                     }}
                   />
@@ -180,27 +235,37 @@ export const ChartInputManager = () => {
                     label="Label Position Y"
                     value={labelPositionY}
                     onChange={(val) => {
-                      handleChange(i, "labelPositionY", val);
+                      handleChange(showindexSettings, "labelPositionY", val);
                       setLabelPositionY(val);
                     }}
                   />
                 </div>
 
-                <div className="border-b pb-6 pt-6">
+                <div className="border-gray-500 border-b pb-6 pt-6 md:pt-0 md:pb-0 md:border-b-0 md:border-r md:pr-3">
                   <input
                     type="text"
-                    value={entry.sublabel ?? ""}
+                    value={entries[showindexSettings]?.sublabel ?? ""}
                     onChange={(e) =>
-                      handleChange(i, "sublabel", e.target.value)
+                      handleChange(
+                        showindexSettings,
+                        "sublabel",
+                        e.target.value
+                      )
                     }
                     placeholder="Sublabel"
                     className="border rounded px-2 py-1 flex-1 min-w-[150px]"
                   />
                   <input
                     type="color"
-                    value={entry.sublabelColour || "#000000"}
+                    value={
+                      entries[showindexSettings]?.sublabelColour || "#000000"
+                    }
                     onChange={(e) =>
-                      handleChange(i, "sublabelColour", e.target.value)
+                      handleChange(
+                        showindexSettings,
+                        "sublabelColour",
+                        e.target.value
+                      )
                     }
                     className="ml-2"
                   />
@@ -208,7 +273,7 @@ export const ChartInputManager = () => {
                     label="Font Size"
                     value={sublabelFontSize}
                     onChange={(val) => {
-                      handleChange(i, "sublabelFontSize", val);
+                      handleChange(showindexSettings, "sublabelFontSize", val);
                       setSublabelFontSize(val);
                     }}
                   />
@@ -216,7 +281,7 @@ export const ChartInputManager = () => {
                     label="Sublabel Position X"
                     value={sublabelPositionX}
                     onChange={(val) => {
-                      handleChange(i, "sublabelPositionX", val);
+                      handleChange(showindexSettings, "sublabelPositionX", val);
                       setSublabelPositionX(val);
                     }}
                   />
@@ -224,25 +289,31 @@ export const ChartInputManager = () => {
                     label="Sublabel Position Y"
                     value={sublabelPositionY}
                     onChange={(val) => {
-                      handleChange(i, "sublabelPositionY", val);
+                      handleChange(showindexSettings, "sublabelPositionY", val);
                       setSublabelPositionY(val);
                     }}
                   />
                 </div>
 
-                <div className="border-b pb-6 pt-6">
+                <div className="border-gray-500 border-b pb-6 pt-6 md:pt-0 md:pb-0 md:border-b-0">
                   <input
                     type="number"
-                    value={entry.value}
-                    onChange={(e) => handleChange(i, "value", e.target.value)}
+                    value={entries[showindexSettings]?.value}
+                    onChange={(e) =>
+                      handleChange(showindexSettings, "value", e.target.value)
+                    }
                     placeholder="Value"
                     className="border rounded px-2 py-1 w-24"
                   />
                   <input
                     type="color"
-                    value={entry.valueColour || "#000000"}
+                    value={entries[showindexSettings]?.valueColour || "#000000"}
                     onChange={(e) =>
-                      handleChange(i, "valueColour", e.target.value)
+                      handleChange(
+                        showindexSettings,
+                        "valueColour",
+                        e.target.value
+                      )
                     }
                     className="ml-2"
                   />
@@ -250,7 +321,7 @@ export const ChartInputManager = () => {
                     label="Font Size"
                     value={valueFontSize}
                     onChange={(val) => {
-                      handleChange(i, "valueFontSize", val);
+                      handleChange(showindexSettings, "valueFontSize", val);
                       setValueFontSize(val);
                     }}
                   />
@@ -258,7 +329,7 @@ export const ChartInputManager = () => {
                     label="Value Position X"
                     value={valuePositionX}
                     onChange={(val) => {
-                      handleChange(i, "valuePositionX", val);
+                      handleChange(showindexSettings, "valuePositionX", val);
                       setValuePositionX(val);
                     }}
                     initialMin={-100}
@@ -268,291 +339,41 @@ export const ChartInputManager = () => {
                     label="Value Position Y"
                     value={valuePositionY}
                     onChange={(val) => {
-                      handleChange(i, "valuePositionY", val);
+                      handleChange(showindexSettings, "valuePositionY", val);
                       setValuePositionY(val);
                     }}
                   />
                 </div>
               </div>
+
               <div className="pb-6 pt-6">
                 <label>
-                  Foreground Color:
+                  Bar Foreground Color:
                   <input
                     type="color"
-                    value={entry.fgColor || "#4f46e5"}
-                    onChange={(e) => handleChange(i, "fgColor", e.target.value)}
+                    value={entries[showindexSettings]?.fgColor || "#4f46e5"}
+                    onChange={(e) =>
+                      handleChange(showindexSettings, "fgColor", e.target.value)
+                    }
                     className="ml-2"
                   />
                 </label>
 
                 <label>
-                  Background Color:
+                  Bar Background Color:
                   <input
                     type="color"
-                    value={entry.bgColor || "#c7d2fe"}
-                    onChange={(e) => handleChange(i, "bgColor", e.target.value)}
+                    value={entries[showindexSettings]?.bgColor || "#c7d2fe"}
+                    onChange={(e) =>
+                      handleChange(showindexSettings, "bgColor", e.target.value)
+                    }
                     className="ml-2"
                   />
                 </label>
               </div>
             </div>
-          ))}
-          <button
-            onClick={addEntry}
-            className="px-3 py-1 rounded mt-2 flex w-full border border-gray-300 hover:border-gray-500 justify-center cursor-pointer"
-          >
-            <Plus />
-          </button>
-        </div> */}
-
-        <div className="flex flex-col gap-2">
-          <div className="border border-gray-300 p-4 rounded-2xl hover:border-gray-400 transition-all ease-in-out duration-300 bg-gray-200">
-            <div className="flex">
-              <button
-                type="button"
-                onClick={() => handleDelete(showindexSettings)}
-                className="cursor-pointer ml-auto pb-4"
-              >
-                <X className="stroke-gray-500 hover:stroke-gray-800 transition-all ease-in-out duration-300" />
-              </button>
-            </div>
-            <div className="flex gap-2 flex-wrap flex-col">
-              <div className="border-b pb-6">
-                <input
-                  type="text"
-                  value={entries[showindexSettings].label}
-                  onChange={(e) =>
-                    handleChange(showindexSettings, "label", e.target.value)
-                  }
-                  placeholder="Label"
-                  className="border rounded px-2 py-1 flex-1 min-w-[150px]"
-                />
-                <input
-                  type="color"
-                  value={entries[showindexSettings].labelColour || "#000000"}
-                  onChange={(e) =>
-                    handleChange(
-                      showindexSettings,
-                      "labelColour",
-                      e.target.value
-                    )
-                  }
-                  className="ml-2"
-                />
-                <LabeledSlider
-                  label="Font Size"
-                  value={labelFontSize}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "labelFontSize", val);
-                    setLabelFontSize(val);
-                  }}
-                />
-                <LabeledSlider
-                  label="Label Position X"
-                  value={labelPositionX}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "labelPositionX", val);
-                    setLabelPositionX(val);
-                  }}
-                />
-                <LabeledSlider
-                  label="Label Position Y"
-                  value={labelPositionY}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "labelPositionY", val);
-                    setLabelPositionY(val);
-                  }}
-                />
-              </div>
-
-              <div className="border-b pb-6 pt-6">
-                <input
-                  type="text"
-                  value={entries[showindexSettings].sublabel ?? ""}
-                  onChange={(e) =>
-                    handleChange(showindexSettings, "sublabel", e.target.value)
-                  }
-                  placeholder="Sublabel"
-                  className="border rounded px-2 py-1 flex-1 min-w-[150px]"
-                />
-                <input
-                  type="color"
-                  value={entries[showindexSettings].sublabelColour || "#000000"}
-                  onChange={(e) =>
-                    handleChange(
-                      showindexSettings,
-                      "sublabelColour",
-                      e.target.value
-                    )
-                  }
-                  className="ml-2"
-                />
-                <LabeledSlider
-                  label="Font Size"
-                  value={sublabelFontSize}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "sublabelFontSize", val);
-                    setSublabelFontSize(val);
-                  }}
-                />
-                <LabeledSlider
-                  label="Sublabel Position X"
-                  value={sublabelPositionX}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "sublabelPositionX", val);
-                    setSublabelPositionX(val);
-                  }}
-                />
-                <LabeledSlider
-                  label="Sublabel Position Y"
-                  value={sublabelPositionY}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "sublabelPositionY", val);
-                    setSublabelPositionY(val);
-                  }}
-                />
-              </div>
-
-              <div className="border-b pb-6 pt-6">
-                <input
-                  type="number"
-                  value={entries[showindexSettings].value}
-                  onChange={(e) =>
-                    handleChange(showindexSettings, "value", e.target.value)
-                  }
-                  placeholder="Value"
-                  className="border rounded px-2 py-1 w-24"
-                />
-                <input
-                  type="color"
-                  value={entries[showindexSettings].valueColour || "#000000"}
-                  onChange={(e) =>
-                    handleChange(
-                      showindexSettings,
-                      "valueColour",
-                      e.target.value
-                    )
-                  }
-                  className="ml-2"
-                />
-                <LabeledSlider
-                  label="Font Size"
-                  value={valueFontSize}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "valueFontSize", val);
-                    setValueFontSize(val);
-                  }}
-                />
-                <LabeledSlider
-                  label="Value Position X"
-                  value={valuePositionX}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "valuePositionX", val);
-                    setValuePositionX(val);
-                  }}
-                  initialMin={-100}
-                  initialMax={0}
-                />
-                <LabeledSlider
-                  label="Value Position Y"
-                  value={valuePositionY}
-                  onChange={(val) => {
-                    handleChange(showindexSettings, "valuePositionY", val);
-                    setValuePositionY(val);
-                  }}
-                />
-              </div>
-            </div>
-            <div className="pb-6 pt-6">
-              <label>
-                Foreground Color:
-                <input
-                  type="color"
-                  value={entries[showindexSettings].fgColor || "#4f46e5"}
-                  onChange={(e) =>
-                    handleChange(showindexSettings, "fgColor", e.target.value)
-                  }
-                  className="ml-2"
-                />
-              </label>
-
-              <label>
-                Background Color:
-                <input
-                  type="color"
-                  value={entries[showindexSettings].bgColor || "#c7d2fe"}
-                  onChange={(e) =>
-                    handleChange(showindexSettings, "bgColor", e.target.value)
-                  }
-                  className="ml-2"
-                />
-              </label>
-            </div>
           </div>
-          <button
-            onClick={addEntry}
-            className="px-3 py-1 rounded mt-2 flex w-full border border-gray-300 hover:border-gray-500 justify-center cursor-pointer"
-          >
-            <Plus />
-          </button>
-        </div>
-
-        {/* Settings */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="chart-width" className="w-24">
-              Chart width
-            </label>
-            <input
-              id="chart-width"
-              type="number"
-              value={chartWidth}
-              onChange={(e) => setChartWidth(Number(e.target.value))}
-              className="border rounded px-2 py-1 w-24"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label htmlFor="bar-height" className="w-24">
-              Bar height
-            </label>
-            <input
-              id="bar-height"
-              type="number"
-              value={barHeight}
-              onChange={(e) => setBarHeight(Number(e.target.value))}
-              className="border rounded px-2 py-1 w-24"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label htmlFor="bar-spacing" className="w-24">
-              Bar spacing
-            </label>
-            <input
-              id="bar-spacing"
-              type="number"
-              value={barSpacing}
-              onChange={(e) => setBarSpacing(Number(e.target.value))}
-              className="border rounded px-2 py-1 w-24"
-            />
-          </div>
-
-          {/* <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="show-label-inside"
-              checked={showLabelInside}
-              onChange={(e) => setShowLabelInside(e.target.checked)}
-            />
-            <label
-              htmlFor="show-label-inside"
-              className="text-sm text-gray-700"
-            >
-              Show label inside bar
-            </label>
-          </div> */}
-        </div>
+        ) : null}
       </div>
     </div>
   );
