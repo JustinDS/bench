@@ -1,6 +1,7 @@
 export enum UserRole {
   Free = 0,
   Premium = 1,
+  Testers = 2,
   // Admin = 2, etc.
 }
 

@@ -39,7 +39,6 @@ export const ChartInputManager = () => {
       valueColour: "#000000",
     },
   ]);
-  const [showLabelInside, setShowLabelInside] = useState(true);
   const [chartWidth, setChartWidth] = useState(600);
   const [barHeight, setBarHeight] = useState(60);
   const [barSpacing, setBarSpacing] = useState(15);
@@ -106,9 +105,11 @@ export const ChartInputManager = () => {
   };
 
   const handleDelete = (index: number) => {
-    const newEntries = [...entries];
-    newEntries.splice(index, 1);
-    setEntries(newEntries);
+    if (entries.length !== 1) {
+      const newEntries = [...entries];
+      newEntries.splice(index, 1);
+      setEntries(newEntries);
+    }
   };
 
   return (
@@ -118,41 +119,38 @@ export const ChartInputManager = () => {
         <div className="border border-gray-300 p-4 rounded-2xl hover:border-gray-400 transition-all ease-in-out duration-300 bg-gray-200 mt-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-2">
-              <label htmlFor="chart-width" className="w-24">
-                Chart width
-              </label>
-              <input
-                id="chart-width"
-                type="number"
+              <LabeledSlider
+                label="Chart Width"
                 value={chartWidth}
-                onChange={(e) => setChartWidth(Number(e.target.value))}
-                className="border rounded px-2 py-1 w-24"
+                onChange={(val) => {
+                  setChartWidth(Number(val));
+                }}
+                initialMax={1920}
+                initialMin={200}
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <label htmlFor="bar-height" className="w-24">
-                Bar height
-              </label>
-              <input
-                id="bar-height"
-                type="number"
+              <LabeledSlider
+                label="Bar Height"
                 value={barHeight}
-                onChange={(e) => setBarHeight(Number(e.target.value))}
-                className="border rounded px-2 py-1 w-24"
+                onChange={(val) => {
+                  setBarHeight(Number(val));
+                }}
+                initialMax={300}
+                initialMin={10}
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <label htmlFor="bar-spacing" className="w-24">
-                Bar spacing
-              </label>
-              <input
-                id="bar-spacing"
-                type="number"
+              <LabeledSlider
+                label="Gap Spacing"
                 value={barSpacing}
-                onChange={(e) => setBarSpacing(Number(e.target.value))}
-                className="border rounded px-2 py-1 w-24"
+                onChange={(val) => {
+                  setBarSpacing(Number(val));
+                }}
+                initialMax={60}
+                initialMin={0}
               />
             </div>
           </div>
@@ -195,6 +193,7 @@ export const ChartInputManager = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="border-gray-500 border-b pb-6 pt-6 md:pt-0 md:pb-0 md:border-b-0 md:border-r md:pr-3">
                   <input
+                    id="label"
                     type="text"
                     value={entries[showindexSettings]?.label}
                     onChange={(e) =>

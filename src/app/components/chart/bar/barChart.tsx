@@ -71,7 +71,7 @@ export const BarChart: React.FC<BarChartProps> = ({
 
           let hasSubLabel = false;
 
-          let labelPosition = barHeight / 2 + (d.labelPositionY ?? 5);
+          let labelPosition = barHeight / 2 + (d?.labelPositionY ?? 5);
           let sublabelPosition = barHeight / 2 + (d?.sublabelPositionY ?? 12);
 
           if (d.sublabel) {
