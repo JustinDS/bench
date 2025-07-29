@@ -4,22 +4,24 @@ import React, { useEffect, useState } from "react";
 import { BarChart } from "../chart/bar/barChart";
 import { Plus, X } from "lucide-react";
 import { LabeledSlider } from "../slider/slider";
+import { RgbaColor, RgbaColorPicker } from "react-colorful";
+import { PopoverPicker } from "../colorPicker/popoverPicker";
 
 export type Entry = {
   label: string;
-  labelFontSize: number;
+  // labelFontSize: number;
   value: number;
-  valueFontSize: number;
-  valuePositionX?: number;
-  valuePositionY?: number;
+  // valueFontSize: number;
+  // valuePositionX?: number;
+  // valuePositionY?: number;
   sublabel?: string;
-  labelPositionX?: number;
-  labelPositionY?: number;
-  sublabelFontSize?: number;
-  sublabelPositionX?: number;
-  sublabelPositionY?: number;
-  fgColor?: string;
-  bgColor?: string;
+  // labelPositionX?: number;
+  // labelPositionY?: number;
+  // sublabelFontSize?: number;
+  // sublabelPositionX?: number;
+  // sublabelPositionY?: number;
+  fgColor?: RgbaColor;
+  bgColor?: RgbaColor;
   labelColour?: string;
   sublabelColour?: string;
   valueColour?: string;
@@ -29,11 +31,21 @@ export const ChartInputManager = () => {
   const [entries, setEntries] = useState<Entry[]>([
     {
       label: "This machine",
-      labelFontSize: 16,
-      valueFontSize: 16,
+      // labelFontSize: 16,
+      // valueFontSize: 16,
       value: 100,
-      bgColor: "#808080",
-      fgColor: "#4a8050",
+      bgColor: {
+        r: 220,
+        g: 220,
+        b: 220,
+        a: 1,
+      },
+      fgColor: {
+        r: 55,
+        g: 173,
+        b: 73,
+        a: 1,
+      },
       labelColour: "#000000",
       sublabelColour: "#000000",
       valueColour: "#000000",
@@ -50,34 +62,65 @@ export const ChartInputManager = () => {
   const [labelPositionY, setLabelPositionY] = useState(5);
   const [valuePositionX, setValuePositionX] = useState(-30);
   const [valuePositionY, setValuePositionY] = useState(5);
-  const [valueFontSize, setValueFontSize] = useState(-30);
+  const [valueFontSize, setValueFontSize] = useState(16);
+  const [roundedCorners, setRoundedCorners] = useState(5);
   const [showindexSettings, setShowindexSettings] = useState(0);
+
+  const [foreGroundColor, setForeGroundColor] = useState({
+    r: 55,
+    g: 173,
+    b: 73,
+    a: 1,
+  });
+  const [backGroundColor, setBackGroundColor] = useState({
+    r: 220,
+    g: 220,
+    b: 220,
+    a: 1,
+  });
 
   const handleShowSettings = (index: number) => {
     setShowindexSettings(index);
   };
 
   useEffect(() => {
-    setLabelFontSize(entries[showindexSettings].labelFontSize);
-    setSublabelFontSize(entries[showindexSettings]?.sublabelFontSize ?? 14);
-    setSublabelPositionX(entries[showindexSettings]?.sublabelPositionX ?? 10);
-    setSublabelPositionY(entries[showindexSettings]?.sublabelPositionY ?? 12);
-    setLabelPositionX(entries[showindexSettings]?.labelPositionX ?? 10);
-    setLabelPositionY(entries[showindexSettings]?.labelPositionY ?? 5);
-    setValuePositionX(entries[showindexSettings]?.valuePositionX ?? -30);
-    setValuePositionY(entries[showindexSettings].valuePositionY ?? 5);
-    setValueFontSize(entries[showindexSettings].valueFontSize);
+    // setLabelFontSize(entries[showindexSettings].labelFontSize);
+    // setSublabelFontSize(entries[showindexSettings]?.sublabelFontSize ?? 14);
+    // setSublabelPositionX(entries[showindexSettings]?.sublabelPositionX ?? 10);
+    // setSublabelPositionY(entries[showindexSettings]?.sublabelPositionY ?? 12);
+    // setLabelPositionX(entries[showindexSettings]?.labelPositionX ?? 10);
+    // setLabelPositionY(entries[showindexSettings]?.labelPositionY ?? 5);
+    // setValuePositionX(entries[showindexSettings]?.valuePositionX ?? -30);
+    // setValuePositionY(entries[showindexSettings].valuePositionY ?? 5);
+    // setValueFontSize(entries[showindexSettings].valueFontSize);
+    setBackGroundColor(
+      entries[showindexSettings].bgColor ?? {
+        r: 55,
+        g: 173,
+        b: 73,
+        a: 1,
+      }
+    );
+    setForeGroundColor(
+      entries[showindexSettings].fgColor ?? {
+        r: 55,
+        g: 173,
+        b: 73,
+        a: 1,
+      }
+    );
   }, [showindexSettings]);
 
   const handleChange = (
     index: number,
     key: keyof Entry,
-    val: string | number
+    val: string | number | RgbaColor
   ) => {
     const newEntries = [...entries];
+
     newEntries[index] = {
       ...newEntries[index],
-      [key]: key === "value" ? Number(val) : val,
+      [key]: val,
     };
     setEntries(newEntries);
   };
@@ -88,16 +131,28 @@ export const ChartInputManager = () => {
       ...entries,
       {
         label: "",
-        value: 0,
-        labelFontSize: entries[entries.length - 1].labelFontSize,
-        valueFontSize: entries[entries.length - 1].valueFontSize,
-        sublabelFontSize: entries[entries.length - 1].sublabelFontSize,
-        labelPositionX: entries[entries.length - 1].labelPositionX,
-        labelPositionY: entries[entries.length - 1].labelPositionY,
-        sublabelPositionX: entries[entries.length - 1].sublabelPositionX,
-        sublabelPositionY: entries[entries.length - 1].sublabelPositionY,
-        valuePositionX: entries[entries.length - 1].valuePositionX,
-        valuePositionY: entries[entries.length - 1].valuePositionY,
+        value: entries[entries.length - 1].value,
+        // labelFontSize: entries[entries.length - 1].labelFontSize,
+        // valueFontSize: entries[entries.length - 1].valueFontSize,
+        // sublabelFontSize: entries[entries.length - 1].sublabelFontSize,
+        // labelPositionX: entries[entries.length - 1].labelPositionX,
+        // labelPositionY: entries[entries.length - 1].labelPositionY,
+        // sublabelPositionX: entries[entries.length - 1].sublabelPositionX,
+        // sublabelPositionY: entries[entries.length - 1].sublabelPositionY,
+        // valuePositionX: entries[entries.length - 1].valuePositionX,
+        // valuePositionY: entries[entries.length - 1].valuePositionY,
+        bgColor: entries[entries.length - 1].bgColor ?? {
+          r: 220,
+          g: 220,
+          b: 220,
+          a: 1,
+        },
+        fgColor: entries[entries.length - 1].fgColor ?? {
+          r: 55,
+          g: 173,
+          b: 73,
+          a: 1,
+        },
       },
     ]);
 
@@ -164,6 +219,16 @@ export const ChartInputManager = () => {
           chartWidth={chartWidth}
           barHeight={barHeight}
           barSpacing={barSpacing}
+          labelFontSize={labelFontSize}
+          valueFontSize={valueFontSize}
+          labelPositionX={labelPositionX}
+          labelPositionY={labelPositionY}
+          sublabelFontSize={sublabelFontSize}
+          sublabelPositionX={sublabelPositionX}
+          sublabelPositionY={sublabelPositionY}
+          valuePositionX={valuePositionX}
+          valuePositionY={valuePositionY}
+          roundedCorners={roundedCorners}
           showindexSettings={handleShowSettings}
         />
       </div>
@@ -218,7 +283,7 @@ export const ChartInputManager = () => {
                     label="Font Size"
                     value={labelFontSize}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "labelFontSize", val);
+                      // handleChange(showindexSettings, "labelFontSize", val);
                       setLabelFontSize(val);
                     }}
                   />
@@ -226,7 +291,7 @@ export const ChartInputManager = () => {
                     label="Label Position X"
                     value={labelPositionX}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "labelPositionX", val);
+                      // handleChange(showindexSettings, "labelPositionX", val);
                       setLabelPositionX(val);
                     }}
                   />
@@ -234,7 +299,7 @@ export const ChartInputManager = () => {
                     label="Label Position Y"
                     value={labelPositionY}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "labelPositionY", val);
+                      // handleChange(showindexSettings, "labelPositionY", val);
                       setLabelPositionY(val);
                     }}
                   />
@@ -272,7 +337,7 @@ export const ChartInputManager = () => {
                     label="Font Size"
                     value={sublabelFontSize}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "sublabelFontSize", val);
+                      // handleChange(showindexSettings, "sublabelFontSize", val);
                       setSublabelFontSize(val);
                     }}
                   />
@@ -280,7 +345,7 @@ export const ChartInputManager = () => {
                     label="Sublabel Position X"
                     value={sublabelPositionX}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "sublabelPositionX", val);
+                      // handleChange(showindexSettings, "sublabelPositionX", val);
                       setSublabelPositionX(val);
                     }}
                   />
@@ -288,7 +353,7 @@ export const ChartInputManager = () => {
                     label="Sublabel Position Y"
                     value={sublabelPositionY}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "sublabelPositionY", val);
+                      // handleChange(showindexSettings, "sublabelPositionY", val);
                       setSublabelPositionY(val);
                     }}
                   />
@@ -320,7 +385,7 @@ export const ChartInputManager = () => {
                     label="Font Size"
                     value={valueFontSize}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "valueFontSize", val);
+                      // handleChange(showindexSettings, "valueFontSize", val);
                       setValueFontSize(val);
                     }}
                   />
@@ -328,7 +393,7 @@ export const ChartInputManager = () => {
                     label="Value Position X"
                     value={valuePositionX}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "valuePositionX", val);
+                      // handleChange(showindexSettings, "valuePositionX", val);
                       setValuePositionX(val);
                     }}
                     initialMin={-100}
@@ -338,7 +403,7 @@ export const ChartInputManager = () => {
                     label="Value Position Y"
                     value={valuePositionY}
                     onChange={(val) => {
-                      handleChange(showindexSettings, "valuePositionY", val);
+                      // handleChange(showindexSettings, "valuePositionY", val);
                       setValuePositionY(val);
                     }}
                   />
@@ -346,27 +411,35 @@ export const ChartInputManager = () => {
               </div>
 
               <div className="pb-6 pt-6">
-                <label>
+                <LabeledSlider
+                  label="Rounded Corners"
+                  value={roundedCorners}
+                  onChange={(val) => {
+                    setRoundedCorners(val);
+                  }}
+                  initialMax={20}
+                  initialMin={0}
+                />
+
+                <label className="flex">
                   Bar Foreground Color:
-                  <input
-                    type="color"
-                    value={entries[showindexSettings]?.fgColor || "#4f46e5"}
-                    onChange={(e) =>
-                      handleChange(showindexSettings, "fgColor", e.target.value)
-                    }
-                    className="ml-2"
+                  <PopoverPicker
+                    color={foreGroundColor}
+                    onChange={(e) => {
+                      handleChange(showindexSettings, "fgColor", e);
+                      setForeGroundColor(e);
+                    }}
                   />
                 </label>
 
-                <label>
+                <label className="flex">
                   Bar Background Color:
-                  <input
-                    type="color"
-                    value={entries[showindexSettings]?.bgColor || "#c7d2fe"}
-                    onChange={(e) =>
-                      handleChange(showindexSettings, "bgColor", e.target.value)
-                    }
-                    className="ml-2"
+                  <PopoverPicker
+                    color={backGroundColor}
+                    onChange={(e) => {
+                      handleChange(showindexSettings, "bgColor", e);
+                      setBackGroundColor(e);
+                    }}
                   />
                 </label>
               </div>

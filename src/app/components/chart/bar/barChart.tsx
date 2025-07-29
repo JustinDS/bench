@@ -6,6 +6,16 @@ interface BarChartProps {
   chartWidth?: number;
   barHeight?: number;
   barSpacing?: number;
+  labelFontSize: number;
+  valueFontSize: number;
+  valuePositionX: number;
+  valuePositionY: number;
+  labelPositionX: number;
+  labelPositionY: number;
+  sublabelFontSize: number;
+  sublabelPositionX: number;
+  sublabelPositionY: number;
+  roundedCorners: number;
   showindexSettings: (index: number) => void;
 }
 
@@ -14,6 +24,16 @@ export const BarChart: React.FC<BarChartProps> = ({
   chartWidth = 600,
   barHeight = 30,
   barSpacing = 15,
+  labelFontSize,
+  valueFontSize,
+  labelPositionX,
+  labelPositionY,
+  sublabelFontSize,
+  sublabelPositionX,
+  sublabelPositionY,
+  valuePositionX,
+  valuePositionY,
+  roundedCorners,
   showindexSettings,
 }) => {
   const chartHeight = data.length * (barHeight + barSpacing);
@@ -71,13 +91,13 @@ export const BarChart: React.FC<BarChartProps> = ({
 
           let hasSubLabel = false;
 
-          let labelPosition = barHeight / 2 + (d?.labelPositionY ?? 5);
-          let sublabelPosition = barHeight / 2 + (d?.sublabelPositionY ?? 12);
+          let labelPosition = barHeight / 2 + (labelPositionY ?? 5);
+          let sublabelPosition = barHeight / 2 + (sublabelPositionY ?? 12);
 
           if (d.sublabel) {
             hasSubLabel = true;
-            labelPosition = barHeight / 2.5 + (d.labelPositionY ?? 5);
-            sublabelPosition = barHeight / 2 + (d?.sublabelPositionY ?? 12);
+            labelPosition = barHeight / 2.5 + (labelPositionY ?? 5);
+            sublabelPosition = barHeight / 2 + (sublabelPositionY ?? 12);
           }
 
           return (
@@ -87,23 +107,29 @@ export const BarChart: React.FC<BarChartProps> = ({
                 y={y}
                 width={chartWidth}
                 height={barHeight}
-                fill={d.bgColor || "#e0e0e0"}
-                rx={10}
-                ry={10}
+                fill={
+                  `rgba(${d?.bgColor?.r},${d?.bgColor?.g},${d?.bgColor?.b},${d?.bgColor?.a})` ||
+                  "#e0e0e0"
+                }
+                rx={roundedCorners}
+                ry={roundedCorners}
               />
               <rect
                 x={0}
                 y={y}
                 width={barWidth}
                 height={barHeight}
-                fill={d.fgColor || "#4f46e5"}
-                rx={10}
-                ry={10}
+                fill={
+                  `rgba(${d?.fgColor?.r},${d?.fgColor?.g},${d?.fgColor?.b},${d?.fgColor?.a})` ||
+                  "#4f46e5"
+                }
+                rx={roundedCorners}
+                ry={roundedCorners}
               />
               <text
-                x={d.labelPositionX ?? 10}
+                x={labelPositionX ?? 10}
                 y={y + labelPosition}
-                fontSize={d?.labelFontSize ?? 14}
+                fontSize={labelFontSize ?? 14}
                 fill={d.labelColour}
                 style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               >
@@ -111,9 +137,9 @@ export const BarChart: React.FC<BarChartProps> = ({
               </text>
               {hasSubLabel && (
                 <text
-                  x={d.sublabelPositionX ?? 10}
+                  x={sublabelPositionX ?? 10}
                   y={y + sublabelPosition}
-                  fontSize={d?.sublabelFontSize ?? 12}
+                  fontSize={sublabelFontSize ?? 12}
                   fill={d.sublabelColour}
                   opacity={0.8}
                   style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
@@ -122,9 +148,9 @@ export const BarChart: React.FC<BarChartProps> = ({
                 </text>
               )}
               <text
-                x={chartWidth - Math.abs(d?.valuePositionX ?? 30)}
-                y={y + barHeight / 2 + (d.valuePositionY ?? 5)}
-                fontSize={d?.valueFontSize ?? 14}
+                x={chartWidth - Math.abs(valuePositionX ?? 30)}
+                y={y + barHeight / 2 + (valuePositionY ?? 5)}
+                fontSize={valueFontSize ?? 14}
                 fill={d.valueColour}
                 style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               >
