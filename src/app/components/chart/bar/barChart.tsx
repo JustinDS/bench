@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { Entry } from "../../chartInputManager/chartInputManager";
+import { useFont } from "@/app/contexts/fontContext";
 
 interface BarChartProps {
   data: Entry[];
@@ -36,6 +37,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   roundedCorners,
   showindexSettings,
 }) => {
+  const { font } = useFont();
   const chartHeight = data.length * (barHeight + barSpacing);
   const max = Math.max(...data.map((d) => d.value), 1); // prevent divide-by-zero
   const svgRef = useRef(null);
@@ -85,6 +87,14 @@ export const BarChart: React.FC<BarChartProps> = ({
         height={chartHeight}
         // type="image/svg+xml;charset=utf-8"
       >
+        <defs>
+          <style>{`
+          @font-face {
+            font-family: 'MyFont';
+            src: url(${font}) format('truetype');
+          }
+        `}</style>
+        </defs>
         {data.map((d, i) => {
           const barWidth = (d.value / max) * chartWidth;
           const y = i * (barHeight + barSpacing);
@@ -131,7 +141,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 y={y + labelPosition}
                 fontSize={labelFontSize ?? 14}
                 fill={d.labelColour}
-                style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+                style={{ fontFamily: "MyFont" }}
               >
                 {d?.label}
               </text>
@@ -142,7 +152,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                   fontSize={sublabelFontSize ?? 12}
                   fill={d.sublabelColour}
                   opacity={0.8}
-                  style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+                  style={{ fontFamily: "MyFont" }}
                 >
                   {d.sublabel}
                 </text>
@@ -152,7 +162,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 y={y + barHeight / 2 + (valuePositionY ?? 5)}
                 fontSize={valueFontSize ?? 14}
                 fill={d.valueColour}
-                style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+                style={{ fontFamily: "MyFont" }}
               >
                 {d.value}
               </text>

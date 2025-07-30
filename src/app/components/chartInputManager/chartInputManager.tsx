@@ -27,6 +27,9 @@ export type Entry = {
   valueColour?: string;
 };
 
+// export interface ChartInputManagerProps {
+// }
+
 export const ChartInputManager = () => {
   const [entries, setEntries] = useState<Entry[]>([
     {

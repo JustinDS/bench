@@ -1,6 +1,26 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ChartInputManager } from "../components/chartInputManager/chartInputManager";
+import FontPicker from "../components/fontPicker/fontPicker";
+import ClientDashboard from "./pageClient";
+
+export interface WebFont {
+  family: string;
+  variants: string[];
+  subsets: string[];
+  version: string;
+  lastModified: string;
+  files: {
+    [variant: string]: string;
+  };
+  category: string;
+  kind: string;
+  menu: string;
+}
+
+export interface WebFontItem {
+  items: WebFont[];
+}
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -23,9 +43,25 @@ export default async function Dashboard() {
 
   const status = profile?.subscription_status;
 
+  const apiKey = process.env.GOOGLE_FONTS_API_KEY;
+  const googleFontsResponse = await fetch(
+    `https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`,
+    {
+      method: "GET",
+      cache: "force-cache",
+    }
+  );
+
+  const googleFonts: WebFontItem = await googleFontsResponse.json();
+
+  const fontFamilies = googleFonts.items.map((font) => font);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <ChartInputManager />
+      <ClientDashboard
+        fonts={fontFamilies}
+        selectedFont={fontFamilies[0].family}
+      />
     </div>
   );
 }
