@@ -19,14 +19,18 @@ const FontPicker = ({ fonts, selectedFont }: FontPickerProps) => {
 
       const fontFile = font?.files["regular"];
 
-      const googleFontsResponse = await fetch(`/api/font/ttf`, {
-        method: "POST",
-        body: JSON.stringify({
-          fontUrl: fontFile,
-        }),
-      });
+      try {
+        const googleFontsResponse = await fetch(`/api/font/ttf`, {
+          method: "POST",
+          body: JSON.stringify({
+            fontUrl: fontFile,
+          }),
+        });
 
-      setFont(await googleFontsResponse.text());
+        setFont(await googleFontsResponse.text());
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     handleFetch();
