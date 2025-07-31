@@ -68,6 +68,19 @@ export const ChartInputManager = () => {
   const [valueFontSize, setValueFontSize] = useState(16);
   const [roundedCorners, setRoundedCorners] = useState(5);
   const [showindexSettings, setShowindexSettings] = useState(0);
+  const [chartTitleHeight, setChartTitleHeight] = useState(0);
+
+  const [chartTitle, setChartTitle] = useState("");
+  const [chartTitleColour, setChartTitleColour] = useState("#000000");
+  const [chartTitleFontSize, setChartTitleFontSize] = useState(16);
+  const [chartTitlePositionX, setChartTitlePositionX] = useState(10);
+  const [chartTitlePositionY, setChartTitlePositionY] = useState(0);
+
+  const [chartSubTitle, setChartSubTitle] = useState("");
+  const [chartSubTitleColour, setChartSubTitleColour] = useState("#000000");
+  const [chartSubTitleFontSize, setChartSubTitleFontSize] = useState(14);
+  const [chartSubTitlePositionX, setChartSubTitlePositionX] = useState(10);
+  const [chartSubTitlePositionY, setChartSubTitlePositionY] = useState(0);
 
   const [foreGroundColor, setForeGroundColor] = useState({
     r: 55,
@@ -215,6 +228,105 @@ export const ChartInputManager = () => {
         </div>
       </div>
 
+      {/* Title section */}
+      <div className="flex flex-col gap-4 max-w-7xl mx-auto">
+        <div className="border border-gray-300 p-4 rounded-2xl hover:border-gray-400 transition-all ease-in-out duration-300 bg-gray-200 mt-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-2">
+              <LabeledSlider
+                label="Title Section Height"
+                value={chartTitleHeight}
+                onChange={(val) => {
+                  setChartTitleHeight(Number(val));
+                }}
+                initialMax={200}
+                initialMin={0}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <input
+                id="chart-title"
+                type="text"
+                value={chartTitle}
+                onChange={(e) => setChartTitle(e.target.value)}
+                placeholder="Title"
+                className="border rounded px-2 py-1 flex-1 min-w-[150px]"
+              />
+              <input
+                type="color"
+                value={chartTitleColour || "#000000"}
+                onChange={(e) => setChartTitleColour(e.target.value)}
+                className="ml-2"
+              />
+              <LabeledSlider
+                label="Title Font Size"
+                value={chartTitleFontSize}
+                onChange={(val) => {
+                  setChartTitleFontSize(val);
+                }}
+              />
+              <LabeledSlider
+                label="Title Position X"
+                value={chartTitlePositionX}
+                onChange={(val) => {
+                  // handleChange(showindexSettings, "labelPositionX", val);
+                  setChartTitlePositionX(val);
+                }}
+              />
+              <LabeledSlider
+                label="Title Position Y"
+                value={chartTitlePositionY}
+                onChange={(val) => {
+                  // handleChange(showindexSettings, "labelPositionY", val);
+                  setChartTitlePositionY(val);
+                }}
+              />
+            </div>
+            <div className="flex flex-col">
+              <input
+                id="chart-subtitle"
+                type="text"
+                value={chartSubTitle}
+                onChange={(e) => setChartSubTitle(e.target.value)}
+                placeholder="Subtitle"
+                className="border rounded px-2 py-1 flex-1 min-w-[150px]"
+              />
+              <input
+                type="color"
+                value={chartSubTitleColour || "#000000"}
+                onChange={(e) => setChartSubTitleColour(e.target.value)}
+                className="ml-2"
+              />
+              <LabeledSlider
+                label="Subtitle Font Size"
+                value={chartSubTitleFontSize}
+                onChange={(val) => {
+                  setChartSubTitleFontSize(val);
+                }}
+              />
+              <LabeledSlider
+                label="Subtitle Position X"
+                value={chartSubTitlePositionX}
+                onChange={(val) => {
+                  // handleChange(showindexSettings, "labelPositionX", val);
+                  setChartSubTitlePositionX(val);
+                }}
+              />
+              <LabeledSlider
+                label="Subtitle Position Y"
+                value={chartSubTitlePositionY}
+                onChange={(val) => {
+                  // handleChange(showindexSettings, "labelPositionY", val);
+                  setChartSubTitlePositionY(val);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="justify-items-center">
         {/* Chart */}
         <BarChart
@@ -232,6 +344,17 @@ export const ChartInputManager = () => {
           valuePositionX={valuePositionX}
           valuePositionY={valuePositionY}
           roundedCorners={roundedCorners}
+          chartTitleHeight={chartTitleHeight}
+          chartTitle={chartTitle}
+          chartTitleColour={chartTitleColour}
+          chartTitleFontSize={chartTitleFontSize}
+          chartTitlePositionX={chartTitlePositionX}
+          chartTitlePositionY={chartTitlePositionY}
+          chartSubTitle={chartSubTitle}
+          chartSubTitleColour={chartSubTitleColour}
+          chartSubTitleFontSize={chartSubTitleFontSize}
+          chartSubTitlePositionX={chartSubTitlePositionX}
+          chartSubTitlePositionY={chartSubTitlePositionY}
           showindexSettings={handleShowSettings}
         />
       </div>

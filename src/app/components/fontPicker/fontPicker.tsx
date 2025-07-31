@@ -19,6 +19,8 @@ const FontPicker = ({ fonts, selectedFont }: FontPickerProps) => {
 
       const fontFile = font?.files["regular"];
 
+      console.log("font", font);
+
       try {
         const googleFontsResponse = await fetch(`/api/font/ttf`, {
           method: "POST",
@@ -35,6 +37,23 @@ const FontPicker = ({ fonts, selectedFont }: FontPickerProps) => {
 
     handleFetch();
   }, [fontFamilies, selectedFontFamily, setFont]);
+
+  useEffect(() => {
+    // const font = fontFamilies.find((x) => x.family === selectedFontFamily);
+    const fontLink = `https://fonts.googleapis.com/css2?family=${selectedFontFamily.replace(
+      / /g,
+      "+"
+    )}:wght@400&display=swap`;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = fontLink;
+
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, [selectedFontFamily]);
 
   return (
     <div>

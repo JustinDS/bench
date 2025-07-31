@@ -17,6 +17,19 @@ interface BarChartProps {
   sublabelPositionX: number;
   sublabelPositionY: number;
   roundedCorners: number;
+  chartTitleHeight: number;
+
+  chartSubTitle: string;
+  chartSubTitleColour: string;
+  chartSubTitleFontSize: number;
+  chartSubTitlePositionX: number;
+  chartSubTitlePositionY: number;
+
+  chartTitle: string;
+  chartTitleColour: string;
+  chartTitleFontSize: number;
+  chartTitlePositionX: number;
+  chartTitlePositionY: number;
   showindexSettings: (index: number) => void;
 }
 
@@ -35,6 +48,19 @@ export const BarChart: React.FC<BarChartProps> = ({
   valuePositionX,
   valuePositionY,
   roundedCorners,
+  chartTitleHeight,
+
+  chartTitle,
+  chartTitleColour,
+  chartTitleFontSize,
+  chartTitlePositionX,
+  chartTitlePositionY,
+
+  chartSubTitle,
+  chartSubTitleColour,
+  chartSubTitleFontSize,
+  chartSubTitlePositionX,
+  chartSubTitlePositionY,
   showindexSettings,
 }) => {
   const { font } = useFont();
@@ -57,6 +83,18 @@ export const BarChart: React.FC<BarChartProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  let chartTitlePosition = chartTitleHeight / 2 + (chartTitlePositionY ?? 5);
+  let chartSubTitlePosition =
+    chartTitleHeight / 2 + (chartSubTitlePositionY ?? 12);
+  let hasChartSubTitle = false;
+
+  if (chartSubTitle) {
+    hasChartSubTitle = true;
+    chartTitlePosition = chartTitleHeight / 2.5 + (chartTitlePositionY ?? 5);
+    chartSubTitlePosition =
+      chartTitleHeight / 2 + (chartSubTitlePositionY ?? 12);
+  }
+
   return (
     <div className="relative">
       <div
@@ -64,6 +102,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           width: chartWidth,
           height: chartHeight,
           position: "absolute",
+          marginTop: chartTitleHeight,
         }}
       >
         {data.map((d, i) => {
@@ -84,7 +123,7 @@ export const BarChart: React.FC<BarChartProps> = ({
       <svg
         ref={svgRef}
         width={chartWidth}
-        height={chartHeight}
+        height={chartHeight + chartTitleHeight}
         // type="image/svg+xml;charset=utf-8"
       >
         <defs>
@@ -95,9 +134,33 @@ export const BarChart: React.FC<BarChartProps> = ({
           }
         `}</style>
         </defs>
+        <g>
+          <rect width="100%" height="100%" fill={"rgba(0,0,0,0.5)"} />
+          <text
+            x={chartTitlePositionX}
+            y={chartTitlePosition}
+            fontSize={chartTitleFontSize ?? 14}
+            style={{ fontFamily: "MyFont" }}
+            fill={chartTitleColour || "#e0e0e0"}
+          >
+            {chartTitle}
+          </text>
+          {hasChartSubTitle ? (
+            <text
+              x={chartSubTitlePositionX}
+              y={chartSubTitlePosition}
+              fontSize={chartSubTitleFontSize ?? 12}
+              style={{ fontFamily: "MyFont" }}
+              fill={chartSubTitleColour || "#e0e0e0"}
+            >
+              {chartSubTitle}
+            </text>
+          ) : null}
+        </g>
+
         {data.map((d, i) => {
           const barWidth = (d.value / max) * chartWidth;
-          const y = i * (barHeight + barSpacing);
+          const y = i * (barHeight + barSpacing) + chartTitleHeight;
 
           let hasSubLabel = false;
 
@@ -162,6 +225,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 y={y + barHeight / 2 + (valuePositionY ?? 5)}
                 fontSize={valueFontSize ?? 14}
                 fill={d.valueColour}
+                textAnchor="end"
                 style={{ fontFamily: "MyFont" }}
               >
                 {d.value}
