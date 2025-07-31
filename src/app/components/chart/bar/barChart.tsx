@@ -1,12 +1,14 @@
 import React, { useRef } from "react";
 import { Entry } from "../../chartInputManager/chartInputManager";
 import { useFont } from "@/app/contexts/fontContext";
+import { RgbaColor } from "react-colorful";
 
 interface BarChartProps {
   data: Entry[];
   chartWidth?: number;
   barHeight?: number;
   barSpacing?: number;
+  barWidth?: number;
   labelFontSize: number;
   valueFontSize: number;
   valuePositionX: number;
@@ -30,6 +32,8 @@ interface BarChartProps {
   chartTitleFontSize: number;
   chartTitlePositionX: number;
   chartTitlePositionY: number;
+  backgroundColour: RgbaColor;
+  hasBackground: boolean;
   showindexSettings: (index: number) => void;
 }
 
@@ -37,7 +41,10 @@ export const BarChart: React.FC<BarChartProps> = ({
   data,
   chartWidth = 600,
   barHeight = 30,
+  barWidth = 600,
   barSpacing = 15,
+  backgroundColour,
+  hasBackground,
   labelFontSize,
   valueFontSize,
   labelPositionX,
@@ -67,6 +74,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   const chartHeight = data.length * (barHeight + barSpacing);
   const max = Math.max(...data.map((d) => d.value), 1); // prevent divide-by-zero
   const svgRef = useRef(null);
+  const barTotalWidth = barWidth;
 
   const handleExportSvg = () => {
     const svg = svgRef.current;
@@ -92,7 +100,7 @@ export const BarChart: React.FC<BarChartProps> = ({
     hasChartSubTitle = true;
     chartTitlePosition = chartTitleHeight / 2.5 + (chartTitlePositionY ?? 5);
     chartSubTitlePosition =
-      chartTitleHeight / 2 + (chartSubTitlePositionY ?? 12);
+      chartTitleHeight / 2 + (chartSubTitlePositionY ?? 15);
   }
 
   return (
@@ -110,9 +118,11 @@ export const BarChart: React.FC<BarChartProps> = ({
             <div
               key={i}
               style={{
-                width: chartWidth,
+                width: barTotalWidth,
                 height: barHeight,
                 marginBottom: `${barSpacing}px`,
+                marginLeft: "auto",
+                marginRight: "auto",
               }}
               className="hover:border-2 hover:border-black rounded-lg"
               onClick={() => showindexSettings(i)}
@@ -135,7 +145,14 @@ export const BarChart: React.FC<BarChartProps> = ({
         `}</style>
         </defs>
         <g>
-          <rect width="100%" height="100%" fill={"rgba(0,0,0,0.5)"} />
+          {hasBackground ? (
+            <rect
+              width="100%"
+              height="100%"
+              fill={`rgba(${backgroundColour.r},${backgroundColour.g},${backgroundColour.b},${backgroundColour.a})`}
+            />
+          ) : null}
+
           <text
             x={chartTitlePositionX}
             y={chartTitlePosition}
@@ -159,7 +176,7 @@ export const BarChart: React.FC<BarChartProps> = ({
         </g>
 
         {data.map((d, i) => {
-          const barWidth = (d.value / max) * chartWidth;
+          const barWidth = (d.value / max) * barTotalWidth;
           const y = i * (barHeight + barSpacing) + chartTitleHeight;
 
           let hasSubLabel = false;
@@ -176,9 +193,9 @@ export const BarChart: React.FC<BarChartProps> = ({
           return (
             <g key={i}>
               <rect
-                x={0}
+                x={chartWidth / 2 - barTotalWidth / 2}
                 y={y}
-                width={chartWidth}
+                width={barTotalWidth}
                 height={barHeight}
                 fill={
                   `rgba(${d?.bgColor?.r},${d?.bgColor?.g},${d?.bgColor?.b},${d?.bgColor?.a})` ||
@@ -186,9 +203,10 @@ export const BarChart: React.FC<BarChartProps> = ({
                 }
                 rx={roundedCorners}
                 ry={roundedCorners}
+                className="z-10 hover:stroke-black"
               />
               <rect
-                x={0}
+                x={chartWidth / 2 - barTotalWidth / 2}
                 y={y}
                 width={barWidth}
                 height={barHeight}
@@ -198,9 +216,10 @@ export const BarChart: React.FC<BarChartProps> = ({
                 }
                 rx={roundedCorners}
                 ry={roundedCorners}
+                className="z-10"
               />
               <text
-                x={labelPositionX ?? 10}
+                x={chartWidth / 2 - barTotalWidth / 2 + (labelPositionX ?? 10)}
                 y={y + labelPosition}
                 fontSize={labelFontSize ?? 14}
                 fill={d.labelColour}
@@ -210,7 +229,11 @@ export const BarChart: React.FC<BarChartProps> = ({
               </text>
               {hasSubLabel && (
                 <text
-                  x={sublabelPositionX ?? 10}
+                  x={
+                    chartWidth / 2 -
+                    barTotalWidth / 2 +
+                    (sublabelPositionX ?? 10)
+                  }
                   y={y + sublabelPosition}
                   fontSize={sublabelFontSize ?? 12}
                   fill={d.sublabelColour}
@@ -221,7 +244,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 </text>
               )}
               <text
-                x={chartWidth - Math.abs(valuePositionX ?? 30)}
+                x={chartWidth / 2 + barTotalWidth / 2 + (valuePositionX ?? 30)}
                 y={y + barHeight / 2 + (valuePositionY ?? 5)}
                 fontSize={valueFontSize ?? 14}
                 fill={d.valueColour}
