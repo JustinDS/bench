@@ -20,18 +20,16 @@ interface BarChartProps {
   sublabelPositionY: number;
   roundedCorners: number;
   chartTitleHeight: number;
-
-  chartSubTitle: string;
-  chartSubTitleColour: string;
-  chartSubTitleFontSize: number;
-  chartSubTitlePositionX: number;
-  chartSubTitlePositionY: number;
-
   chartTitle: string;
   chartTitleColour: string;
   chartTitleFontSize: number;
   chartTitlePositionX: number;
   chartTitlePositionY: number;
+  chartSubTitle: string;
+  chartSubTitleColour: string;
+  chartSubTitleFontSize: number;
+  chartSubTitlePositionX: number;
+  chartSubTitlePositionY: number;
   backgroundColour: RgbaColor;
   hasBackground: boolean;
   showindexSettings: (index: number) => void;
@@ -41,8 +39,8 @@ export const BarChart: React.FC<BarChartProps> = ({
   data,
   chartWidth = 600,
   barHeight = 30,
-  barWidth = 600,
   barSpacing = 15,
+  barWidth = 600,
   backgroundColour,
   hasBackground,
   labelFontSize,
@@ -56,13 +54,11 @@ export const BarChart: React.FC<BarChartProps> = ({
   valuePositionY,
   roundedCorners,
   chartTitleHeight,
-
   chartTitle,
   chartTitleColour,
   chartTitleFontSize,
   chartTitlePositionX,
   chartTitlePositionY,
-
   chartSubTitle,
   chartSubTitleColour,
   chartSubTitleFontSize,
@@ -71,9 +67,9 @@ export const BarChart: React.FC<BarChartProps> = ({
   showindexSettings,
 }) => {
   const { font } = useFont();
-  const chartHeight = data.length * (barHeight + barSpacing);
-  const max = Math.max(...data.map((d) => d.value), 1); // prevent divide-by-zero
   const svgRef = useRef(null);
+  const chartHeight = data.length * (barHeight + barSpacing);
+  const max = Math.max(...data.map((d) => d.value), 1);
   const barTotalWidth = barWidth;
 
   const handleExportSvg = () => {
@@ -91,17 +87,11 @@ export const BarChart: React.FC<BarChartProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  let chartTitlePosition = chartTitleHeight / 2 + (chartTitlePositionY ?? 5);
-  let chartSubTitlePosition =
-    chartTitleHeight / 2 + (chartSubTitlePositionY ?? 12);
-  let hasChartSubTitle = false;
-
-  if (chartSubTitle) {
-    hasChartSubTitle = true;
-    chartTitlePosition = chartTitleHeight / 2.5 + (chartTitlePositionY ?? 5);
-    chartSubTitlePosition =
-      chartTitleHeight / 2 + (chartSubTitlePositionY ?? 15);
-  }
+  const hasChartSubTitle = Boolean(chartSubTitle);
+  const chartTitleY = hasChartSubTitle
+    ? chartTitleHeight / 2.5 + chartTitlePositionY
+    : chartTitleHeight / 2 + chartTitlePositionY;
+  const chartSubTitleY = chartTitleHeight / 2 + chartSubTitlePositionY;
 
   return (
     <div className="relative">
@@ -113,82 +103,84 @@ export const BarChart: React.FC<BarChartProps> = ({
           marginTop: chartTitleHeight,
         }}
       >
-        {data.map((d, i) => {
-          return (
-            <div
-              key={i}
-              style={{
-                width: barTotalWidth,
-                height: barHeight,
-                marginBottom: `${barSpacing}px`,
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
-              className="hover:border-2 hover:border-black rounded-lg"
-              onClick={() => showindexSettings(i)}
-            />
-          );
-        })}
+        {data.map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: barTotalWidth,
+              height: barHeight,
+              marginBottom: barSpacing,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+            className="hover:border-2 hover:border-black rounded-lg"
+            onClick={() => showindexSettings(i)}
+          />
+        ))}
       </div>
+
       <svg
+        preserveAspectRatio="xMidYMid meet"
         ref={svgRef}
         width={chartWidth}
         height={chartHeight + chartTitleHeight}
-        // type="image/svg+xml;charset=utf-8"
+        viewBox={`0 0 ${chartWidth} ${chartHeight + chartTitleHeight}`}
+        // style={{
+        //   width: "100%",
+        //   maxWidth: "100vw",
+        //   height: "auto",
+        //   display: "block",
+        // }}
       >
         <defs>
           <style>{`
-          @font-face {
-            font-family: 'MyFont';
-            src: url(${font}) format('truetype');
-          }
-        `}</style>
+            @font-face {
+              font-family: 'MyFont';
+              src: url(${font}) format('truetype');
+            }
+          `}</style>
         </defs>
-        <g>
-          {hasBackground ? (
-            <rect
-              width="100%"
-              height="100%"
-              fill={`rgba(${backgroundColour.r},${backgroundColour.g},${backgroundColour.b},${backgroundColour.a})`}
-            />
-          ) : null}
 
+        {hasBackground && (
+          <rect
+            width="100%"
+            height="100%"
+            fill={`rgba(${backgroundColour.r},${backgroundColour.g},${backgroundColour.b},${backgroundColour.a})`}
+          />
+        )}
+
+        <text
+          x={chartTitlePositionX}
+          y={chartTitleY}
+          fontSize={chartTitleFontSize}
+          style={{ fontFamily: "MyFont" }}
+          fill={chartTitleColour}
+        >
+          {chartTitle}
+        </text>
+
+        {hasChartSubTitle && (
           <text
-            x={chartTitlePositionX}
-            y={chartTitlePosition}
-            fontSize={chartTitleFontSize ?? 14}
+            x={chartSubTitlePositionX}
+            y={chartSubTitleY}
+            fontSize={chartSubTitleFontSize}
             style={{ fontFamily: "MyFont" }}
-            fill={chartTitleColour || "#e0e0e0"}
+            fill={chartSubTitleColour}
           >
-            {chartTitle}
+            {chartSubTitle}
           </text>
-          {hasChartSubTitle ? (
-            <text
-              x={chartSubTitlePositionX}
-              y={chartSubTitlePosition}
-              fontSize={chartSubTitleFontSize ?? 12}
-              style={{ fontFamily: "MyFont" }}
-              fill={chartSubTitleColour || "#e0e0e0"}
-            >
-              {chartSubTitle}
-            </text>
-          ) : null}
-        </g>
+        )}
 
         {data.map((d, i) => {
-          const barWidth = (d.value / max) * barTotalWidth;
+          const barActualWidth = (d.value / max) * barTotalWidth;
           const y = i * (barHeight + barSpacing) + chartTitleHeight;
+          const hasSubLabel = Boolean(d.sublabel);
 
-          let hasSubLabel = false;
+          const labelY = hasSubLabel
+            ? barHeight / 2.5 + labelPositionY
+            : barHeight / 2 + labelPositionY;
 
-          let labelPosition = barHeight / 2 + (labelPositionY ?? 5);
-          let sublabelPosition = barHeight / 2 + (sublabelPositionY ?? 12);
-
-          if (d.sublabel) {
-            hasSubLabel = true;
-            labelPosition = barHeight / 2.5 + (labelPositionY ?? 5);
-            sublabelPosition = barHeight / 2 + (sublabelPositionY ?? 12);
-          }
+          const sublabelY = barHeight / 2 + sublabelPositionY;
 
           return (
             <g key={i}>
@@ -197,45 +189,33 @@ export const BarChart: React.FC<BarChartProps> = ({
                 y={y}
                 width={barTotalWidth}
                 height={barHeight}
-                fill={
-                  `rgba(${d?.bgColor?.r},${d?.bgColor?.g},${d?.bgColor?.b},${d?.bgColor?.a})` ||
-                  "#e0e0e0"
-                }
+                fill={`rgba(${d.bgColor?.r},${d.bgColor?.g},${d.bgColor?.b},${d.bgColor?.a})`}
                 rx={roundedCorners}
                 ry={roundedCorners}
-                className="z-10 hover:stroke-black"
               />
               <rect
                 x={chartWidth / 2 - barTotalWidth / 2}
                 y={y}
-                width={barWidth}
+                width={barActualWidth}
                 height={barHeight}
-                fill={
-                  `rgba(${d?.fgColor?.r},${d?.fgColor?.g},${d?.fgColor?.b},${d?.fgColor?.a})` ||
-                  "#4f46e5"
-                }
+                fill={`rgba(${d.fgColor?.r},${d.fgColor?.g},${d.fgColor?.b},${d.fgColor?.a})`}
                 rx={roundedCorners}
                 ry={roundedCorners}
-                className="z-10"
               />
               <text
-                x={chartWidth / 2 - barTotalWidth / 2 + (labelPositionX ?? 10)}
-                y={y + labelPosition}
-                fontSize={labelFontSize ?? 14}
+                x={chartWidth / 2 - barTotalWidth / 2 + labelPositionX}
+                y={y + labelY}
+                fontSize={labelFontSize}
                 fill={d.labelColour}
                 style={{ fontFamily: "MyFont" }}
               >
-                {d?.label}
+                {d.label}
               </text>
               {hasSubLabel && (
                 <text
-                  x={
-                    chartWidth / 2 -
-                    barTotalWidth / 2 +
-                    (sublabelPositionX ?? 10)
-                  }
-                  y={y + sublabelPosition}
-                  fontSize={sublabelFontSize ?? 12}
+                  x={chartWidth / 2 - barTotalWidth / 2 + sublabelPositionX}
+                  y={y + sublabelY}
+                  fontSize={sublabelFontSize}
                   fill={d.sublabelColour}
                   opacity={0.8}
                   style={{ fontFamily: "MyFont" }}
@@ -244,9 +224,9 @@ export const BarChart: React.FC<BarChartProps> = ({
                 </text>
               )}
               <text
-                x={chartWidth / 2 + barTotalWidth / 2 + (valuePositionX ?? 30)}
-                y={y + barHeight / 2 + (valuePositionY ?? 5)}
-                fontSize={valueFontSize ?? 14}
+                x={chartWidth / 2 + barTotalWidth / 2 + valuePositionX}
+                y={y + barHeight / 2 + valuePositionY}
+                fontSize={valueFontSize}
                 fill={d.valueColour}
                 textAnchor="end"
                 style={{ fontFamily: "MyFont" }}
@@ -257,6 +237,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           );
         })}
       </svg>
+
       <button
         className="bg-gray-700 text-white py-2 px-2 rounded-lg hover:bg-gray-700 transition cursor-pointer mt-4 mb-4"
         onClick={handleExportSvg}
