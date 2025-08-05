@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Entry } from "../../chartInputManager/chartInputManager";
 import { useFont } from "@/app/contexts/fontContext";
 import { RgbaColor } from "react-colorful";
@@ -72,6 +72,8 @@ export const BarChart: React.FC<BarChartProps> = ({
   const max = Math.max(...data.map((d) => d.value), 1);
   const barTotalWidth = barWidth;
 
+  const [selectedBarId, setSelectedBarId] = useState<number>(0);
+
   const handleExportSvg = () => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -93,9 +95,14 @@ export const BarChart: React.FC<BarChartProps> = ({
     : chartTitleHeight / 2 + chartTitlePositionY;
   const chartSubTitleY = chartTitleHeight / 2 + chartSubTitlePositionY;
 
+  const handleSelectedBar = (index: number) => {
+    showindexSettings(index);
+    setSelectedBarId(index);
+  };
+
   return (
     <div className="relative">
-      <div
+      {/* <div
         style={{
           width: chartWidth,
           height: chartHeight,
@@ -117,7 +124,7 @@ export const BarChart: React.FC<BarChartProps> = ({
             onClick={() => showindexSettings(i)}
           />
         ))}
-      </div>
+      </div> */}
 
       <svg
         preserveAspectRatio="xMidYMid meet"
@@ -125,12 +132,12 @@ export const BarChart: React.FC<BarChartProps> = ({
         width={chartWidth}
         height={chartHeight + chartTitleHeight}
         viewBox={`0 0 ${chartWidth} ${chartHeight + chartTitleHeight}`}
-        // style={{
-        //   width: "100%",
-        //   maxWidth: "100vw",
-        //   height: "auto",
-        //   display: "block",
-        // }}
+        style={{
+          width: "100%",
+          maxWidth: "100vw",
+          height: "auto",
+          display: "block",
+        }}
       >
         <defs>
           <style>{`
@@ -171,10 +178,10 @@ export const BarChart: React.FC<BarChartProps> = ({
           </text>
         )}
 
-        {data.map((d, i) => {
-          const barActualWidth = (d.value / max) * barTotalWidth;
+        {data.map((bar, i) => {
+          const barActualWidth = (bar.value / max) * barTotalWidth;
           const y = i * (barHeight + barSpacing) + chartTitleHeight;
-          const hasSubLabel = Boolean(d.sublabel);
+          const hasSubLabel = Boolean(bar.sublabel);
 
           const labelY = hasSubLabel
             ? barHeight / 2.5 + labelPositionY
@@ -183,55 +190,73 @@ export const BarChart: React.FC<BarChartProps> = ({
           const sublabelY = barHeight / 2 + sublabelPositionY;
 
           return (
-            <g key={i}>
+            <g key={i} onClick={() => handleSelectedBar(i)}>
               <rect
                 x={chartWidth / 2 - barTotalWidth / 2}
                 y={y}
                 width={barTotalWidth}
                 height={barHeight}
-                fill={`rgba(${d.bgColor?.r},${d.bgColor?.g},${d.bgColor?.b},${d.bgColor?.a})`}
+                fill={`rgba(${bar.bgColor?.r},${bar.bgColor?.g},${bar.bgColor?.b},${bar.bgColor?.a})`}
                 rx={roundedCorners}
                 ry={roundedCorners}
+                stroke={
+                  selectedBarId === i
+                    ? `rgba(${255 - (bar?.bgColor?.r ?? 0)},${
+                        255 - (bar.bgColor?.g ?? 0)
+                      },${255 - (bar.bgColor?.b ?? 0)},${bar.bgColor?.a})`
+                    : "#e2e8f0"
+                }
+                strokeWidth={selectedBarId === i ? 2 : 1}
+                strokeDasharray={selectedBarId === i ? "5,5" : "none"}
               />
               <rect
                 x={chartWidth / 2 - barTotalWidth / 2}
                 y={y}
                 width={barActualWidth}
                 height={barHeight}
-                fill={`rgba(${d.fgColor?.r},${d.fgColor?.g},${d.fgColor?.b},${d.fgColor?.a})`}
+                fill={`rgba(${bar.fgColor?.r},${bar.fgColor?.g},${bar.fgColor?.b},${bar.fgColor?.a})`}
                 rx={roundedCorners}
                 ry={roundedCorners}
+                stroke={
+                  selectedBarId === i
+                    ? `rgba(${255 - (bar?.fgColor?.r ?? 0)},${
+                        255 - (bar.fgColor?.g ?? 0)
+                      },${255 - (bar.fgColor?.b ?? 0)},${bar.bgColor?.a})`
+                    : "#e2e8f0"
+                }
+                strokeWidth={selectedBarId === i ? 2 : 1}
+                strokeDasharray={selectedBarId === i ? "5,5" : "none"}
               />
               <text
                 x={chartWidth / 2 - barTotalWidth / 2 + labelPositionX}
                 y={y + labelY}
                 fontSize={labelFontSize}
-                fill={d.labelColour}
+                fill={bar.labelColour}
                 style={{ fontFamily: "MyFont" }}
               >
-                {d.label}
+                {bar.label}
               </text>
               {hasSubLabel && (
                 <text
                   x={chartWidth / 2 - barTotalWidth / 2 + sublabelPositionX}
                   y={y + sublabelY}
                   fontSize={sublabelFontSize}
-                  fill={d.sublabelColour}
+                  fill={bar.sublabelColour}
                   opacity={0.8}
                   style={{ fontFamily: "MyFont" }}
                 >
-                  {d.sublabel}
+                  {bar.sublabel}
                 </text>
               )}
               <text
                 x={chartWidth / 2 + barTotalWidth / 2 + valuePositionX}
                 y={y + barHeight / 2 + valuePositionY}
                 fontSize={valueFontSize}
-                fill={d.valueColour}
+                fill={bar.valueColour}
                 textAnchor="end"
                 style={{ fontFamily: "MyFont" }}
               >
-                {d.value}
+                {bar.value}
               </text>
             </g>
           );
