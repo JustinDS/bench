@@ -7,6 +7,7 @@ import FontPicker, {
 } from "../components/fontPicker/fontPicker";
 import { WebFont } from "./page";
 import { FontProvider } from "../contexts/fontContext";
+import { GroupedBarChart } from "../components/chart/bar/groupedBarChart";
 
 export interface ClientDashboardProps {
   fonts: WebFont[];
@@ -22,6 +23,10 @@ export default function ClientDashboard({
       <div className="max-w-7xl mx-auto px-4 py-6">
         <FontPicker fonts={fonts} selectedFont={selectedFont} />
         <ChartInputManager />
+
+        <div className="pt-10">
+          <GroupedBarChart />
+        </div>
       </div>
     </FontProvider>
   );
