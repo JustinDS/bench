@@ -44,10 +44,27 @@ interface ChartGroup {
   collapsed: boolean;
 }
 
+interface Name {
+  value: string;
+  color: string;
+}
+
+interface Description {
+  value: string;
+  color: string;
+}
+
+interface ChartTitleSection {
+  name: Name;
+  description: Description;
+  height: number;
+  position: "left" | "middle" | "right";
+}
+
 interface ChartTemplate {
   id: string;
-  name: string;
-  description: string;
+  width: number;
+  chartTitleSection: ChartTitleSection;
   groups: ChartGroup[];
   bars: ChartBar[];
   chartType: "horizontal" | "vertical";
@@ -55,16 +72,25 @@ interface ChartTemplate {
 
 interface ModalState {
   isOpen: boolean;
-  type: "bar" | "group" | null;
-  itemId: string | null;
+  type: "bar" | "group" | "titleSection" | null;
+  itemId?: string | null;
   position: { x: number; y: number };
 }
 
 const defaultTemplates: ChartTemplate[] = [
   {
     id: "GpuCpu",
-    name: "CPU GPU Compare",
-    description: "Compare AMD and Intel",
+    width: 1000,
+    chartTitleSection: {
+      name: { value: "CPU GPU Compare", color: "#000000" },
+      description: {
+        value: "Compare AMD and Intel",
+        color: "#000000",
+      },
+      height: 100,
+      position: "middle",
+    },
+
     chartType: "horizontal",
     groups: [
       { id: "High", label: "High", color: "#8B5CF6", collapsed: false },
@@ -83,35 +109,35 @@ const defaultTemplates: ChartTemplate[] = [
         id: "2",
         label: "AMD GPU",
         value: 5200,
-        color: "#A855F7",
+        color: "#3B82F6",
         groupId: "High",
       },
       {
         id: "3",
         label: "Intel CPU",
         value: 4800,
-        color: "#C084FC",
+        color: "#10B981",
         groupId: "Medium",
       },
       {
         id: "4",
         label: "Geforce GPU",
         value: 6100,
-        color: "#10B981",
+        color: "#F59E0B",
         groupId: "Medium",
       },
       {
         id: "5",
         label: "Intel CPU",
         value: 5800,
-        color: "#34D399",
+        color: "#EF4444",
         groupId: "Low",
       },
       {
         id: "6",
         label: "Geforce GPU",
         value: 7200,
-        color: "#6EE7B7",
+        color: "#EC4899",
         groupId: "Low",
       },
     ],
@@ -138,6 +164,21 @@ export const GroupedBarChart: React.FC = ({}) => {
 
   const [chartType, setChartType] = useState<"horizontal" | "vertical">(
     "horizontal"
+  );
+  const [chartWidth, setChartWidth] = useState(1000);
+  const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
+    {
+      name: {
+        value: "Chart",
+        color: "#000000",
+      },
+      description: {
+        value: "Description",
+        color: "#000000",
+      },
+      height: 60,
+      position: "middle",
+    }
   );
   const [groups, setGroups] = useState<ChartGroup[]>([
     { id: "group1", label: "Group A", color: "#8B5CF6", collapsed: false },
@@ -206,9 +247,9 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const openModal = (
-    type: "bar" | "group",
-    itemId: string,
-    event: React.MouseEvent
+    type: "bar" | "group" | "titleSection",
+    event: React.MouseEvent,
+    itemId?: string
   ) => {
     event.stopPropagation();
 
@@ -338,6 +379,8 @@ export const GroupedBarChart: React.FC = ({}) => {
     setGroups(template.groups);
     setBars(template.bars);
     setChartType(template.chartType);
+    setChartTitleSection(template.chartTitleSection);
+    setChartWidth(template.width);
     closeModal();
   };
 
@@ -376,6 +419,19 @@ export const GroupedBarChart: React.FC = ({}) => {
         groupId: "group2",
       },
     ]);
+    setChartTitleSection({
+      name: {
+        value: "Chart",
+        color: "#000000",
+      },
+      description: {
+        value: "Description",
+        color: "#000000",
+      },
+      height: 60,
+      position: "middle",
+    });
+    setChartWidth(1000);
     closeModal();
   };
 
@@ -669,19 +725,204 @@ export const GroupedBarChart: React.FC = ({}) => {
       );
     }
 
+    if (modalState.type === "titleSection") {
+      return (
+        <div
+          ref={modalRef}
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72"
+          style={{
+            left: `${adjustedPosition.x}px`,
+            top: `${adjustedPosition.y}px`,
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded"
+                style={{ backgroundColor: chartTitleSection.name.color }}
+              />
+              <h3 className="font-semibold text-gray-900">
+                Edit Title Section
+              </h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeModal}
+              className="h-6 w-6 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Name
+              </Label>
+              <Input
+                value={chartTitleSection.name.value}
+                onChange={(e) =>
+                  setChartTitleSection({
+                    ...chartTitleSection,
+                    name: { ...chartTitleSection.name, value: e.target.value },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Name Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={chartTitleSection.name.color}
+                  onChange={(e) =>
+                    setChartTitleSection({
+                      ...chartTitleSection,
+                      name: {
+                        ...chartTitleSection.name,
+                        color: e.target.value,
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+                <Select
+                  value={chartTitleSection.name.color}
+                  onValueChange={(value) =>
+                    setChartTitleSection({
+                      ...chartTitleSection,
+                      name: {
+                        ...chartTitleSection.name,
+                        color: value,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="flex-1 h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {colorOptions.map((color) => (
+                      <SelectItem key={color.value} value={color.value}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full border"
+                            style={{ backgroundColor: color.value }}
+                          />
+                          <span className="text-xs">{color.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Description
+              </Label>
+              <Input
+                value={chartTitleSection.description.value}
+                onChange={(e) =>
+                  setChartTitleSection({
+                    ...chartTitleSection,
+                    description: {
+                      ...chartTitleSection.description,
+                      value: e.target.value,
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Chart Description"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Description Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={chartTitleSection.description.color}
+                  onChange={(e) =>
+                    setChartTitleSection({
+                      ...chartTitleSection,
+                      description: {
+                        ...chartTitleSection.description,
+                        color: e.target.value,
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+                <Select
+                  value={chartTitleSection.description.color}
+                  onValueChange={(value) =>
+                    setChartTitleSection({
+                      ...chartTitleSection,
+                      description: {
+                        ...chartTitleSection.description,
+                        color: value,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="flex-1 h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {colorOptions.map((color) => (
+                      <SelectItem key={color.value} value={color.value}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full border"
+                            style={{ backgroundColor: color.value }}
+                          />
+                          <span className="text-xs">{color.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return null;
   };
 
-  const renderHorizontalChart = () => {
-    const chartWidth = 1000;
+  const getTitleSectionPosition = () => {
+    switch (chartTitleSection.position) {
+      case "left":
+        return 0;
+      case "middle":
+        return chartWidth / 2;
+      case "right":
+        return chartWidth;
 
+      default:
+        break;
+    }
+  };
+
+  const renderHorizontalChart = () => {
     const barHeight = 60;
     const barSpacing = 10;
     const groupSpacing = 40;
     const groupLabelHeight = 25;
     const labelWidth = 140;
 
-    const chartTitleHeight = 60;
     const padding = { top: 50, right: 40, bottom: 40, left: labelWidth + 20 };
 
     const totalNumberOfBars = groupedBars.reduce(
@@ -689,16 +930,16 @@ export const GroupedBarChart: React.FC = ({}) => {
       0
     );
 
-    const totalHeightOfBars =
-      totalNumberOfBars * (barHeight + barSpacing) + chartTitleHeight;
+    const totalHeightOfBars = totalNumberOfBars * (barHeight + barSpacing);
     const totalHeightOfGroup =
       groupedBars.length * (groupSpacing + groupLabelHeight);
 
-    const chartHeight = totalHeightOfBars + totalHeightOfGroup;
+    const chartHeight =
+      totalHeightOfBars + totalHeightOfGroup + chartTitleSection.height;
 
     const availableWidth = chartWidth - padding.left - padding.right;
 
-    let currentY = chartTitleHeight;
+    let currentY = chartTitleSection.height;
 
     return (
       <svg
@@ -727,26 +968,30 @@ export const GroupedBarChart: React.FC = ({}) => {
 
         {/* Chart Title */}
         <text
-          x={chartWidth / 2}
-          y={25}
+          x={getTitleSectionPosition()}
+          y={chartTitleSection.height / 2.75}
           textAnchor="middle"
-          className="fill-gray-800 text-lg font-semibold"
+          className="text-lg font-semibold"
+          fill={chartTitleSection.name.color}
+          onClick={(e) => openModal("titleSection", e)}
         >
-          {"Test Group"}
+          {chartTitleSection.name.value}
         </text>
         <text
-          x={chartWidth / 2}
-          y={40}
+          x={getTitleSectionPosition()}
+          y={chartTitleSection.height / 1.65}
           textAnchor="middle"
-          className="fill-gray-500 text-xs"
+          className="text-xs"
+          fill={chartTitleSection.description.color}
+          onClick={(e) => openModal("titleSection", e)}
         >
-          {"Test Group click to edit"}
+          {chartTitleSection.description.value}
         </text>
 
         {/* Y-axis line */}
         <line
           x1={padding.left}
-          y1={padding.top}
+          y1={currentY - 20}
           x2={padding.left}
           y2={chartHeight - padding.bottom}
           stroke="#e2e8f0"
@@ -811,7 +1056,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   strokeWidth="1"
                   rx="4"
                   className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={(e) => openModal("group", group.id, e)}
+                  onClick={(e) => openModal("group", e, group.id)}
                 />
 
                 {/* Group label */}
@@ -850,7 +1095,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                 strokeWidth="1"
                 rx="6"
                 className="cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={(e) => openModal("group", group.id, e)}
+                onClick={(e) => openModal("group", e, group.id)}
               />
 
               {/* Group label */}
@@ -897,7 +1142,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       rx="3"
                       className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
                       strokeWidth="0"
-                      onClick={(e) => openModal("bar", bar.id, e)}
+                      onClick={(e) => openModal("bar", e, bar.id)}
                     />
 
                     {/* Bar Label */}
@@ -907,7 +1152,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       textAnchor="end"
                       alignmentBaseline="middle"
                       className="fill-gray-700 text-xs font-medium cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
-                      onClick={(e) => openModal("bar", bar.id, e)}
+                      onClick={(e) => openModal("bar", e, bar.id)}
                     >
                       {bar.label}
                     </text>
@@ -919,7 +1164,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       textAnchor="start"
                       alignmentBaseline="middle"
                       className="fill-gray-700 text-xs font-semibold cursor-pointer hover:fill-gray-900"
-                      onClick={(e) => openModal("bar", bar.id, e)}
+                      onClick={(e) => openModal("bar", e, bar.id)}
                     >
                       {bar.value.toLocaleString()}
                     </text>
@@ -977,9 +1222,11 @@ export const GroupedBarChart: React.FC = ({}) => {
                   onClick={() => loadTemplate(template)}
                 >
                   <div className="text-left">
-                    <div className="font-medium">{template.name}</div>
+                    <div className="font-medium">
+                      {template.chartTitleSection.name.value}
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                      {template.description}
+                      {template.chartTitleSection.description.value}
                     </div>
                   </div>
                 </Button>
