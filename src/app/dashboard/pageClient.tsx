@@ -22,7 +22,7 @@ export default function ClientDashboard({
     <FontProvider>
       <div className="max-w-7xl mx-auto px-4 py-6">
         <FontPicker fonts={fonts} selectedFont={selectedFont} />
-        <ChartInputManager />
+        {/* <ChartInputManager /> */}
 
         <div className="pt-10">
           <GroupedBarChart />

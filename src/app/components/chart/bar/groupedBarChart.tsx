@@ -28,46 +28,66 @@ import {
   CardHeader,
   CardTitle,
 } from "../../ui/card";
+import { PopoverPicker } from "../../colorPicker/popoverPicker";
+import { v4 as uuidv4 } from "uuid";
 
 interface ChartBar {
   id: string;
-  label: string;
-  value: number;
-  color: string;
-  groupId: string;
+  label: Text;
+  value: Value;
+  backgroundColor: RgbaColor;
+  foreGroundColor: RgbaColor;
+  groupId?: string;
 }
 
 interface ChartGroup {
   id: string;
-  label: string;
-  color: string;
+  label: Text;
+  backgroundColor: RgbaColor;
   collapsed: boolean;
 }
 
-interface Name {
+interface Text {
   value: string;
   color: string;
+  fontSize: number;
+  positionX?: number;
+  poisitonY?: number;
 }
 
-interface Description {
-  value: string;
+interface Value {
+  value: number;
   color: string;
+  fontSize: number;
+  positionX?: number;
+  poisitonY?: number;
+  prefix?: string;
+  postfix?: string;
 }
 
 interface ChartTitleSection {
-  name: Name;
-  description: Description;
+  name: Text;
+  description: Text;
   height: number;
-  position: "left" | "middle" | "right";
+}
+
+interface Background {
+  color?: RgbaColor;
+  width: number;
+  height: number;
+  backgroundURL?: string;
 }
 
 interface ChartTemplate {
   id: string;
   width: number;
   chartTitleSection: ChartTitleSection;
+  background: Background;
   groups: ChartGroup[];
   bars: ChartBar[];
   chartType: "horizontal" | "vertical";
+  barSpacing: number;
+  groupSpacing: number;
 }
 
 interface ModalState {
@@ -82,63 +102,157 @@ const defaultTemplates: ChartTemplate[] = [
     id: "GpuCpu",
     width: 1000,
     chartTitleSection: {
-      name: { value: "CPU GPU Compare", color: "#000000" },
+      name: { value: "CPU GPU Compare", color: "#000000", fontSize: 16 },
       description: {
         value: "Compare AMD and Intel",
         color: "#000000",
+        fontSize: 14,
       },
       height: 100,
-      position: "middle",
     },
-
+    background: {
+      color: { r: 0, g: 0, b: 0, a: 1 },
+      width: 1280,
+      height: 720,
+      backgroundURL: "",
+    },
     chartType: "horizontal",
+    barSpacing: 10,
+    groupSpacing: 30,
     groups: [
-      { id: "High", label: "High", color: "#8B5CF6", collapsed: false },
-      { id: "Medium", label: "Medium", color: "#10B981", collapsed: false },
-      { id: "Low", label: "Low", color: "#C084FC", collapsed: false },
+      {
+        id: "HighCPU",
+        label: { value: "High CPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
+        collapsed: false,
+      },
+      {
+        id: "HighGPU",
+        label: { value: "High GPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
+        collapsed: false,
+      },
+      {
+        id: "MediumCPU",
+        label: { value: "Medium CPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 16, g: 185, b: 129, a: 0.2 },
+        collapsed: false,
+      },
+      {
+        id: "MediumGPU",
+        label: { value: "Medium GPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 16, g: 185, b: 129, a: 0.2 },
+        collapsed: false,
+      },
+      {
+        id: "LowCPU",
+        label: { value: "Low CPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 192, g: 132, b: 252, a: 0.2 },
+        collapsed: false,
+      },
+      {
+        id: "LowGPU",
+        label: { value: "Low GPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 192, g: 132, b: 252, a: 0.2 },
+        collapsed: false,
+      },
     ],
     bars: [
       {
-        id: "1",
-        label: "AMD CPU",
-        value: 4500,
-        color: "#8B5CF6",
-        groupId: "High",
+        id: uuidv4(),
+        label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        value: { value: 4500, color: "#000000", fontSize: 16 },
+        groupId: "HighCPU",
       },
       {
-        id: "2",
-        label: "AMD GPU",
-        value: 5200,
-        color: "#3B82F6",
-        groupId: "High",
+        id: uuidv4(),
+        label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+        value: { value: 4800, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "HighCPU",
       },
       {
-        id: "3",
-        label: "Intel CPU",
-        value: 4800,
-        color: "#10B981",
-        groupId: "Medium",
+        id: uuidv4(),
+        label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+        value: { value: 5200, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "HighGPU",
       },
       {
-        id: "4",
-        label: "Geforce GPU",
-        value: 6100,
-        color: "#F59E0B",
-        groupId: "Medium",
+        id: uuidv4(),
+        label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+        value: { value: 6100, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "HighGPU",
       },
       {
-        id: "5",
-        label: "Intel CPU",
-        value: 5800,
-        color: "#EF4444",
-        groupId: "Low",
+        id: uuidv4(),
+        label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        value: { value: 4500, color: "#000000", fontSize: 16 },
+        groupId: "MediumCPU",
       },
       {
-        id: "6",
-        label: "Geforce GPU",
-        value: 7200,
-        color: "#EC4899",
-        groupId: "Low",
+        id: uuidv4(),
+        label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+        value: { value: 4800, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "MediumCPU",
+      },
+      {
+        id: uuidv4(),
+        label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+        value: { value: 5200, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "MediumGPU",
+      },
+      {
+        id: uuidv4(),
+        label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+        value: { value: 6100, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "MediumGPU",
+      },
+      {
+        id: uuidv4(),
+        label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        value: { value: 4500, color: "#000000", fontSize: 16 },
+        groupId: "LowCPU",
+      },
+      {
+        id: uuidv4(),
+        label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+        value: { value: 4800, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "LowCPU",
+      },
+      {
+        id: uuidv4(),
+        label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+        value: { value: 5200, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "LowGPU",
+      },
+      {
+        id: uuidv4(),
+        label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+        value: { value: 6100, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
+        groupId: "LowGPU",
       },
     ],
   },
@@ -166,51 +280,68 @@ export const GroupedBarChart: React.FC = ({}) => {
     "horizontal"
   );
   const [chartWidth, setChartWidth] = useState(1000);
+  const [groupSpacing, setGroupSpacing] = useState(30);
+  const [barSpacing, setBarSpacing] = useState(10);
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
     {
       name: {
         value: "Chart",
         color: "#000000",
+        fontSize: 16,
       },
       description: {
         value: "Description",
         color: "#000000",
+        fontSize: 14,
       },
       height: 60,
-      position: "middle",
     }
   );
   const [groups, setGroups] = useState<ChartGroup[]>([
-    { id: "group1", label: "Group A", color: "#8B5CF6", collapsed: false },
-    { id: "group2", label: "Group B", color: "#10B981", collapsed: false },
+    {
+      id: "group1",
+      label: { value: "Group A", color: "#000000", fontSize: 16 },
+      backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
+      collapsed: false,
+    },
+    {
+      id: "group2",
+      label: { value: "Group B", color: "#000000", fontSize: 16 },
+      backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
+      collapsed: false,
+    },
   ]);
   const [bars, setBars] = useState<ChartBar[]>([
     {
       id: "1",
-      label: "Item 1",
-      value: 400,
-      color: "#8B5CF6",
+      label: { value: "Item 1", color: "#000000", fontSize: 16 },
+      value: { value: 400, color: "#000000", fontSize: 16 },
+      backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+      foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
     },
     {
       id: "2",
-      label: "Item 2",
-      value: 300,
-      color: "#A855F7",
+      label: { value: "Item 2", color: "#000000", fontSize: 16 },
+      value: { value: 300, color: "#000000", fontSize: 16 },
+      backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+      foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
     },
     {
       id: "3",
-      label: "Item 3",
-      value: 500,
-      color: "#10B981",
+      label: { value: "Item 3", color: "#000000", fontSize: 16 },
+      value: { value: 500, color: "#000000", fontSize: 16 },
+      backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+      foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
     },
     {
       id: "4",
-      label: "Item 4",
-      value: 200,
-      color: "#34D399",
+      label: { value: "Item 4", color: "#000000", fontSize: 16 },
+      value: { value: 200, color: "#000000", fontSize: 16 },
+      backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+      foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
     },
   ]);
@@ -226,7 +357,7 @@ export const GroupedBarChart: React.FC = ({}) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const maxValue = useMemo(
-    () => Math.max(...bars.map((bar) => bar.value), 1),
+    () => Math.max(...bars.map((bar) => bar.value.value), 1),
     [bars]
   );
 
@@ -290,8 +421,12 @@ export const GroupedBarChart: React.FC = ({}) => {
   const addGroup = () => {
     const newGroup: ChartGroup = {
       id: Date.now().toString(),
-      label: `Group ${groups.length + 1}`,
-      color: colorOptions[groups.length % colorOptions.length].value,
+      label: {
+        value: `Group ${groups.length + 1}`,
+        color: "#000000",
+        fontSize: 16,
+      },
+      backgroundColor: { r: 249, g: 250, b: 255, a: 0.4 },
       collapsed: false,
     };
     setGroups([...groups, newGroup]);
@@ -306,8 +441,12 @@ export const GroupedBarChart: React.FC = ({}) => {
       // Create a default group if no groups remain
       const defaultGroup: ChartGroup = {
         id: "default",
-        label: "Default Group",
-        color: "#8B5CF6",
+        label: {
+          value: `Default Group`,
+          color: "#000000",
+          fontSize: 16,
+        },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 0.4 },
         collapsed: false,
       };
       setGroups([defaultGroup]);
@@ -346,9 +485,18 @@ export const GroupedBarChart: React.FC = ({}) => {
     const group = groups.find((g) => g.id === targetGroupId);
     const newBar: ChartBar = {
       id: Date.now().toString(),
-      label: `Item ${bars.length + 1}`,
-      value: 100,
-      color: group?.color || colorOptions[0].value,
+      label: {
+        value: `Item ${bars.length + 1}`,
+        color: "#000000",
+        fontSize: 16,
+      },
+      value: {
+        value: 100,
+        color: "#000000",
+        fontSize: 16,
+      },
+      backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+      foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: targetGroupId,
     };
     setBars([...bars, newBar]);
@@ -369,7 +517,10 @@ export const GroupedBarChart: React.FC = ({}) => {
       const newBar: ChartBar = {
         ...barToDuplicate,
         id: Date.now().toString(),
-        label: `${barToDuplicate.label} Copy`,
+        label: {
+          ...barToDuplicate.label,
+          value: `${barToDuplicate.label.value} Copy`,
+        },
       };
       setBars([...bars, newBar]);
     }
@@ -381,41 +532,57 @@ export const GroupedBarChart: React.FC = ({}) => {
     setChartType(template.chartType);
     setChartTitleSection(template.chartTitleSection);
     setChartWidth(template.width);
+    setBarSpacing(template.barSpacing);
+    setGroupSpacing(template.groupSpacing);
     closeModal();
   };
 
   const resetChart = () => {
     setGroups([
-      { id: "group1", label: "Group A", color: "#8B5CF6", collapsed: false },
-      { id: "group2", label: "Group B", color: "#10B981", collapsed: false },
+      {
+        id: "group1",
+        label: { value: "Group A", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
+        collapsed: false,
+      },
+      {
+        id: "group2",
+        label: { value: "Group B", color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
+        collapsed: false,
+      },
     ]);
     setBars([
       {
         id: "1",
-        label: "Item 1",
-        value: 400,
-        color: "#8B5CF6",
+        label: { value: "Item 1", color: "#000000", fontSize: 16 },
+        value: { value: 400, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group1",
       },
       {
         id: "2",
-        label: "Item 2",
-        value: 300,
-        color: "#A855F7",
+        label: { value: "Item 2", color: "#000000", fontSize: 16 },
+        value: { value: 300, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group1",
       },
       {
         id: "3",
-        label: "Item 3",
-        value: 500,
-        color: "#10B981",
+        label: { value: "Item 3", color: "#000000", fontSize: 16 },
+        value: { value: 500, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group2",
       },
       {
         id: "4",
-        label: "Item 4",
-        value: 200,
-        color: "#34D399",
+        label: { value: "Item 4", color: "#000000", fontSize: 16 },
+        value: { value: 200, color: "#000000", fontSize: 16 },
+        backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
+        foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group2",
       },
     ]);
@@ -423,15 +590,18 @@ export const GroupedBarChart: React.FC = ({}) => {
       name: {
         value: "Chart",
         color: "#000000",
+        fontSize: 16,
       },
       description: {
         value: "Description",
         color: "#000000",
+        fontSize: 14,
       },
       height: 60,
-      position: "middle",
     });
     setChartWidth(1000);
+    setBarSpacing(10);
+    setGroupSpacing(30);
     closeModal();
   };
 
@@ -467,7 +637,9 @@ export const GroupedBarChart: React.FC = ({}) => {
             <div className="flex items-center gap-2">
               <div
                 className="w-4 h-4 rounded"
-                style={{ backgroundColor: currentBar.color }}
+                style={{
+                  backgroundColor: `rgba(${currentBar.foreGroundColor.r},${currentBar.foreGroundColor.g},${currentBar.foreGroundColor.b},${currentBar.foreGroundColor.a})`,
+                }}
               />
               <h3 className="font-semibold text-gray-900">Edit Bar</h3>
             </div>
@@ -485,9 +657,12 @@ export const GroupedBarChart: React.FC = ({}) => {
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">Label</Label>
               <Input
-                value={currentBar.label}
+                value={currentBar.label.value}
                 onChange={(e) =>
-                  updateBar(currentBar.id, { label: e.target.value })
+                  updateBar(currentBar.id, {
+                    ...currentBar,
+                    label: { ...currentBar.label, value: e.target.value },
+                  })
                 }
                 className="h-8 text-sm"
                 placeholder="Bar label"
@@ -498,10 +673,14 @@ export const GroupedBarChart: React.FC = ({}) => {
               <Label className="text-xs font-medium text-gray-500">Value</Label>
               <Input
                 type="number"
-                value={currentBar.value}
+                value={currentBar.value.value}
                 onChange={(e) =>
                   updateBar(currentBar.id, {
-                    value: parseFloat(e.target.value) || 0,
+                    ...currentBar,
+                    value: {
+                      ...currentBar.value,
+                      value: parseFloat(e.target.value) || 0,
+                    },
                   })
                 }
                 className="h-8 text-sm"
@@ -510,43 +689,40 @@ export const GroupedBarChart: React.FC = ({}) => {
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-gray-500">Color</Label>
+              <Label className="text-xs font-medium text-gray-500">
+                Background Color
+              </Label>
               <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={currentBar.color}
-                  onChange={(e) =>
-                    updateBar(currentBar.id, { color: e.target.value })
-                  }
-                  className="w-12 h-8 p-1 border rounded"
+                <PopoverPicker
+                  color={currentBar.backgroundColor}
+                  onChange={(e) => {
+                    updateBar(currentBar.id, {
+                      ...currentBar,
+                      backgroundColor: e,
+                    });
+                  }}
                 />
-                <Select
-                  value={currentBar.color}
-                  onValueChange={(value) =>
-                    updateBar(currentBar.id, { color: value })
-                  }
-                >
-                  <SelectTrigger className="flex-1 h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full border"
-                            style={{ backgroundColor: color.value }}
-                          />
-                          <span className="text-xs">{color.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
             <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                ForeGround Color
+              </Label>
+              <div className="flex gap-2">
+                <PopoverPicker
+                  color={currentBar.foreGroundColor}
+                  onChange={(e) => {
+                    updateBar(currentBar.id, {
+                      ...currentBar,
+                      foreGroundColor: e,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">Group</Label>
               <Select
                 value={currentBar.groupId}
@@ -571,7 +747,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             <div className="flex gap-2 pt-2">
               <Button
@@ -599,7 +775,10 @@ export const GroupedBarChart: React.FC = ({}) => {
 
     if (modalState.type === "group" && currentGroup) {
       const groupBars = bars.filter((b) => b.groupId === currentGroup.id);
-      const groupTotal = groupBars.reduce((sum, bar) => sum + bar.value, 0);
+      const groupTotal = groupBars.reduce(
+        (sum, bar) => sum + bar.value.value,
+        0
+      );
 
       return (
         <div
@@ -614,7 +793,9 @@ export const GroupedBarChart: React.FC = ({}) => {
             <div className="flex items-center gap-2">
               <div
                 className="w-4 h-4 rounded"
-                style={{ backgroundColor: currentGroup.color }}
+                style={{
+                  backgroundColor: `rgba(${currentGroup.backgroundColor.r},${currentGroup.backgroundColor.g},${currentGroup.backgroundColor.b},${currentGroup.backgroundColor.a})`,
+                }}
               />
               <h3 className="font-semibold text-gray-900">Edit Group</h3>
             </div>
@@ -634,9 +815,12 @@ export const GroupedBarChart: React.FC = ({}) => {
                 Group Name
               </Label>
               <Input
-                value={currentGroup.label}
+                value={currentGroup.label.value}
                 onChange={(e) =>
-                  updateGroup(currentGroup.id, { label: e.target.value })
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    label: { ...currentGroup.label, value: e.target.value },
+                  })
                 }
                 className="h-8 text-sm"
                 placeholder="Group name"
@@ -644,49 +828,29 @@ export const GroupedBarChart: React.FC = ({}) => {
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-gray-500">Color</Label>
+              <Label className="text-xs font-medium text-gray-500">
+                Background Color
+              </Label>
               <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={currentGroup.color}
-                  onChange={(e) =>
-                    updateGroup(currentGroup.id, { color: e.target.value })
-                  }
-                  className="w-12 h-8 p-1 border rounded"
+                <PopoverPicker
+                  color={currentGroup.backgroundColor}
+                  onChange={(e) => {
+                    updateGroup(currentGroup.id, {
+                      ...currentGroup,
+                      backgroundColor: e,
+                    });
+                  }}
                 />
-                <Select
-                  value={currentGroup.color}
-                  onValueChange={(value) =>
-                    updateGroup(currentGroup.id, { color: value })
-                  }
-                >
-                  <SelectTrigger className="flex-1 h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full border"
-                            style={{ backgroundColor: color.value }}
-                          />
-                          <span className="text-xs">{color.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded p-2">
+            {/* <div className="bg-gray-50 rounded p-2">
               <div className="text-xs text-gray-500 mb-1">Group Statistics</div>
               <div className="text-sm font-medium">{groupBars.length} bars</div>
               <div className="text-sm font-medium">
                 Total: {groupTotal.toLocaleString()}
               </div>
-            </div>
+            </div> */}
 
             <div className="flex gap-2 pt-2">
               <Button
@@ -902,24 +1066,8 @@ export const GroupedBarChart: React.FC = ({}) => {
     return null;
   };
 
-  const getTitleSectionPosition = () => {
-    switch (chartTitleSection.position) {
-      case "left":
-        return 0;
-      case "middle":
-        return chartWidth / 2;
-      case "right":
-        return chartWidth;
-
-      default:
-        break;
-    }
-  };
-
   const renderHorizontalChart = () => {
     const barHeight = 60;
-    const barSpacing = 10;
-    const groupSpacing = 40;
     const groupLabelHeight = 25;
     const labelWidth = 140;
 
@@ -948,6 +1096,14 @@ export const GroupedBarChart: React.FC = ({}) => {
         viewBox={`0 0 ${chartWidth} ${chartHeight}`}
         className="border rounded-lg bg-white cursor-pointer"
       >
+        <defs>
+          <style>{`
+            @font-face {
+              font-family: 'MyFont';
+              src: url(${font}) format('truetype');
+            }
+          `}</style>
+        </defs>
         {/* Background Grid */}
         <defs>
           <pattern
@@ -968,21 +1124,23 @@ export const GroupedBarChart: React.FC = ({}) => {
 
         {/* Chart Title */}
         <text
-          x={getTitleSectionPosition()}
+          x={chartWidth / 2}
           y={chartTitleSection.height / 2.75}
           textAnchor="middle"
           className="text-lg font-semibold"
           fill={chartTitleSection.name.color}
+          style={{ fontFamily: "MyFont" }}
           onClick={(e) => openModal("titleSection", e)}
         >
           {chartTitleSection.name.value}
         </text>
         <text
-          x={getTitleSectionPosition()}
+          x={chartWidth / 2}
           y={chartTitleSection.height / 1.65}
           textAnchor="middle"
           className="text-xs"
           fill={chartTitleSection.description.color}
+          style={{ fontFamily: "MyFont" }}
           onClick={(e) => openModal("titleSection", e)}
         >
           {chartTitleSection.description.value}
@@ -1027,6 +1185,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                 y={chartHeight - padding.bottom + 18}
                 textAnchor="middle"
                 className="fill-gray-600 text-xs"
+                style={{ fontFamily: "MyFont" }}
               >
                 {value.toLocaleString()}
               </text>
@@ -1038,43 +1197,43 @@ export const GroupedBarChart: React.FC = ({}) => {
         {groupedBars.map((groupData, groupIndex) => {
           const { group, bars: groupBars } = groupData;
 
-          if (group.collapsed) {
-            // Render collapsed group header only
-            const groupY = currentY;
-            currentY += groupLabelHeight + 10;
+          // if (group.collapsed) {
+          //   // Render collapsed group header only
+          //   const groupY = currentY;
+          //   currentY += groupLabelHeight + 10;
 
-            return (
-              <g key={group.id}>
-                {/* Group background */}
-                <rect
-                  x={padding.left - labelWidth - 10}
-                  y={groupY - 5}
-                  width={labelWidth + availableWidth + 20}
-                  height={groupLabelHeight}
-                  fill={`${group.color}15`}
-                  stroke={group.color}
-                  strokeWidth="1"
-                  rx="4"
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={(e) => openModal("group", e, group.id)}
-                />
+          //   return (
+          //     <g key={group.id}>
+          //       {/* Group background */}
+          //       <rect
+          //         x={padding.left - labelWidth - 10}
+          //         y={groupY - 5}
+          //         width={labelWidth + availableWidth + 20}
+          //         height={groupLabelHeight}
+          //         fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+          //         stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+          //         strokeWidth="1"
+          //         rx="4"
+          //         className="cursor-pointer hover:opacity-80 transition-opacity"
+          //         onClick={(e) => openModal("group", e, group.id)}
+          //       />
 
-                {/* Group label */}
-                <text
-                  x={padding.left - labelWidth - 5}
-                  y={groupY + groupLabelHeight / 2}
-                  alignmentBaseline="middle"
-                  className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // toggleGroupCollapse(group.id);
-                  }}
-                >
-                  ▶ {group.label} ({groupBars.length} items)
-                </text>
-              </g>
-            );
-          }
+          //       {/* Group label */}
+          //       <text
+          //         x={padding.left - labelWidth - 5}
+          //         y={groupY + groupLabelHeight / 2}
+          //         alignmentBaseline="middle"
+          //         className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
+          //         onClick={(e) => {
+          //           e.stopPropagation();
+          //           // toggleGroupCollapse(group.id);
+          //         }}
+          //       >
+          //         ▶ {group.label.value} ({groupBars.length} items)
+          //       </text>
+          //     </g>
+          //   );
+          // }
 
           // Render expanded group
           const groupStartY = currentY;
@@ -1090,8 +1249,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                 height={
                   groupLabelHeight + groupBars.length * (barHeight + barSpacing)
                 }
-                fill={`${group.color}10`}
-                stroke={`${group.color}40`}
+                fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+                stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
                 strokeWidth="1"
                 rx="6"
                 className="cursor-pointer hover:opacity-80 transition-opacity"
@@ -1104,18 +1263,19 @@ export const GroupedBarChart: React.FC = ({}) => {
                 y={groupStartY + groupLabelHeight / 2}
                 alignmentBaseline="middle"
                 className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
+                style={{ fontFamily: "MyFont" }}
                 onClick={(e) => {
                   e.stopPropagation();
                   //   toggleGroupCollapse(group.id);
                 }}
               >
                 {/* ▼  */}
-                {group.label}
+                {group.label.value}
               </text>
 
               {/* Group bars */}
               {groupBars.map((bar, barIndex) => {
-                const barWidth = (bar.value / maxValue) * availableWidth;
+                const barWidth = (bar.value.value / maxValue) * availableWidth;
                 const barY = currentY + barIndex * (barHeight + barSpacing);
 
                 return (
@@ -1126,8 +1286,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                       y={barY}
                       width={availableWidth}
                       height={barHeight}
-                      fill="#f8fafc"
-                      stroke="#e2e8f0"
+                      fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
+                      stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
                       strokeWidth="1"
                       rx="3"
                     />
@@ -1138,7 +1298,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       y={barY}
                       width={barWidth}
                       height={barHeight}
-                      fill={bar.color}
+                      fill={`rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`}
                       rx="3"
                       className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
                       strokeWidth="0"
@@ -1152,9 +1312,10 @@ export const GroupedBarChart: React.FC = ({}) => {
                       textAnchor="end"
                       alignmentBaseline="middle"
                       className="fill-gray-700 text-xs font-medium cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
+                      style={{ fontFamily: "MyFont" }}
                       onClick={(e) => openModal("bar", e, bar.id)}
                     >
-                      {bar.label}
+                      {bar.label.value}
                     </text>
 
                     {/* Bar Value */}
@@ -1164,9 +1325,10 @@ export const GroupedBarChart: React.FC = ({}) => {
                       textAnchor="start"
                       alignmentBaseline="middle"
                       className="fill-gray-700 text-xs font-semibold cursor-pointer hover:fill-gray-900"
+                      style={{ fontFamily: "MyFont" }}
                       onClick={(e) => openModal("bar", e, bar.id)}
                     >
-                      {bar.value.toLocaleString()}
+                      {bar.value.value.toLocaleString()}
                     </text>
 
                     {/* Hover indicator */}
