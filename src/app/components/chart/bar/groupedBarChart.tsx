@@ -4,6 +4,7 @@ import { RgbaColor } from "react-colorful";
 import { Button } from "../../ui/button";
 import {
   Copy,
+  Download,
   Folder,
   FolderOpen,
   Plus,
@@ -92,7 +93,7 @@ interface ChartTemplate {
 
 interface ModalState {
   isOpen: boolean;
-  type: "bar" | "group" | "titleSection" | null;
+  type: "bar" | "group" | "titleSection" | "chart" | null;
   itemId?: string | null;
   position: { x: number; y: number };
 }
@@ -280,6 +281,14 @@ export const GroupedBarChart: React.FC = ({}) => {
     "horizontal"
   );
   const [chartWidth, setChartWidth] = useState(1000);
+  const [chartBackgroundWidth, setChartBackgroundWidth] = useState(1000);
+  const [chartBackgroundHeight, setChartBackgroundHeight] = useState(1000);
+  const [chartBackgroundColor, setChartBackgroundColor] = useState({
+    r: 0,
+    g: 0,
+    b: 0,
+    a: 0,
+  });
   const [groupSpacing, setGroupSpacing] = useState(30);
   const [barSpacing, setBarSpacing] = useState(10);
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
@@ -355,6 +364,22 @@ export const GroupedBarChart: React.FC = ({}) => {
 
   const chartRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef(null);
+
+  const handleExportSvg = () => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "bar-chart.svg";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const maxValue = useMemo(
     () => Math.max(...bars.map((bar) => bar.value.value), 1),
@@ -378,7 +403,7 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const openModal = (
-    type: "bar" | "group" | "titleSection",
+    type: "bar" | "group" | "titleSection" | "chart",
     event: React.MouseEvent,
     itemId?: string
   ) => {
@@ -1063,6 +1088,111 @@ export const GroupedBarChart: React.FC = ({}) => {
       );
     }
 
+    if (modalState.type === "chart") {
+      return (
+        <div
+          ref={modalRef}
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72"
+          style={{
+            left: `${adjustedPosition.x}px`,
+            top: `${adjustedPosition.y}px`,
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded"
+                style={{ backgroundColor: `rgba(${chartBackgroundColor})` }}
+              />
+              <h3 className="font-semibold text-gray-900">Edit Chart</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeModal}
+              className="h-6 w-6 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Background Color
+              </Label>
+              <PopoverPicker
+                color={chartBackgroundColor}
+                onChange={(e) => {
+                  setChartBackgroundColor(e);
+                }}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Background Width
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={chartBackgroundWidth}
+                  onChange={(e) =>
+                    setChartBackgroundWidth(parseInt(e.target.value))
+                  }
+                  className="w-full h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Chart Background Height
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={chartBackgroundHeight}
+                  onChange={(e) =>
+                    setChartBackgroundHeight(parseInt(e.target.value))
+                  }
+                  className="w-full h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Bar Spacing
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={barSpacing}
+                  onChange={(e) => setBarSpacing(parseInt(e.target.value))}
+                  className="w-full h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Spacing
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={groupSpacing}
+                  onChange={(e) => setGroupSpacing(parseInt(e.target.value))}
+                  className="w-full h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return null;
   };
 
@@ -1091,10 +1221,13 @@ export const GroupedBarChart: React.FC = ({}) => {
 
     return (
       <svg
-        width="100%"
-        height={chartHeight}
-        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+        preserveAspectRatio="xMidYMid meet"
+        ref={svgRef}
+        width={chartBackgroundWidth}
+        height={chartBackgroundHeight}
+        viewBox={`0 0 ${chartBackgroundWidth} ${chartBackgroundHeight}`}
         className="border rounded-lg bg-white cursor-pointer"
+        onClick={(e) => openModal("chart", e)}
       >
         <defs>
           <style>{`
@@ -1120,239 +1253,252 @@ export const GroupedBarChart: React.FC = ({}) => {
             />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-
-        {/* Chart Title */}
-        <text
-          x={chartWidth / 2}
-          y={chartTitleSection.height / 2.75}
-          textAnchor="middle"
-          className="text-lg font-semibold"
-          fill={chartTitleSection.name.color}
-          style={{ fontFamily: "MyFont" }}
-          onClick={(e) => openModal("titleSection", e)}
-        >
-          {chartTitleSection.name.value}
-        </text>
-        <text
-          x={chartWidth / 2}
-          y={chartTitleSection.height / 1.65}
-          textAnchor="middle"
-          className="text-xs"
-          fill={chartTitleSection.description.color}
-          style={{ fontFamily: "MyFont" }}
-          onClick={(e) => openModal("titleSection", e)}
-        >
-          {chartTitleSection.description.value}
-        </text>
-
-        {/* Y-axis line */}
-        <line
-          x1={padding.left}
-          y1={currentY - 20}
-          x2={padding.left}
-          y2={chartHeight - padding.bottom}
-          stroke="#e2e8f0"
-          strokeWidth="2"
+        {/* url(#grid) */}
+        <rect
+          width={"100%"}
+          height={"100%"}
+          fill={`rgba(${chartBackgroundColor.r},${chartBackgroundColor.g},${chartBackgroundColor.b},${chartBackgroundColor.a})`}
         />
 
-        {/* X-axis line */}
-        <line
-          x1={padding.left}
-          y1={chartHeight - padding.bottom}
-          x2={chartWidth - padding.right}
-          y2={chartHeight - padding.bottom}
-          stroke="#e2e8f0"
-          strokeWidth="2"
-        />
+        <g
+          transform={`translate(${chartBackgroundWidth / 2 - chartWidth / 2}, ${
+            chartBackgroundHeight / 2 - chartHeight / 2
+          })`}
+        >
+          {/* Chart Title */}
+          <text
+            x={chartWidth / 2}
+            y={chartTitleSection.height / 2.75}
+            textAnchor="middle"
+            className="text-lg font-semibold"
+            fill={chartTitleSection.name.color}
+            style={{ fontFamily: "MyFont" }}
+            onClick={(e) => openModal("titleSection", e)}
+          >
+            {chartTitleSection.name.value}
+          </text>
+          <text
+            x={chartWidth / 2}
+            y={chartTitleSection.height / 1.65}
+            textAnchor="middle"
+            className="text-xs"
+            fill={chartTitleSection.description.color}
+            style={{ fontFamily: "MyFont" }}
+            onClick={(e) => openModal("titleSection", e)}
+          >
+            {chartTitleSection.description.value}
+          </text>
 
-        {/* X-axis scale markers */}
-        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-          const x = padding.left + ratio * availableWidth;
-          const value = Math.round(ratio * maxValue);
-          return (
-            <g key={ratio}>
-              <line
-                x1={x}
-                y1={chartHeight - padding.bottom}
-                x2={x}
-                y2={chartHeight - padding.bottom + 5}
-                stroke="#94a3b8"
-                strokeWidth="1"
-              />
-              <text
-                x={x}
-                y={chartHeight - padding.bottom + 18}
-                textAnchor="middle"
-                className="fill-gray-600 text-xs"
-                style={{ fontFamily: "MyFont" }}
-              >
-                {value.toLocaleString()}
-              </text>
-            </g>
-          );
-        })}
+          {/* Y-axis line */}
+          <line
+            x1={padding.left}
+            y1={currentY - 20}
+            x2={padding.left}
+            y2={chartHeight - padding.bottom}
+            stroke="#e2e8f0"
+            strokeWidth="2"
+          />
 
-        {/* Render Groups and Bars */}
-        {groupedBars.map((groupData, groupIndex) => {
-          const { group, bars: groupBars } = groupData;
+          {/* X-axis line */}
+          <line
+            x1={padding.left}
+            y1={chartHeight - padding.bottom}
+            x2={chartWidth - padding.right}
+            y2={chartHeight - padding.bottom}
+            stroke="#e2e8f0"
+            strokeWidth="2"
+          />
 
-          // if (group.collapsed) {
-          //   // Render collapsed group header only
-          //   const groupY = currentY;
-          //   currentY += groupLabelHeight + 10;
+          {/* X-axis scale markers */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const x = padding.left + ratio * availableWidth;
+            const value = Math.round(ratio * maxValue);
+            return (
+              <g key={ratio}>
+                <line
+                  x1={x}
+                  y1={chartHeight - padding.bottom}
+                  x2={x}
+                  y2={chartHeight - padding.bottom + 5}
+                  stroke="#94a3b8"
+                  strokeWidth="1"
+                />
+                <text
+                  x={x}
+                  y={chartHeight - padding.bottom + 18}
+                  textAnchor="middle"
+                  className="fill-gray-600 text-xs"
+                  style={{ fontFamily: "MyFont" }}
+                >
+                  {value.toLocaleString()}
+                </text>
+              </g>
+            );
+          })}
 
-          //   return (
-          //     <g key={group.id}>
-          //       {/* Group background */}
-          //       <rect
-          //         x={padding.left - labelWidth - 10}
-          //         y={groupY - 5}
-          //         width={labelWidth + availableWidth + 20}
-          //         height={groupLabelHeight}
-          //         fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
-          //         stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
-          //         strokeWidth="1"
-          //         rx="4"
-          //         className="cursor-pointer hover:opacity-80 transition-opacity"
-          //         onClick={(e) => openModal("group", e, group.id)}
-          //       />
+          {/* Render Groups and Bars */}
+          {groupedBars.map((groupData, groupIndex) => {
+            const { group, bars: groupBars } = groupData;
 
-          //       {/* Group label */}
-          //       <text
-          //         x={padding.left - labelWidth - 5}
-          //         y={groupY + groupLabelHeight / 2}
-          //         alignmentBaseline="middle"
-          //         className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
-          //         onClick={(e) => {
-          //           e.stopPropagation();
-          //           // toggleGroupCollapse(group.id);
-          //         }}
-          //       >
-          //         ▶ {group.label.value} ({groupBars.length} items)
-          //       </text>
-          //     </g>
-          //   );
-          // }
+            // if (group.collapsed) {
+            //   // Render collapsed group header only
+            //   const groupY = currentY;
+            //   currentY += groupLabelHeight + 10;
 
-          // Render expanded group
-          const groupStartY = currentY;
-          currentY += groupLabelHeight;
+            //   return (
+            //     <g key={group.id}>
+            //       {/* Group background */}
+            //       <rect
+            //         x={padding.left - labelWidth - 10}
+            //         y={groupY - 5}
+            //         width={labelWidth + availableWidth + 20}
+            //         height={groupLabelHeight}
+            //         fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+            //         stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+            //         strokeWidth="1"
+            //         rx="4"
+            //         className="cursor-pointer hover:opacity-80 transition-opacity"
+            //         onClick={(e) => openModal("group", e, group.id)}
+            //       />
 
-          const groupElements = (
-            <g key={group.id}>
-              {/* Group background */}
-              <rect
-                x={padding.left - labelWidth - 10}
-                y={groupStartY - 5}
-                width={labelWidth + availableWidth + 20}
-                height={
-                  groupLabelHeight + groupBars.length * (barHeight + barSpacing)
-                }
-                fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
-                stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
-                strokeWidth="1"
-                rx="6"
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={(e) => openModal("group", e, group.id)}
-              />
+            //       {/* Group label */}
+            //       <text
+            //         x={padding.left - labelWidth - 5}
+            //         y={groupY + groupLabelHeight / 2}
+            //         alignmentBaseline="middle"
+            //         className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
+            //         onClick={(e) => {
+            //           e.stopPropagation();
+            //           // toggleGroupCollapse(group.id);
+            //         }}
+            //       >
+            //         ▶ {group.label.value} ({groupBars.length} items)
+            //       </text>
+            //     </g>
+            //   );
+            // }
 
-              {/* Group label */}
-              <text
-                x={padding.left - labelWidth - 5}
-                y={groupStartY + groupLabelHeight / 2}
-                alignmentBaseline="middle"
-                className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
-                style={{ fontFamily: "MyFont" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  //   toggleGroupCollapse(group.id);
-                }}
-              >
-                {/* ▼  */}
-                {group.label.value}
-              </text>
+            // Render expanded group
+            const groupStartY = currentY;
+            currentY += groupLabelHeight;
 
-              {/* Group bars */}
-              {groupBars.map((bar, barIndex) => {
-                const barWidth = (bar.value.value / maxValue) * availableWidth;
-                const barY = currentY + barIndex * (barHeight + barSpacing);
+            const groupElements = (
+              <g key={group.id}>
+                {/* Group background */}
+                <rect
+                  x={padding.left - labelWidth - 10}
+                  y={groupStartY - 5}
+                  width={labelWidth + availableWidth + 20}
+                  height={
+                    groupLabelHeight +
+                    groupBars.length * (barHeight + barSpacing)
+                  }
+                  fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+                  stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+                  strokeWidth="1"
+                  rx="6"
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={(e) => openModal("group", e, group.id)}
+                />
 
-                return (
-                  <g key={bar.id}>
-                    {/* Bar background */}
-                    <rect
-                      x={padding.left}
-                      y={barY}
-                      width={availableWidth}
-                      height={barHeight}
-                      fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
-                      stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
-                      strokeWidth="1"
-                      rx="3"
-                    />
+                {/* Group label */}
+                <text
+                  x={padding.left - labelWidth - 5}
+                  y={groupStartY + groupLabelHeight / 2}
+                  alignmentBaseline="middle"
+                  className="fill-gray-800 text-sm font-bold cursor-pointer hover:fill-gray-600"
+                  style={{ fontFamily: "MyFont" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    //   toggleGroupCollapse(group.id);
+                  }}
+                >
+                  {/* ▼  */}
+                  {group.label.value}
+                </text>
 
-                    {/* Actual Bar */}
-                    <rect
-                      x={padding.left}
-                      y={barY}
-                      width={barWidth}
-                      height={barHeight}
-                      fill={`rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`}
-                      rx="3"
-                      className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
-                      strokeWidth="0"
-                      onClick={(e) => openModal("bar", e, bar.id)}
-                    />
+                {/* Group bars */}
+                {groupBars.map((bar, barIndex) => {
+                  const barWidth =
+                    (bar.value.value / maxValue) * availableWidth;
+                  const barY = currentY + barIndex * (barHeight + barSpacing);
 
-                    {/* Bar Label */}
-                    <text
-                      x={padding.left - 10}
-                      y={barY + barHeight / 2}
-                      textAnchor="end"
-                      alignmentBaseline="middle"
-                      className="fill-gray-700 text-xs font-medium cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
-                      style={{ fontFamily: "MyFont" }}
-                      onClick={(e) => openModal("bar", e, bar.id)}
-                    >
-                      {bar.label.value}
-                    </text>
+                  return (
+                    <g key={bar.id}>
+                      {/* Bar background */}
+                      <rect
+                        x={padding.left}
+                        y={barY}
+                        width={availableWidth}
+                        height={barHeight}
+                        fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
+                        stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
+                        strokeWidth="1"
+                        rx="3"
+                      />
 
-                    {/* Bar Value */}
-                    <text
-                      x={padding.left + barWidth + 8}
-                      y={barY + barHeight / 2}
-                      textAnchor="start"
-                      alignmentBaseline="middle"
-                      className="fill-gray-700 text-xs font-semibold cursor-pointer hover:fill-gray-900"
-                      style={{ fontFamily: "MyFont" }}
-                      onClick={(e) => openModal("bar", e, bar.id)}
-                    >
-                      {bar.value.value.toLocaleString()}
-                    </text>
+                      {/* Actual Bar */}
+                      <rect
+                        x={padding.left}
+                        y={barY}
+                        width={barWidth}
+                        height={barHeight}
+                        fill={`rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`}
+                        rx="3"
+                        className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
+                        strokeWidth="0"
+                        onClick={(e) => openModal("bar", e, bar.id)}
+                      />
 
-                    {/* Hover indicator */}
-                    <rect
-                      x={padding.left - 2}
-                      y={barY - 2}
-                      width={barWidth + 4}
-                      height={barHeight + 4}
-                      fill="none"
-                      stroke="transparent"
-                      strokeWidth="2"
-                      rx="5"
-                      className="pointer-events-none opacity-0 hover:opacity-100 hover:stroke-blue-400 transition-all"
-                    />
-                  </g>
-                );
-              })}
-            </g>
-          );
+                      {/* Bar Label */}
+                      <text
+                        x={padding.left - 10}
+                        y={barY + barHeight / 2}
+                        textAnchor="end"
+                        alignmentBaseline="middle"
+                        className="fill-gray-700 text-xs font-medium cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
+                        style={{ fontFamily: "MyFont" }}
+                        onClick={(e) => openModal("bar", e, bar.id)}
+                      >
+                        {bar.label.value}
+                      </text>
 
-          currentY +=
-            groupBars.length * (barHeight + barSpacing) + groupSpacing;
-          return groupElements;
-        })}
+                      {/* Bar Value */}
+                      <text
+                        x={padding.left + barWidth + 8}
+                        y={barY + barHeight / 2}
+                        textAnchor="start"
+                        alignmentBaseline="middle"
+                        className="fill-gray-700 text-xs font-semibold cursor-pointer hover:fill-gray-900"
+                        style={{ fontFamily: "MyFont" }}
+                        onClick={(e) => openModal("bar", e, bar.id)}
+                      >
+                        {bar.value.value.toLocaleString()}
+                      </text>
+
+                      {/* Hover indicator */}
+                      <rect
+                        x={padding.left - 2}
+                        y={barY - 2}
+                        width={barWidth + 4}
+                        height={barHeight + 4}
+                        fill="none"
+                        stroke="transparent"
+                        strokeWidth="2"
+                        rx="5"
+                        className="pointer-events-none opacity-0 hover:opacity-100 hover:stroke-blue-400 transition-all"
+                      />
+                    </g>
+                  );
+                })}
+              </g>
+            );
+
+            currentY +=
+              groupBars.length * (barHeight + barSpacing) + groupSpacing;
+            return groupElements;
+          })}
+        </g>
       </svg>
     );
   };
@@ -1396,6 +1542,14 @@ export const GroupedBarChart: React.FC = ({}) => {
               <Button variant="outline" className="w-full" onClick={resetChart}>
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Reset Chart
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleExportSvg}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export SVG
               </Button>
             </CardContent>
           </Card>
