@@ -79,6 +79,17 @@ interface Background {
   backgroundURL?: string;
 }
 
+type BarValuePositionKeys =
+  | "onForegroundRight"
+  | "onBackgroundLeft"
+  | "onBackgroundRight"
+  | "outside";
+
+interface Settings {
+  barLabelInside: boolean;
+  barValuePosition: BarValuePositionKeys;
+}
+
 interface ChartTemplate {
   id: string;
   width: number;
@@ -89,6 +100,7 @@ interface ChartTemplate {
   chartType: "horizontal" | "vertical";
   barSpacing: number;
   groupSpacing: number;
+  settings: Settings;
 }
 
 interface ModalState {
@@ -120,6 +132,10 @@ const defaultTemplates: ChartTemplate[] = [
     chartType: "horizontal",
     barSpacing: 10,
     groupSpacing: 30,
+    settings: {
+      barLabelInside: true,
+      barValuePosition: "outside",
+    },
     groups: [
       {
         id: "HighCPU",
@@ -218,7 +234,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
-        value: { value: 6100, color: "#000000", fontSize: 16 },
+        value: { value: 100, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "MediumGPU",
@@ -292,6 +308,11 @@ export const GroupedBarChart: React.FC = ({}) => {
   const [groupSpacing, setGroupSpacing] = useState(30);
   const [barSpacing, setBarSpacing] = useState(10);
   const [barHeight, setBarHeight] = useState(60);
+  const [settings, setSettings] = useState<Settings>({
+    barLabelInside: false,
+    barValuePosition: "onBackgroundLeft",
+  });
+
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
     {
       name: {
@@ -560,6 +581,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     setChartWidth(template.width);
     setBarSpacing(template.barSpacing);
     setGroupSpacing(template.groupSpacing);
+    setSettings(template.settings);
     closeModal();
   };
 
@@ -688,6 +710,24 @@ export const GroupedBarChart: React.FC = ({}) => {
                   updateBar(currentBar.id, {
                     ...currentBar,
                     label: { ...currentBar.label, value: e.target.value },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Bar label"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Label inside bar
+              </Label>
+              <Input
+                type="checkbox"
+                checked={settings.barLabelInside}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    barLabelInside: e.target.checked,
                   })
                 }
                 className="h-8 text-sm"
@@ -1505,6 +1545,28 @@ export const GroupedBarChart: React.FC = ({}) => {
                     (bar.value.value / maxValue) * availableWidth;
                   const barY = currentY + barIndex * (barHeight + barSpacing);
 
+                  const barValuePosition: Record<
+                    BarValuePositionKeys,
+                    { position: number; anchor: string }
+                  > = {
+                    onBackgroundLeft: {
+                      position: padding.left + barWidth + 8,
+                      anchor: "start",
+                    },
+                    onForegroundRight: {
+                      position: barWidth + labelWidth + 10,
+                      anchor: "end",
+                    },
+                    onBackgroundRight: {
+                      position: labelWidth + availableWidth + 10,
+                      anchor: "end",
+                    },
+                    outside: {
+                      position: chartWidth - 15,
+                      anchor: "start",
+                    },
+                  };
+
                   return (
                     <g key={bar.id}>
                       {/* Bar background */}
@@ -1535,9 +1597,13 @@ export const GroupedBarChart: React.FC = ({}) => {
 
                       {/* Bar Label */}
                       <text
-                        x={padding.left - 10}
+                        x={
+                          settings.barLabelInside
+                            ? padding.left + 10
+                            : padding.left - 10
+                        }
                         y={barY + barHeight / 2}
-                        textAnchor="end"
+                        textAnchor={settings.barLabelInside ? "start" : "end"}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
                         style={{ fontFamily: "MyFont" }}
@@ -1548,9 +1614,11 @@ export const GroupedBarChart: React.FC = ({}) => {
 
                       {/* Bar Value */}
                       <text
-                        x={padding.left + barWidth + 8}
+                        x={barValuePosition[settings.barValuePosition].position}
                         y={barY + barHeight / 2}
-                        textAnchor="start"
+                        textAnchor={
+                          barValuePosition[settings.barValuePosition].anchor
+                        }
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900"
                         style={{ fontFamily: "MyFont" }}
