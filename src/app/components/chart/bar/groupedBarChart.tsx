@@ -88,6 +88,12 @@ type BarValuePositionKeys =
 interface Settings {
   barLabelInside: boolean;
   barValuePosition: BarValuePositionKeys;
+  barLabelFontSize: number;
+  groupLabelFontSize: number;
+  barValueFontSize: number;
+  xAxisLabelFontSize: number;
+  hideXAxis: boolean;
+  hideYAxis: boolean;
 }
 
 interface ChartTemplate {
@@ -135,6 +141,12 @@ const defaultTemplates: ChartTemplate[] = [
     settings: {
       barLabelInside: true,
       barValuePosition: "outside",
+      barLabelFontSize: 14,
+      groupLabelFontSize: 16,
+      barValueFontSize: 14,
+      xAxisLabelFontSize: 12,
+      hideXAxis: true,
+      hideYAxis: true,
     },
     groups: [
       {
@@ -311,6 +323,12 @@ export const GroupedBarChart: React.FC = ({}) => {
   const [settings, setSettings] = useState<Settings>({
     barLabelInside: false,
     barValuePosition: "onBackgroundLeft",
+    barLabelFontSize: 14,
+    groupLabelFontSize: 16,
+    barValueFontSize: 14,
+    xAxisLabelFontSize: 12,
+    hideXAxis: true,
+    hideYAxis: true,
   });
 
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
@@ -436,8 +454,8 @@ export const GroupedBarChart: React.FC = ({}) => {
     if (!chartRect) return;
 
     // Calculate position relative to the chart container
-    const x = event.clientX - chartRect.left;
-    const y = event.clientY - chartRect.top;
+    const x = event.clientX;
+    const y = event.clientY;
 
     setModalState({
       isOpen: true,
@@ -716,6 +734,23 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Bar label"
               />
             </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Label Font Size
+              </Label>
+              <Input
+                type="number"
+                value={settings.barLabelFontSize}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    barLabelFontSize: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="14"
+              />
+            </div>
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
@@ -751,6 +786,24 @@ export const GroupedBarChart: React.FC = ({}) => {
                 }
                 className="h-8 text-sm"
                 placeholder="Bar value"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Value Font Size
+              </Label>
+              <Input
+                type="number"
+                value={settings.barValueFontSize}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    barValueFontSize: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="14"
               />
             </div>
 
@@ -890,6 +943,24 @@ export const GroupedBarChart: React.FC = ({}) => {
                 }
                 className="h-8 text-sm"
                 placeholder="Group name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Name Font Size
+              </Label>
+              <Input
+                type="number"
+                value={settings.groupLabelFontSize}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    groupLabelFontSize: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="14"
               />
             </div>
 
@@ -1286,6 +1357,41 @@ export const GroupedBarChart: React.FC = ({}) => {
               </div>
             </div>
 
+            <div className="space-y-1 grid grid-cols-2">
+              <div>
+                <Label className="text-xs font-medium text-gray-500">
+                  Hide X Axis
+                </Label>
+                <Input
+                  type="checkbox"
+                  checked={settings.hideXAxis}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      hideXAxis: e.target.checked,
+                    })
+                  }
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-medium text-gray-500">
+                  Hide Y Axis
+                </Label>
+                <Input
+                  type="checkbox"
+                  checked={settings.hideYAxis}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      hideYAxis: e.target.checked,
+                    })
+                  }
+                  className="h-8 text-sm"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Group Spacing
@@ -1317,7 +1423,7 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const renderHorizontalChart = () => {
-    const groupLabelHeight = 25;
+    const groupLabelHeight = 10 + settings.groupLabelFontSize;
     const labelWidth = 140;
 
     const padding = { top: 30, right: 40, bottom: 40, left: labelWidth + 20 };
@@ -1412,51 +1518,58 @@ export const GroupedBarChart: React.FC = ({}) => {
             {chartTitleSection.description.value}
           </text>
 
-          {/* Y-axis line */}
-          <line
-            x1={padding.left}
-            y1={currentY - 20}
-            x2={padding.left}
-            y2={chartHeight}
-            stroke="#e2e8f0"
-            strokeWidth="2"
-          />
+          {settings.hideYAxis ? null : (
+            <>
+              {/* Y-axis line */}
+              <line
+                x1={padding.left}
+                y1={currentY - 20}
+                x2={padding.left}
+                y2={chartHeight}
+                stroke="#e2e8f0"
+                strokeWidth="2"
+              />
+            </>
+          )}
 
-          {/* X-axis line */}
-          <line
-            x1={padding.left}
-            y1={chartHeight}
-            x2={chartWidth - padding.right}
-            y2={chartHeight}
-            stroke="#e2e8f0"
-            strokeWidth="2"
-          />
-
-          {/* X-axis scale markers */}
-          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-            const x = padding.left + ratio * availableWidth;
-            const value = Math.round(ratio * maxValue);
-            return (
-              <g key={ratio}>
-                <line
-                  x1={x}
-                  y1={chartHeight}
-                  x2={x}
-                  y2={chartHeight + 5}
-                  stroke="#94a3b8"
-                  strokeWidth="1"
-                />
-                <text
-                  x={x}
-                  y={chartHeight + 18}
-                  textAnchor="middle"
-                  style={{ fontFamily: "MyFont" }}
-                >
-                  {value.toLocaleString()}
-                </text>
-              </g>
-            );
-          })}
+          {settings.hideXAxis ? null : (
+            <>
+              {/* X-axis line */}
+              <line
+                x1={padding.left}
+                y1={chartHeight}
+                x2={chartWidth - padding.right}
+                y2={chartHeight}
+                stroke="#e2e8f0"
+                strokeWidth="2"
+              />
+              {/* X-axis scale markers */}
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                const x = padding.left + ratio * availableWidth;
+                const value = Math.round(ratio * maxValue);
+                return (
+                  <g key={ratio}>
+                    <line
+                      x1={x}
+                      y1={chartHeight}
+                      x2={x}
+                      y2={chartHeight + 5}
+                      stroke="#94a3b8"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={x}
+                      y={chartHeight + 18}
+                      textAnchor="middle"
+                      style={{ fontFamily: "MyFont" }}
+                    >
+                      {value.toLocaleString()}
+                    </text>
+                  </g>
+                );
+              })}
+            </>
+          )}
 
           {/* Render Groups and Bars */}
           {groupedBars.map((groupData, groupIndex) => {
@@ -1530,6 +1643,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   alignmentBaseline="middle"
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "MyFont" }}
+                  fontSize={settings.groupLabelFontSize}
                   onClick={(e) => {
                     e.stopPropagation();
                     //   toggleGroupCollapse(group.id);
@@ -1607,6 +1721,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
                         style={{ fontFamily: "MyFont" }}
+                        fontSize={settings.barLabelFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
                         {bar.label.value}
@@ -1622,6 +1737,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900"
                         style={{ fontFamily: "MyFont" }}
+                        fontSize={settings.barValueFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
                         {bar.value.value.toLocaleString()}
