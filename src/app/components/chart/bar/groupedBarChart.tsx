@@ -137,7 +137,7 @@ const defaultTemplates: ChartTemplate[] = [
     },
     chartType: "horizontal",
     barSpacing: 10,
-    groupSpacing: 30,
+    groupSpacing: 15,
     settings: {
       barLabelInside: true,
       barValuePosition: "outside",
@@ -317,7 +317,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     b: 0,
     a: 0,
   });
-  const [groupSpacing, setGroupSpacing] = useState(30);
+  const [groupSpacing, setGroupSpacing] = useState(15);
   const [barSpacing, setBarSpacing] = useState(10);
   const [barHeight, setBarHeight] = useState(60);
   const [settings, setSettings] = useState<Settings>({
@@ -667,7 +667,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     });
     setChartWidth(1000);
     setBarSpacing(10);
-    setGroupSpacing(30);
+    setGroupSpacing(15);
     closeModal();
   };
 
@@ -1426,7 +1426,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     const groupLabelHeight = 10 + settings.groupLabelFontSize;
     const labelWidth = 140;
 
-    const padding = { top: 30, right: 40, bottom: 40, left: labelWidth + 20 };
+    const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
 
     const totalNumberOfBars = groupedBars.reduce(
       (sum, group) => sum + group.bars.length,
@@ -1622,7 +1622,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                 {/* Group background */}
                 <rect
                   x={padding.left - labelWidth - 10}
-                  y={groupStartY - 5}
+                  y={groupStartY}
                   width={labelWidth + availableWidth + 20}
                   height={
                     groupLabelHeight +
@@ -1762,7 +1762,7 @@ export const GroupedBarChart: React.FC = ({}) => {
             );
 
             currentY +=
-              groupBars.length * (barHeight + barSpacing) + groupSpacing;
+              groupBars.length * (barHeight + barSpacing + groupSpacing);
             return groupElements;
           })}
         </g>
