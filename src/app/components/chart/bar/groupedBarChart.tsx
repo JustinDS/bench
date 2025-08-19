@@ -44,6 +44,7 @@ interface ChartBar {
 interface ChartGroup {
   id: string;
   label: Text;
+  description?: Text;
   backgroundColor: RgbaColor;
   collapsed: boolean;
 }
@@ -85,15 +86,36 @@ type BarValuePositionKeys =
   | "onBackgroundRight"
   | "outside";
 
+const barValuePositions = [
+  {
+    key: "onForegroundRight",
+    label: "On Foreground Right",
+  },
+  {
+    key: "onBackgroundLeft",
+    label: "On Background Left",
+  },
+  {
+    key: "onBackgroundRight",
+    label: "On Background Right",
+  },
+  {
+    key: "outside",
+    label: "Outside Right",
+  },
+];
+
 interface Settings {
   barLabelInside: boolean;
   barValuePosition: BarValuePositionKeys;
-  barLabelFontSize: number;
+  barLabelFontSize?: number;
   groupLabelFontSize: number;
+  groupDescriptionFontSize?: number;
   barValueFontSize: number;
   xAxisLabelFontSize: number;
   hideXAxis: boolean;
   hideYAxis: boolean;
+  labelWidth: number;
 }
 
 interface ChartTemplate {
@@ -132,7 +154,7 @@ const defaultTemplates: ChartTemplate[] = [
     background: {
       color: { r: 0, g: 0, b: 0, a: 1 },
       width: 1280,
-      height: 720,
+      height: 1300,
       backgroundURL: "",
     },
     chartType: "horizontal",
@@ -143,10 +165,12 @@ const defaultTemplates: ChartTemplate[] = [
       barValuePosition: "outside",
       barLabelFontSize: 14,
       groupLabelFontSize: 16,
+      //groupDescriptionFontSize: 14,
       barValueFontSize: 14,
       xAxisLabelFontSize: 12,
       hideXAxis: true,
       hideYAxis: true,
+      labelWidth: 140,
     },
     groups: [
       {
@@ -309,8 +333,8 @@ export const GroupedBarChart: React.FC = ({}) => {
     "horizontal"
   );
   const [chartWidth, setChartWidth] = useState(1000);
-  const [chartBackgroundWidth, setChartBackgroundWidth] = useState(1000);
-  const [chartBackgroundHeight, setChartBackgroundHeight] = useState(1000);
+  const [chartBackgroundWidth, setChartBackgroundWidth] = useState(1200);
+  const [chartBackgroundHeight, setChartBackgroundHeight] = useState(500);
   const [chartBackgroundColor, setChartBackgroundColor] = useState({
     r: 0,
     g: 0,
@@ -325,10 +349,12 @@ export const GroupedBarChart: React.FC = ({}) => {
     barValuePosition: "onBackgroundLeft",
     barLabelFontSize: 14,
     groupLabelFontSize: 16,
+    groupDescriptionFontSize: 14,
     barValueFontSize: 14,
     xAxisLabelFontSize: 12,
     hideXAxis: true,
     hideYAxis: true,
+    labelWidth: 140,
   });
 
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
@@ -350,12 +376,14 @@ export const GroupedBarChart: React.FC = ({}) => {
     {
       id: "group1",
       label: { value: "Group A", color: "#000000", fontSize: 16 },
+      description: { value: "Des", color: "#000000", fontSize: 14 },
       backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
       collapsed: false,
     },
     {
       id: "group2",
       label: { value: "Group B", color: "#000000", fontSize: 16 },
+      description: { value: "Des", color: "#000000", fontSize: 14 },
       backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
       collapsed: false,
     },
@@ -592,6 +620,8 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const loadTemplate = (template: ChartTemplate) => {
+    setChartBackgroundHeight(template.background.height);
+    setChartBackgroundWidth(template.background.width);
     setGroups(template.groups);
     setBars(template.bars);
     setChartType(template.chartType);
@@ -791,6 +821,34 @@ export const GroupedBarChart: React.FC = ({}) => {
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
+                Value Position
+              </Label>
+              <Select
+                value={settings.barValuePosition}
+                onValueChange={(value) =>
+                  setSettings({
+                    ...settings,
+                    barValuePosition: value as BarValuePositionKeys,
+                  })
+                }
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {barValuePositions.map((barPosition) => (
+                    <SelectItem key={barPosition.key} value={barPosition.key}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">{barPosition.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
                 Value Font Size
               </Label>
               <Input
@@ -805,6 +863,25 @@ export const GroupedBarChart: React.FC = ({}) => {
                 className="h-8 text-sm"
                 placeholder="14"
               />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Label Width
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={settings.labelWidth}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      labelWidth: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full h-8 p-1 border rounded"
+                />
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -957,6 +1034,45 @@ export const GroupedBarChart: React.FC = ({}) => {
                   setSettings({
                     ...settings,
                     groupLabelFontSize: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="14"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Description
+              </Label>
+              <Input
+                value={currentGroup?.description?.value ?? ""}
+                onChange={(e) =>
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    description: {
+                      color: currentGroup.description?.color ?? "#000000",
+                      fontSize: currentGroup.description?.fontSize ?? 14,
+                      value: e.target.value,
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Group name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Description Font Size
+              </Label>
+              <Input
+                type="number"
+                value={settings.groupDescriptionFontSize}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    groupDescriptionFontSize: parseInt(e.target.value),
                   })
                 }
                 className="h-8 text-sm"
@@ -1424,7 +1540,11 @@ export const GroupedBarChart: React.FC = ({}) => {
 
   const renderHorizontalChart = () => {
     const groupLabelHeight = 10 + settings.groupLabelFontSize;
-    const labelWidth = 140;
+    const groupDescriptionHeight = settings?.groupDescriptionFontSize
+      ? 10 + settings?.groupDescriptionFontSize
+      : 0;
+
+    const labelWidth = settings.labelWidth;
 
     const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
 
@@ -1435,7 +1555,8 @@ export const GroupedBarChart: React.FC = ({}) => {
 
     const totalHeightOfBars = totalNumberOfBars * (barHeight + barSpacing);
     const totalHeightOfGroup =
-      groupedBars.length * (groupSpacing + groupLabelHeight);
+      groupedBars.length *
+      (groupSpacing + groupLabelHeight + groupDescriptionHeight);
 
     const chartHeight =
       totalHeightOfBars +
@@ -1615,7 +1736,7 @@ export const GroupedBarChart: React.FC = ({}) => {
 
             // Render expanded group
             const groupStartY = currentY;
-            currentY += groupLabelHeight;
+            currentY += groupLabelHeight + groupDescriptionHeight;
 
             const groupElements = (
               <g key={group.id}>
@@ -1626,6 +1747,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   width={labelWidth + availableWidth + 20}
                   height={
                     groupLabelHeight +
+                    groupDescriptionHeight +
                     groupBars.length * (barHeight + barSpacing)
                   }
                   fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
@@ -1653,6 +1775,24 @@ export const GroupedBarChart: React.FC = ({}) => {
                   {group.label.value}
                 </text>
 
+                <text
+                  x={padding.left - labelWidth - 5}
+                  y={
+                    groupStartY + groupLabelHeight + groupDescriptionHeight / 2
+                  }
+                  alignmentBaseline="middle"
+                  className="cursor-pointer hover:fill-gray-600"
+                  style={{ fontFamily: "MyFont" }}
+                  fontSize={settings.groupDescriptionFontSize}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    //   toggleGroupCollapse(group.id);
+                  }}
+                >
+                  {/* ▼  */}
+                  {group?.description?.value ?? ""}
+                </text>
+
                 {/* Group bars */}
                 {groupBars.map((bar, barIndex) => {
                   const barWidth =
@@ -1676,7 +1816,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       anchor: "end",
                     },
                     outside: {
-                      position: chartWidth - 15,
+                      position: chartWidth,
                       anchor: "start",
                     },
                   };
