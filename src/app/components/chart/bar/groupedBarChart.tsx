@@ -86,7 +86,12 @@ type BarValuePositionKeys =
   | "onBackgroundRight"
   | "outside";
 
-const barValuePositions = [
+interface BarValuePosition {
+  key: BarValuePositionKeys;
+  label: string;
+}
+
+const barValuePositions: BarValuePosition[] = [
   {
     key: "onForegroundRight",
     label: "On Foreground Right",
@@ -105,6 +110,32 @@ const barValuePositions = [
   },
 ];
 
+type GroupLabelPositionKeys = "left" | "center" | "right" | "replaceBarLabels";
+
+interface GroupLabelPosition {
+  key: GroupLabelPositionKeys;
+  label: string;
+}
+
+const GroupLabelPositions: GroupLabelPosition[] = [
+  {
+    key: "left",
+    label: "Left Align",
+  },
+  {
+    key: "center",
+    label: "Center Align",
+  },
+  {
+    key: "right",
+    label: "Right Align",
+  },
+  {
+    key: "replaceBarLabels",
+    label: "Replace Bar Label",
+  },
+];
+
 interface Settings {
   barLabelInside: boolean;
   barValuePosition: BarValuePositionKeys;
@@ -116,6 +147,7 @@ interface Settings {
   hideXAxis: boolean;
   hideYAxis: boolean;
   labelWidth: number;
+  groupLabelPosition: GroupLabelPositionKeys;
 }
 
 interface ChartTemplate {
@@ -171,6 +203,7 @@ const defaultTemplates: ChartTemplate[] = [
       hideXAxis: true,
       hideYAxis: true,
       labelWidth: 140,
+      groupLabelPosition: "replaceBarLabels",
     },
     groups: [
       {
@@ -355,6 +388,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     hideXAxis: true,
     hideYAxis: true,
     labelWidth: 140,
+    groupLabelPosition: "left",
   });
 
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
@@ -823,28 +857,49 @@ export const GroupedBarChart: React.FC = ({}) => {
               <Label className="text-xs font-medium text-gray-500">
                 Value Position
               </Label>
-              <Select
+              {/* <Select
                 value={settings.barValuePosition}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
+                  console.log("here");
                   setSettings({
                     ...settings,
                     barValuePosition: value as BarValuePositionKeys,
-                  })
-                }
+                  });
+                }}
               >
-                <SelectTrigger className="h-8 text-sm">
+                <SelectTrigger className="h-8 text-sm z-[100]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]">
                   {barValuePositions.map((barPosition) => (
-                    <SelectItem key={barPosition.key} value={barPosition.key}>
-                      <div className="flex items-center gap-2">
+                    <SelectItem
+                      key={barPosition.key}
+                      value={barPosition.key}
+                      className="z-[100]"
+                    >
+                      <div className="flex items-center gap-2 cursor-pointer">
                         <span className="text-xs">{barPosition.label}</span>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </Select> */}
+              <select
+                value={settings.barValuePosition}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    barValuePosition: e.target.value as BarValuePositionKeys,
+                  })
+                }
+                className="flex-1 h-8 text-sm border border-input bg-background px-3 py-1 rounded-md w-full"
+              >
+                {barValuePositions.map((barPosition) => (
+                  <option key={barPosition.key} value={barPosition.key}>
+                    {barPosition.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-1">
@@ -1539,14 +1594,17 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const renderHorizontalChart = () => {
-    const groupLabelHeight = 10 + settings.groupLabelFontSize;
-    const groupDescriptionHeight = settings?.groupDescriptionFontSize
+    const labelWidth = settings.labelWidth;
+    const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
+    let groupLabelHeight = 10 + settings.groupLabelFontSize;
+    let groupDescriptionHeight = settings?.groupDescriptionFontSize
       ? 10 + settings?.groupDescriptionFontSize
       : 0;
 
-    const labelWidth = settings.labelWidth;
-
-    const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
+    if (settings.groupLabelPosition === "replaceBarLabels") {
+      groupLabelHeight = barSpacing;
+      groupDescriptionHeight = 0;
+    }
 
     const totalNumberOfBars = groupedBars.reduce(
       (sum, group) => sum + group.bars.length,
@@ -1738,6 +1796,34 @@ export const GroupedBarChart: React.FC = ({}) => {
             const groupStartY = currentY;
             currentY += groupLabelHeight + groupDescriptionHeight;
 
+            const groupLabelPosition: Record<
+              GroupLabelPositionKeys,
+              { x: number; y: number; anchor: string }
+            > = {
+              left: {
+                x: padding.left - labelWidth - 5,
+                y: groupStartY + groupLabelHeight / 2,
+                anchor: "start",
+              },
+              center: {
+                x: padding.left - labelWidth - 5,
+                y: groupStartY + groupLabelHeight / 2,
+                anchor: "start",
+              },
+              right: {
+                x: padding.left - labelWidth - 5,
+                y: groupStartY + groupLabelHeight / 2,
+                anchor: "start",
+              },
+              replaceBarLabels: {
+                x: padding.left - labelWidth - 5,
+                y:
+                  groupStartY +
+                  (bars.length * (barHeight + barSpacing)) / bars.length,
+                anchor: "start",
+              },
+            };
+
             const groupElements = (
               <g key={group.id}>
                 {/* Group background */}
@@ -1760,9 +1846,12 @@ export const GroupedBarChart: React.FC = ({}) => {
 
                 {/* Group label */}
                 <text
-                  x={padding.left - labelWidth - 5}
-                  y={groupStartY + groupLabelHeight / 2}
+                  x={groupLabelPosition[settings.groupLabelPosition].x}
+                  y={groupLabelPosition[settings.groupLabelPosition].y}
                   alignmentBaseline="middle"
+                  textAnchor={
+                    groupLabelPosition[settings.groupLabelPosition].anchor
+                  }
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "MyFont" }}
                   fontSize={settings.groupLabelFontSize}
