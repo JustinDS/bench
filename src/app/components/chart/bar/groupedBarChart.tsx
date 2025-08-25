@@ -150,6 +150,7 @@ interface Settings {
   hideYAxis: boolean;
   labelWidth: number;
   groupLabelPosition: GroupLabelPositionKeys;
+  roundedCorners: number;
 }
 
 interface ChartTemplate {
@@ -207,6 +208,7 @@ const defaultTemplates: ChartTemplate[] = [
       hideYAxis: true,
       labelWidth: 140,
       groupLabelPosition: "replaceBarLabels",
+      roundedCorners: 5,
     },
     groups: [
       {
@@ -405,6 +407,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     hideYAxis: true,
     labelWidth: 140,
     groupLabelPosition: "left",
+    roundedCorners: 5,
   });
 
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
@@ -824,6 +827,28 @@ export const GroupedBarChart: React.FC = ({}) => {
             </div>
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
+                Bar Label Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={currentBar?.label?.color}
+                  onChange={(e) =>
+                    updateBar(currentBar.id, {
+                      ...currentBar,
+                      label: {
+                        color: e.target.value ?? "#000000",
+                        fontSize: currentBar.label?.fontSize ?? 14,
+                        value: currentBar?.label?.value ?? "",
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
                 Label Font Size
               </Label>
               <Input
@@ -880,6 +905,28 @@ export const GroupedBarChart: React.FC = ({}) => {
             </div>
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
+                Bar Deescription Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={currentBar?.description?.color}
+                  onChange={(e) =>
+                    updateBar(currentBar.id, {
+                      ...currentBar,
+                      description: {
+                        color: e.target.value ?? "#000000",
+                        fontSize: currentBar.description?.fontSize ?? 14,
+                        value: currentBar?.description?.value ?? "",
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
                 Description Font Size
               </Label>
               <Input
@@ -919,33 +966,6 @@ export const GroupedBarChart: React.FC = ({}) => {
               <Label className="text-xs font-medium text-gray-500">
                 Value Position
               </Label>
-              {/* <Select
-                value={settings.barValuePosition}
-                onValueChange={(value) => {
-                  console.log("here");
-                  setSettings({
-                    ...settings,
-                    barValuePosition: value as BarValuePositionKeys,
-                  });
-                }}
-              >
-                <SelectTrigger className="h-8 text-sm z-[100]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="z-[100]">
-                  {barValuePositions.map((barPosition) => (
-                    <SelectItem
-                      key={barPosition.key}
-                      value={barPosition.key}
-                      className="z-[100]"
-                    >
-                      <div className="flex items-center gap-2 cursor-pointer">
-                        <span className="text-xs">{barPosition.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select> */}
               <select
                 value={settings.barValuePosition}
                 onChange={(e) =>
@@ -980,6 +1000,29 @@ export const GroupedBarChart: React.FC = ({}) => {
                 className="h-8 text-sm"
                 placeholder="14"
               />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Bar Value Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={currentBar?.value?.color}
+                  onChange={(e) =>
+                    updateBar(currentBar.id, {
+                      ...currentBar,
+                      value: {
+                        color: e.target.value ?? "#000000",
+                        fontSize: currentBar.value?.fontSize ?? 14,
+                        value: currentBar.value.value,
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -1142,6 +1185,29 @@ export const GroupedBarChart: React.FC = ({}) => {
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
+                Group Label Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={currentGroup?.label?.color}
+                  onChange={(e) =>
+                    updateGroup(currentGroup.id, {
+                      ...currentGroup,
+                      label: {
+                        color: e.target.value ?? "#000000",
+                        fontSize: currentGroup.label?.fontSize ?? 14,
+                        value: currentGroup.label?.value,
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
                 Group Name Font Size
               </Label>
               <Input
@@ -1177,6 +1243,28 @@ export const GroupedBarChart: React.FC = ({}) => {
                 className="h-8 text-sm"
                 placeholder="Group name"
               />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Description Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={currentGroup?.description?.color}
+                  onChange={(e) =>
+                    updateGroup(currentGroup.id, {
+                      ...currentGroup,
+                      description: {
+                        color: e.target.value ?? "#000000",
+                        fontSize: currentGroup.description?.fontSize ?? 14,
+                        value: currentGroup?.description?.value ?? "",
+                      },
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -1349,35 +1437,6 @@ export const GroupedBarChart: React.FC = ({}) => {
                   }
                   className="w-12 h-8 p-1 border rounded"
                 />
-                <Select
-                  value={chartTitleSection.name.color}
-                  onValueChange={(value) =>
-                    setChartTitleSection({
-                      ...chartTitleSection,
-                      name: {
-                        ...chartTitleSection.name,
-                        color: value,
-                      },
-                    })
-                  }
-                >
-                  <SelectTrigger className="flex-1 h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {colorOptions.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full border"
-                            style={{ backgroundColor: color.value }}
-                          />
-                          <span className="text-xs">{color.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
@@ -1441,35 +1500,6 @@ export const GroupedBarChart: React.FC = ({}) => {
                   }
                   className="w-12 h-8 p-1 border rounded"
                 />
-                <Select
-                  value={chartTitleSection.description.color}
-                  onValueChange={(value) =>
-                    setChartTitleSection({
-                      ...chartTitleSection,
-                      description: {
-                        ...chartTitleSection.description,
-                        color: value,
-                      },
-                    })
-                  }
-                >
-                  <SelectTrigger className="flex-1 h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full border"
-                            style={{ backgroundColor: color.value }}
-                          />
-                          <span className="text-xs">{color.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
             <div className="space-y-1">
@@ -1608,6 +1638,25 @@ export const GroupedBarChart: React.FC = ({}) => {
                   type="number"
                   value={barSpacing}
                   onChange={(e) => setBarSpacing(parseInt(e.target.value))}
+                  className="w-full h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Rounded Corners
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={settings.roundedCorners}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      roundedCorners: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full h-8 p-1 border rounded"
                 />
               </div>
@@ -1944,7 +1993,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                   fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
                   stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
                   strokeWidth="1"
-                  rx="6"
+                  rx={settings.roundedCorners}
+                  ry={settings.roundedCorners}
                   className="cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={(e) => openModal("group", e, group.id)}
                 />
@@ -1957,6 +2007,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   textAnchor={
                     groupLabelPosition[settings.groupLabelPosition].anchor
                   }
+                  fill={group.label.color}
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "MyFont" }}
                   fontSize={settings.groupLabelFontSize}
@@ -1972,6 +2023,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   textAnchor={
                     groupDescriptionPosition[settings.groupLabelPosition].anchor
                   }
+                  fill={group?.description?.color ?? "#000000"}
                   alignmentBaseline="middle"
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "MyFont" }}
@@ -2021,7 +2073,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                         fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
                         stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
                         strokeWidth="1"
-                        rx="3"
+                        rx={settings.roundedCorners}
+                        ry={settings.roundedCorners}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       />
 
@@ -2032,7 +2085,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                         width={barWidth}
                         height={barHeight}
                         fill={`rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`}
-                        rx="3"
+                        rx={settings.roundedCorners}
+                        ry={settings.roundedCorners}
                         className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
                         strokeWidth="0"
                         onClick={(e) => openModal("bar", e, bar.id)}
@@ -2051,6 +2105,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                           barHeight / 2
                         }
                         textAnchor={settings.barLabelInside ? "start" : "end"}
+                        fill={bar.label.color}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
                         style={{ fontFamily: "MyFont" }}
@@ -2071,6 +2126,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                           barHeight / 2
                         }
                         textAnchor={settings.barLabelInside ? "start" : "end"}
+                        fill={bar?.description?.color ?? "#000000"}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
                         style={{ fontFamily: "MyFont" }}
@@ -2087,6 +2143,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         textAnchor={
                           barValuePosition[settings.barValuePosition].anchor
                         }
+                        fill={bar.value.color}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900"
                         style={{ fontFamily: "MyFont" }}
@@ -2105,7 +2162,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                         fill="none"
                         stroke="transparent"
                         strokeWidth="2"
-                        rx="5"
+                        rx={settings.roundedCorners}
+                        ry={settings.roundedCorners}
                         className="pointer-events-none opacity-0 hover:opacity-100 hover:stroke-blue-400 transition-all"
                       />
                     </g>
