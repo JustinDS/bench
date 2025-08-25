@@ -35,6 +35,7 @@ import { v4 as uuidv4 } from "uuid";
 interface ChartBar {
   id: string;
   label: Text;
+  description?: Text;
   value: Value;
   backgroundColor: RgbaColor;
   foreGroundColor: RgbaColor;
@@ -140,6 +141,7 @@ interface Settings {
   barLabelInside: boolean;
   barValuePosition: BarValuePositionKeys;
   barLabelFontSize?: number;
+  barDescriptionFontSize?: number;
   groupLabelFontSize: number;
   groupDescriptionFontSize?: number;
   barValueFontSize: number;
@@ -196,6 +198,7 @@ const defaultTemplates: ChartTemplate[] = [
       barLabelInside: true,
       barValuePosition: "outside",
       barLabelFontSize: 14,
+      barDescriptionFontSize: 14,
       groupLabelFontSize: 16,
       //groupDescriptionFontSize: 14,
       barValueFontSize: 14,
@@ -247,6 +250,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         value: { value: 4500, color: "#000000", fontSize: 16 },
@@ -256,6 +260,7 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
         value: { value: 4800, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "HighCPU",
@@ -264,6 +269,7 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
         value: { value: 5200, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "HighGPU",
@@ -272,6 +278,7 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
         value: { value: 6100, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "HighGPU",
@@ -279,6 +286,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         value: { value: 4500, color: "#000000", fontSize: 16 },
@@ -287,6 +295,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         value: { value: 4800, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -295,6 +304,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         value: { value: 5200, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -303,6 +313,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         value: { value: 100, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -311,6 +322,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         value: { value: 4500, color: "#000000", fontSize: 16 },
@@ -319,6 +331,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         value: { value: 4800, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -327,6 +340,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         value: { value: 5200, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -335,6 +349,7 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         value: { value: 6100, color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -381,6 +396,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     barLabelInside: false,
     barValuePosition: "onBackgroundLeft",
     barLabelFontSize: 14,
+    barDescriptionFontSize: 14,
     groupLabelFontSize: 16,
     groupDescriptionFontSize: 14,
     barValueFontSize: 14,
@@ -427,6 +443,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       id: "1",
       label: { value: "Item 1", color: "#000000", fontSize: 16 },
       value: { value: 400, color: "#000000", fontSize: 16 },
+      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
@@ -435,6 +452,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       id: "2",
       label: { value: "Item 2", color: "#000000", fontSize: 16 },
       value: { value: 300, color: "#000000", fontSize: 16 },
+      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
@@ -443,6 +461,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       id: "3",
       label: { value: "Item 3", color: "#000000", fontSize: 16 },
       value: { value: 500, color: "#000000", fontSize: 16 },
+      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
@@ -451,6 +470,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       id: "4",
       label: { value: "Item 4", color: "#000000", fontSize: 16 },
       value: { value: 200, color: "#000000", fontSize: 16 },
+      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
@@ -687,6 +707,7 @@ export const GroupedBarChart: React.FC = ({}) => {
         id: "1",
         label: { value: "Item 1", color: "#000000", fontSize: 16 },
         value: { value: 400, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group1",
@@ -695,6 +716,7 @@ export const GroupedBarChart: React.FC = ({}) => {
         id: "2",
         label: { value: "Item 2", color: "#000000", fontSize: 16 },
         value: { value: 300, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group1",
@@ -703,6 +725,7 @@ export const GroupedBarChart: React.FC = ({}) => {
         id: "3",
         label: { value: "Item 3", color: "#000000", fontSize: 16 },
         value: { value: 500, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group2",
@@ -711,6 +734,7 @@ export const GroupedBarChart: React.FC = ({}) => {
         id: "4",
         label: { value: "Item 4", color: "#000000", fontSize: 16 },
         value: { value: 200, color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group2",
@@ -831,6 +855,44 @@ export const GroupedBarChart: React.FC = ({}) => {
                 }
                 className="h-8 text-sm"
                 placeholder="Bar label"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Description
+              </Label>
+              <Input
+                value={currentBar.description?.value}
+                onChange={(e) =>
+                  updateBar(currentBar.id, {
+                    ...currentBar,
+                    description: {
+                      color: currentBar.description?.color ?? "#000000",
+                      fontSize: currentBar.description?.fontSize ?? 16,
+                      value: e?.target?.value,
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Bar label"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Description Font Size
+              </Label>
+              <Input
+                type="number"
+                value={settings.barDescriptionFontSize}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    barDescriptionFontSize: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="14"
               />
             </div>
 
@@ -1630,19 +1692,21 @@ export const GroupedBarChart: React.FC = ({}) => {
       groupDescriptionHeight = 0;
     }
 
-    const totalNumberOfBars = groupedBars.reduce(
-      (sum, group) => sum + group.bars.length,
+    const totalGroupBarHeight = groupedBars.reduce(
+      (sum, group, groupIndex) =>
+        sum +
+        barSpacing * (group.bars.length - 1) +
+        barHeight * group.bars.length +
+        (groupIndex === groupedBars.length - 1 ? 0 : groupSpacing) +
+        groupLabelHeight +
+        groupDescriptionHeight +
+        groupPadding.top +
+        groupPadding.bottom,
       0
     );
 
-    const totalHeightOfBars = totalNumberOfBars * (barHeight + barSpacing);
-    const totalHeightOfGroup =
-      groupedBars.length *
-      (groupSpacing + groupLabelHeight + groupDescriptionHeight);
-
     const chartHeight =
-      totalHeightOfBars +
-      totalHeightOfGroup +
+      totalGroupBarHeight +
       chartTitleSection.name.fontSize +
       chartTitleSection.description.fontSize +
       padding.top +
@@ -1661,8 +1725,8 @@ export const GroupedBarChart: React.FC = ({}) => {
         preserveAspectRatio="xMidYMid meet"
         ref={svgRef}
         width={chartBackgroundWidth}
-        height={chartBackgroundHeight}
-        viewBox={`0 0 ${chartBackgroundWidth} ${chartBackgroundHeight}`}
+        height={chartHeight}
+        viewBox={`0 0 ${chartBackgroundWidth} ${chartHeight}`}
         className="border rounded-lg bg-white cursor-pointer"
         onClick={(e) => openModal("chart", e)}
         style={{
@@ -1690,7 +1754,7 @@ export const GroupedBarChart: React.FC = ({}) => {
 
         <g
           transform={`translate(${chartBackgroundWidth / 2 - chartWidth / 2}, ${
-            chartBackgroundHeight / 2 - chartHeight / 2
+            chartHeight / 2 - chartHeight / 2
           })`}
         >
           {/* Chart Title */}
@@ -1896,10 +1960,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "MyFont" }}
                   fontSize={settings.groupLabelFontSize}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    //   toggleGroupCollapse(group.id);
-                  }}
+                  onClick={(e) => openModal("group", e, group.id)}
                 >
                   {/* ▼  */}
                   {group.label.value}
@@ -1915,10 +1976,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "MyFont" }}
                   fontSize={settings.groupDescriptionFontSize}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    //   toggleGroupCollapse(group.id);
-                  }}
+                  onClick={(e) => openModal("group", e, group.id)}
                 >
                   {/* ▼  */}
                   {group?.description?.value ?? ""}
@@ -1987,7 +2045,11 @@ export const GroupedBarChart: React.FC = ({}) => {
                             ? padding.left + 10
                             : padding.left - 10
                         }
-                        y={barY + barHeight / 2}
+                        y={
+                          barY -
+                          (settings?.barDescriptionFontSize ?? 0) +
+                          barHeight / 2
+                        }
                         textAnchor={settings.barLabelInside ? "start" : "end"}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
@@ -1996,6 +2058,26 @@ export const GroupedBarChart: React.FC = ({}) => {
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
                         {bar.label.value}
+                      </text>
+                      <text
+                        x={
+                          settings.barLabelInside
+                            ? padding.left + 10
+                            : padding.left - 10
+                        }
+                        y={
+                          barY +
+                          (settings?.barLabelFontSize ?? 0) +
+                          barHeight / 2
+                        }
+                        textAnchor={settings.barLabelInside ? "start" : "end"}
+                        alignmentBaseline="middle"
+                        className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
+                        style={{ fontFamily: "MyFont" }}
+                        fontSize={settings.barDescriptionFontSize}
+                        onClick={(e) => openModal("bar", e, bar.id)}
+                      >
+                        {bar.description?.value}
                       </text>
 
                       {/* Bar Value */}
@@ -2034,7 +2116,7 @@ export const GroupedBarChart: React.FC = ({}) => {
 
             currentY +=
               groupBars.length * barHeight +
-              groupSpacing +
+              (groupIndex === groupedBars.length - 1 ? 0 : groupSpacing) +
               (groupBars.length - 1) * barSpacing +
               groupPadding.top;
             return groupElements;
