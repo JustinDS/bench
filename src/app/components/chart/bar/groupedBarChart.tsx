@@ -5,8 +5,6 @@ import { Button } from "../../ui/button";
 import {
   Copy,
   Download,
-  Folder,
-  FolderOpen,
   Plus,
   RotateCcw,
   Sparkles,
@@ -15,13 +13,6 @@ import {
 } from "lucide-react";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
 import {
   Card,
   CardContent,
@@ -255,13 +246,25 @@ const defaultTemplates: ChartTemplate[] = [
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
-        value: { value: 4500, color: "#000000", fontSize: 16 },
+        value: {
+          value: 4500,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         groupId: "HighCPU",
       },
       {
         id: uuidv4(),
         label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
-        value: { value: 4800, color: "#000000", fontSize: 16 },
+        value: {
+          value: 4800,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -270,7 +273,13 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
-        value: { value: 5200, color: "#000000", fontSize: 16 },
+        value: {
+          value: 5200,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -279,7 +288,13 @@ const defaultTemplates: ChartTemplate[] = [
       {
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
-        value: { value: 6100, color: "#000000", fontSize: 16 },
+        value: {
+          value: 6100,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -291,14 +306,26 @@ const defaultTemplates: ChartTemplate[] = [
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
-        value: { value: 4500, color: "#000000", fontSize: 16 },
+        value: {
+          value: 4500,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         groupId: "MediumCPU",
       },
       {
         id: uuidv4(),
         label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
         description: { value: "test", color: "#000000", fontSize: 16 },
-        value: { value: 4800, color: "#000000", fontSize: 16 },
+        value: {
+          value: 4800,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "MediumCPU",
@@ -307,7 +334,13 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
         description: { value: "test", color: "#000000", fontSize: 16 },
-        value: { value: 5200, color: "#000000", fontSize: 16 },
+        value: {
+          value: 5200,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "MediumGPU",
@@ -316,7 +349,13 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
         description: { value: "test", color: "#000000", fontSize: 16 },
-        value: { value: 100, color: "#000000", fontSize: 16 },
+        value: {
+          value: 100,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "MediumGPU",
@@ -327,14 +366,26 @@ const defaultTemplates: ChartTemplate[] = [
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
-        value: { value: 4500, color: "#000000", fontSize: 16 },
+        value: {
+          value: 4500,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         groupId: "LowCPU",
       },
       {
         id: uuidv4(),
         label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
         description: { value: "test", color: "#000000", fontSize: 16 },
-        value: { value: 4800, color: "#000000", fontSize: 16 },
+        value: {
+          value: 4800,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "LowCPU",
@@ -343,7 +394,13 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
         description: { value: "test", color: "#000000", fontSize: 16 },
-        value: { value: 5200, color: "#000000", fontSize: 16 },
+        value: {
+          value: 5200,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "LowGPU",
@@ -352,7 +409,13 @@ const defaultTemplates: ChartTemplate[] = [
         id: uuidv4(),
         label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
         description: { value: "test", color: "#000000", fontSize: 16 },
-        value: { value: 6100, color: "#000000", fontSize: 16 },
+        value: {
+          value: 6100,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "LowGPU",
@@ -445,7 +508,13 @@ export const GroupedBarChart: React.FC = ({}) => {
     {
       id: "1",
       label: { value: "Item 1", color: "#000000", fontSize: 16 },
-      value: { value: 400, color: "#000000", fontSize: 16 },
+      value: {
+        value: 400,
+        color: "#000000",
+        fontSize: 16,
+        postfix: "",
+        prefix: "",
+      },
       description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -454,7 +523,13 @@ export const GroupedBarChart: React.FC = ({}) => {
     {
       id: "2",
       label: { value: "Item 2", color: "#000000", fontSize: 16 },
-      value: { value: 300, color: "#000000", fontSize: 16 },
+      value: {
+        value: 300,
+        color: "#000000",
+        fontSize: 16,
+        postfix: "",
+        prefix: "",
+      },
       description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -463,7 +538,13 @@ export const GroupedBarChart: React.FC = ({}) => {
     {
       id: "3",
       label: { value: "Item 3", color: "#000000", fontSize: 16 },
-      value: { value: 500, color: "#000000", fontSize: 16 },
+      value: {
+        value: 500,
+        color: "#000000",
+        fontSize: 16,
+        postfix: "",
+        prefix: "",
+      },
       description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -472,7 +553,13 @@ export const GroupedBarChart: React.FC = ({}) => {
     {
       id: "4",
       label: { value: "Item 4", color: "#000000", fontSize: 16 },
-      value: { value: 200, color: "#000000", fontSize: 16 },
+      value: {
+        value: 200,
+        color: "#000000",
+        fontSize: 16,
+        postfix: "",
+        prefix: "",
+      },
       description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -709,7 +796,13 @@ export const GroupedBarChart: React.FC = ({}) => {
       {
         id: "1",
         label: { value: "Item 1", color: "#000000", fontSize: 16 },
-        value: { value: 400, color: "#000000", fontSize: 16 },
+        value: {
+          value: 400,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -718,7 +811,13 @@ export const GroupedBarChart: React.FC = ({}) => {
       {
         id: "2",
         label: { value: "Item 2", color: "#000000", fontSize: 16 },
-        value: { value: 300, color: "#000000", fontSize: 16 },
+        value: {
+          value: 300,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -727,7 +826,13 @@ export const GroupedBarChart: React.FC = ({}) => {
       {
         id: "3",
         label: { value: "Item 3", color: "#000000", fontSize: 16 },
-        value: { value: 500, color: "#000000", fontSize: 16 },
+        value: {
+          value: 500,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -736,7 +841,13 @@ export const GroupedBarChart: React.FC = ({}) => {
       {
         id: "4",
         label: { value: "Item 4", color: "#000000", fontSize: 16 },
-        value: { value: 200, color: "#000000", fontSize: 16 },
+        value: {
+          value: 200,
+          color: "#000000",
+          fontSize: 16,
+          postfix: "",
+          prefix: "",
+        },
         description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
@@ -959,6 +1070,46 @@ export const GroupedBarChart: React.FC = ({}) => {
                 }
                 className="h-8 text-sm"
                 placeholder="Bar value"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Value Prefix
+              </Label>
+              <Input
+                type="text"
+                value={currentBar.value.prefix}
+                onChange={(e) =>
+                  updateBar(currentBar.id, {
+                    ...currentBar,
+                    value: {
+                      ...currentBar.value,
+                      prefix: e?.target?.value || "",
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Bar Prefix"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Value Postfix
+              </Label>
+              <Input
+                type="text"
+                value={currentBar.value.postfix}
+                onChange={(e) =>
+                  updateBar(currentBar.id, {
+                    ...currentBar,
+                    value: {
+                      ...currentBar.value,
+                      postfix: e?.target?.value || "",
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Bar Postfix"
               />
             </div>
 
@@ -2150,7 +2301,11 @@ export const GroupedBarChart: React.FC = ({}) => {
                         fontSize={settings.barValueFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
-                        {bar.value.value.toLocaleString()}
+                        {`${
+                          bar?.value?.prefix ?? ""
+                        }${bar.value.value.toLocaleString()}${
+                          bar?.value?.postfix ?? ""
+                        }`}
                       </text>
 
                       {/* Hover indicator */}
