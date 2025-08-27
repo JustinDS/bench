@@ -128,6 +128,28 @@ const GroupLabelPositions: GroupLabelPosition[] = [
   },
 ];
 
+type Sort = "asc" | "des" | "none";
+
+interface SortOrderProps {
+  key: Sort;
+  label: string;
+}
+
+const SortOrder: SortOrderProps[] = [
+  {
+    key: "asc",
+    label: "Ascending",
+  },
+  {
+    key: "des",
+    label: "Descending",
+  },
+  {
+    key: "none",
+    label: "None",
+  },
+];
+
 interface Settings {
   barLabelInside: boolean;
   barValuePosition: BarValuePositionKeys;
@@ -142,6 +164,7 @@ interface Settings {
   labelWidth: number;
   groupLabelPosition: GroupLabelPositionKeys;
   roundedCorners: number;
+  sort: Sort;
 }
 
 interface ChartTemplate {
@@ -200,6 +223,7 @@ const defaultTemplates: ChartTemplate[] = [
       labelWidth: 140,
       groupLabelPosition: "replaceBarLabels",
       roundedCorners: 5,
+      sort: "des",
     },
     groups: [
       {
@@ -471,6 +495,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     labelWidth: 140,
     groupLabelPosition: "left",
     roundedCorners: 5,
+    sort: "des",
   });
 
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
@@ -895,7 +920,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       return (
         <div
           ref={modalRef}
-          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72"
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72 h-150 overflow-auto"
           style={{
             left: `${adjustedPosition.x}px`,
             top: `${adjustedPosition.y}px`,
@@ -1476,14 +1501,6 @@ export const GroupedBarChart: React.FC = ({}) => {
               </div>
             </div>
 
-            {/* <div className="bg-gray-50 rounded p-2">
-              <div className="text-xs text-gray-500 mb-1">Group Statistics</div>
-              <div className="text-sm font-medium">{groupBars.length} bars</div>
-              <div className="text-sm font-medium">
-                Total: {groupTotal.toLocaleString()}
-              </div>
-            </div> */}
-
             <div className="flex gap-2 pt-2">
               <Button
                 variant="outline"
@@ -1494,18 +1511,6 @@ export const GroupedBarChart: React.FC = ({}) => {
                 <Plus className="w-3 h-3 mr-1" />
                 Add Bar
               </Button>
-              {/* <Button
-                variant="outline"
-                size="sm"
-                // onClick={() => toggleGroupCollapse(currentGroup.id)}
-                className="h-8 text-xs"
-              >
-                {currentGroup.collapsed ? (
-                  <FolderOpen className="w-3 h-3" />
-                ) : (
-                  <Folder className="w-3 h-3" />
-                )}
-              </Button> */}
               <Button
                 variant="outline"
                 size="sm"
@@ -1796,6 +1801,28 @@ export const GroupedBarChart: React.FC = ({}) => {
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
+                Bar Sort Order
+              </Label>
+              <select
+                value={settings.sort}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    sort: e.target.value as Sort,
+                  })
+                }
+                className="flex-1 h-8 text-sm border border-input bg-background px-3 py-1 rounded-md w-full"
+              >
+                {SortOrder.map((order) => (
+                  <option key={order.key} value={order.key}>
+                    {order.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
                 Rounded Corners
               </Label>
               <div className="flex gap-2">
@@ -2042,6 +2069,14 @@ export const GroupedBarChart: React.FC = ({}) => {
           {groupedBars.map((groupData, groupIndex) => {
             const { group, bars: groupBars } = groupData;
 
+            if (settings.sort !== "none") {
+              groupBars.sort((a, b) =>
+                settings.sort === "asc"
+                  ? a.value.value - b.value.value
+                  : b.value.value - a.value.value
+              );
+            }
+
             // Render expanded group
             const groupStartY = currentY;
             currentY +=
@@ -2251,9 +2286,9 @@ export const GroupedBarChart: React.FC = ({}) => {
                             : padding.left - 10
                         }
                         y={
-                          barY -
-                          (settings?.barDescriptionFontSize ?? 0) +
-                          barHeight / 2
+                          (settings?.barDescriptionFontSize ?? 0) === 0
+                            ? barY + barHeight / 2
+                            : barY + (settings?.barLabelFontSize ?? 0)
                         }
                         textAnchor={settings.barLabelInside ? "start" : "end"}
                         fill={bar.label.color}
@@ -2273,8 +2308,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                         }
                         y={
                           barY +
-                          (settings?.barLabelFontSize ?? 0) +
-                          barHeight / 2
+                          barHeight -
+                          (settings?.barDescriptionFontSize ?? 0)
                         }
                         textAnchor={settings.barLabelInside ? "start" : "end"}
                         fill={bar?.description?.color ?? "#000000"}
