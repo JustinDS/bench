@@ -31,6 +31,7 @@ interface ChartBar {
   backgroundColor: RgbaColor;
   foreGroundColor: RgbaColor;
   groupId?: string;
+  categoryId?: string;
 }
 
 interface ChartGroup {
@@ -167,11 +168,18 @@ interface Settings {
   sort: Sort;
 }
 
+interface ChartCategory {
+  id: string;
+  label: string;
+  color: RgbaColor;
+}
+
 interface ChartTemplate {
   id: string;
   width: number;
   chartTitleSection: ChartTitleSection;
   background: Background;
+  categories: ChartCategory[];
   groups: ChartGroup[];
   bars: ChartBar[];
   chartType: "horizontal" | "vertical";
@@ -225,6 +233,11 @@ const defaultTemplates: ChartTemplate[] = [
       roundedCorners: 5,
       sort: "des",
     },
+    categories: [
+      { id: "max", label: "Max", color: { r: 0, g: 0, b: 0, a: 1 } },
+      { id: "avg", label: "Average", color: { r: 0, g: 0, b: 0, a: 1 } },
+      { id: "min", label: "Min", color: { r: 0, g: 0, b: 0, a: 1 } },
+    ],
     groups: [
       {
         id: "HighCPU",
@@ -498,6 +511,11 @@ export const GroupedBarChart: React.FC = ({}) => {
     sort: "des",
   });
 
+  const [categories, setCategories] = useState<ChartCategory[]>([
+    { id: "max", label: "Max", color: { r: 60, g: 179, b: 113, a: 1 } },
+    { id: "min", label: "Min", color: { r: 255, g: 165, b: 0, a: 1 } },
+  ]);
+
   const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
     {
       name: {
@@ -544,6 +562,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
+      categoryId: "max",
     },
     {
       id: "2",
@@ -559,6 +578,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
+      categoryId: "min",
     },
     {
       id: "3",
@@ -574,6 +594,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
+      categoryId: "max",
     },
     {
       id: "4",
@@ -589,6 +610,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
+      categoryId: "min",
     },
   ]);
 
@@ -803,6 +825,7 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const resetChart = () => {
+    setCategories([]);
     setGroups([
       {
         id: "group1",
@@ -1906,6 +1929,7 @@ export const GroupedBarChart: React.FC = ({}) => {
   };
 
   const renderHorizontalChart = () => {
+    const legendHeight = categories.length > 0 ? 60 : 0;
     const labelWidth = settings.labelWidth;
     const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
     const groupPadding = { top: 10, right: 10, bottom: 10, left: 10 };
@@ -1937,7 +1961,8 @@ export const GroupedBarChart: React.FC = ({}) => {
       chartTitleSection.name.fontSize +
       chartTitleSection.description.fontSize +
       padding.top +
-      chartTitleSection.gap;
+      chartTitleSection.gap +
+      legendHeight;
 
     const availableWidth = chartWidth - padding.left - padding.right;
 
@@ -2248,6 +2273,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                     },
                   };
 
+                  const catColor = categories.find(
+                    (x) => x.id === bar.categoryId
+                  )?.color;
+
+                  const barColor = bar.categoryId
+                    ? `rgba(${catColor?.r},${catColor?.g},${catColor?.b},${catColor?.a})`
+                    : `rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`;
+
                   return (
                     <g key={bar.id}>
                       {/* Bar background */}
@@ -2270,7 +2303,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         y={barY}
                         width={barWidth}
                         height={barHeight}
-                        fill={`rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`}
+                        fill={barColor}
                         rx={settings.roundedCorners}
                         ry={settings.roundedCorners}
                         className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
@@ -2369,6 +2402,66 @@ export const GroupedBarChart: React.FC = ({}) => {
               groupPadding.top;
             return groupElements;
           })}
+
+          {categories.length > 0 ? (
+            <>
+              {/* Legend */}
+              <g>
+                <text
+                  x={chartWidth / 2}
+                  y={chartHeight - legendHeight + 15}
+                  textAnchor="middle"
+                  className=""
+                >
+                  Category Legend
+                </text>
+
+                {/* Legend Items */}
+                {categories.map((category, index) => {
+                  const legendItemWidth = 140;
+                  const itemsPerRow = Math.floor(
+                    availableWidth / legendItemWidth
+                  );
+                  const totalItems = categories.length;
+                  const rows = Math.ceil(totalItems / itemsPerRow);
+                  const startX =
+                    (chartWidth -
+                      Math.min(totalItems, itemsPerRow) * legendItemWidth) /
+                    2;
+
+                  const row = Math.floor(index / itemsPerRow);
+                  const col = index % itemsPerRow;
+                  const x = startX + col * legendItemWidth;
+                  const y = chartHeight - legendHeight + 35 + row * 20;
+
+                  return (
+                    <g key={category.id}>
+                      {/* Legend color swatch */}
+                      <rect
+                        x={x}
+                        y={y - 6}
+                        width={12}
+                        height={12}
+                        fill={`rgba(${category.color?.r},${category.color?.g},${category.color?.b},${category.color?.a})`}
+                        rx="2"
+                        className="cursor-pointer hover:opacity-80"
+                      />
+
+                      {/* Legend label */}
+                      <text
+                        x={x + 18}
+                        y={y}
+                        alignmentBaseline="middle"
+                        className="fill-gray-700 text-xs cursor-pointer hover:fill-gray-900"
+                      >
+                        {category.label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
+            </>
+          ) : null}
         </g>
       </svg>
     );
