@@ -9,19 +9,11 @@ import { WebFont } from "./page";
 import { FontProvider } from "../contexts/fontContext";
 import { GroupedBarChart } from "../components/chart/bar/groupedBarChart";
 
-export interface ClientDashboardProps {
-  fonts: WebFont[];
-  selectedFont: string;
-}
-
-export default function ClientDashboard({
-  fonts,
-  selectedFont,
-}: ClientDashboardProps) {
+export default function ClientDashboard() {
   return (
     <FontProvider>
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <FontPicker fonts={fonts} selectedFont={selectedFont} />
+        {/* <FontPicker fonts={fonts} selectedFont={selectedFont} /> */}
         {/* <ChartInputManager /> */}
 
         <div className="pt-10">

@@ -43,29 +43,29 @@ export default async function Dashboard() {
 
   const status = profile?.subscription_status;
 
-  let googleFonts: WebFontItem = { items: [] };
+  // let googleFonts: WebFontItem = { items: [] };
 
-  const apiKey = process.env.GOOGLE_FONTS_API_KEY;
-  try {
-    const googleFontsResponse = await fetch(
-      `https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`,
-      {
-        method: "GET",
-      }
-    );
+  // const apiKey = process.env.GOOGLE_FONTS_API_KEY;
+  // try {
+  //   const googleFontsResponse = await fetch(
+  //     `https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`,
+  //     {
+  //       method: "GET",
+  //     }
+  //   );
 
-    googleFonts = await googleFontsResponse.json();
-  } catch (error) {
-    console.error(error);
-  }
+  //   googleFonts = await googleFontsResponse.json();
+  // } catch (error) {
+  //   console.error(error);
+  // }
 
-  const fontFamilies = googleFonts?.items?.map((font) => font);
+  // const fontFamilies = googleFonts?.items?.map((font) => font);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <ClientDashboard
-        fonts={fontFamilies}
-        selectedFont={fontFamilies[0].family}
+      // fonts={fontFamilies}
+      // selectedFont={fontFamilies[0].family}
       />
     </div>
   );

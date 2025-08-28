@@ -1,21 +1,38 @@
 "use client";
-import { useFont } from "@/app/contexts/fontContext";
-import { WebFont } from "@/app/dashboard/page";
-import React, { useState, useEffect } from "react";
+import { WebFont, WebFontItem } from "@/app/dashboard/page";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 
 export interface FontPickerProps {
-  fonts: WebFont[];
-  selectedFont: string;
+  setFont: Dispatch<SetStateAction<string>>;
 }
 
-const FontPicker = ({ fonts, selectedFont }: FontPickerProps) => {
-  const { setFont } = useFont();
-  const [fontFamilies, setFontFamilies] = useState(fonts);
-  const [selectedFontFamily, setSelectedFont] = useState(selectedFont);
+const FontPicker = ({ setFont }: FontPickerProps) => {
+  const [fontFamilies, setFontFamilies] = useState<WebFont[]>();
+  const [selectedFontFamily, setSelectedFont] = useState<string>();
 
   useEffect(() => {
     const handleFetch = async () => {
-      const font = fontFamilies.find((x) => x.family === selectedFontFamily);
+      try {
+        const fontResponse = await fetch(`/api/font/googleFonts`, {
+          method: "GET",
+        });
+
+        debugger;
+
+        const googleFonts: WebFontItem = await fontResponse.json();
+
+        setFontFamilies(googleFonts?.items?.map((font) => font));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    handleFetch();
+  }, []);
+
+  useEffect(() => {
+    const handleFetch = async () => {
+      const font = fontFamilies?.find((x) => x.family === selectedFontFamily);
 
       const fontFile = font?.files["regular"];
 
@@ -40,7 +57,7 @@ const FontPicker = ({ fonts, selectedFont }: FontPickerProps) => {
 
   useEffect(() => {
     // const font = fontFamilies.find((x) => x.family === selectedFontFamily);
-    const fontLink = `https://fonts.googleapis.com/css2?family=${selectedFontFamily.replace(
+    const fontLink = `https://fonts.googleapis.com/css2?family=${selectedFontFamily?.replace(
       / /g,
       "+"
     )}:wght@400&display=swap`;
@@ -63,7 +80,7 @@ const FontPicker = ({ fonts, selectedFont }: FontPickerProps) => {
         onChange={(e) => setSelectedFont(e.target.value)}
         style={{ fontFamily: selectedFontFamily, fontSize: "16px" }}
       >
-        {fontFamilies.map((font) => (
+        {fontFamilies?.map((font) => (
           <option
             key={font.family}
             value={font.family}

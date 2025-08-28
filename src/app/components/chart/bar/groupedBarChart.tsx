@@ -22,6 +22,7 @@ import {
 } from "../../ui/card";
 import { PopoverPicker } from "../../colorPicker/popoverPicker";
 import { v4 as uuidv4 } from "uuid";
+import FontPicker from "../../fontPicker/fontPicker";
 
 interface ChartBar {
   id: string;
@@ -477,11 +478,12 @@ const colorOptions = [
 ];
 
 export const GroupedBarChart: React.FC = ({}) => {
-  const { font } = useFont();
+  //const { font } = useFont();
 
   const [chartType, setChartType] = useState<"horizontal" | "vertical">(
     "horizontal"
   );
+  const [chartTitleFont, setChartTitleFont] = useState<string>("");
   const [chartWidth, setChartWidth] = useState(1000);
   const [chartBackgroundWidth, setChartBackgroundWidth] = useState(1200);
   const [chartBackgroundHeight, setChartBackgroundHeight] = useState(500);
@@ -1619,6 +1621,8 @@ export const GroupedBarChart: React.FC = ({}) => {
               </div>
             </div>
 
+            <FontPicker setFont={setChartTitleFont} />
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Chart Title Font Size
@@ -1989,12 +1993,12 @@ export const GroupedBarChart: React.FC = ({}) => {
         }}
       >
         <defs>
-          <style>{`
+          {/* <style>{`
             @font-face {
               font-family: 'MyFont';
               src: url(${font}) format('truetype');
             }
-          `}</style>
+          `}</style> */}
         </defs>
 
         {/* url(#grid) */}
