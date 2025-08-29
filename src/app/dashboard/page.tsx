@@ -10,16 +10,25 @@ export interface WebFont {
   subsets: string[];
   version: string;
   lastModified: string;
-  files: {
-    [variant: string]: string;
-  };
+  files: Variant;
   category: string;
   kind: string;
   menu: string;
 }
 
+export interface Variant {
+  [variant: string]: string;
+}
+
 export interface WebFontItem {
   items: WebFont[];
+}
+
+export interface FontSelection {
+  variant: Variant;
+  selectedFontFamily: string;
+  selectedVariant: string;
+  ttf: string;
 }
 
 export default async function Dashboard() {

@@ -23,6 +23,7 @@ import {
 import { PopoverPicker } from "../../colorPicker/popoverPicker";
 import { v4 as uuidv4 } from "uuid";
 import FontPicker from "../../fontPicker/fontPicker";
+import { FontSelection } from "@/app/dashboard/page";
 
 interface ChartBar {
   id: string;
@@ -235,9 +236,9 @@ const defaultTemplates: ChartTemplate[] = [
       sort: "des",
     },
     categories: [
-      { id: "max", label: "Max", color: { r: 0, g: 0, b: 0, a: 1 } },
-      { id: "avg", label: "Average", color: { r: 0, g: 0, b: 0, a: 1 } },
-      { id: "min", label: "Min", color: { r: 0, g: 0, b: 0, a: 1 } },
+      // { id: "max", label: "Max", color: { r: 0, g: 0, b: 0, a: 1 } },
+      // { id: "avg", label: "Average", color: { r: 0, g: 0, b: 0, a: 1 } },
+      // { id: "min", label: "Min", color: { r: 0, g: 0, b: 0, a: 1 } },
     ],
     groups: [
       {
@@ -483,7 +484,10 @@ export const GroupedBarChart: React.FC = ({}) => {
   const [chartType, setChartType] = useState<"horizontal" | "vertical">(
     "horizontal"
   );
-  const [chartTitleFont, setChartTitleFont] = useState<string>("");
+  const [chartFont, setChartFont] = useState<FontSelection>();
+  const [chartTitleFont, setChartTitleFont] = useState<FontSelection>();
+  const [chartDescriptionFont, setChartDescriptionFont] =
+    useState<FontSelection>();
   const [chartWidth, setChartWidth] = useState(1000);
   const [chartBackgroundWidth, setChartBackgroundWidth] = useState(1200);
   const [chartBackgroundHeight, setChartBackgroundHeight] = useState(500);
@@ -823,6 +827,7 @@ export const GroupedBarChart: React.FC = ({}) => {
     setBarSpacing(template.barSpacing);
     setGroupSpacing(template.groupSpacing);
     setSettings(template.settings);
+    setCategories(template.categories);
     closeModal();
   };
 
@@ -1599,6 +1604,13 @@ export const GroupedBarChart: React.FC = ({}) => {
               />
             </div>
 
+            <FontPicker
+              setFont={setChartTitleFont}
+              fontSelection={chartTitleFont}
+              mainLabel="Chart Name Font"
+              variantLabel="Chart Name Font Variant"
+            />
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Chart Name Color
@@ -1620,8 +1632,6 @@ export const GroupedBarChart: React.FC = ({}) => {
                 />
               </div>
             </div>
-
-            <FontPicker setFont={setChartTitleFont} />
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
@@ -1663,6 +1673,13 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Chart Description"
               />
             </div>
+
+            <FontPicker
+              setFont={setChartDescriptionFont}
+              fontSelection={chartDescriptionFont}
+              mainLabel="Chart Description Font"
+              variantLabel="Chart Description Font Variant"
+            />
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
@@ -1751,6 +1768,27 @@ export const GroupedBarChart: React.FC = ({}) => {
             >
               <X className="w-4 h-4" />
             </Button>
+          </div>
+
+          <FontPicker
+            setFont={setChartFont}
+            fontSelection={chartFont}
+            mainLabel="Chart Font"
+            variantLabel="Chart Variant"
+          />
+
+          <div className="space-y-1">
+            <Label className="text-xs font-medium text-gray-500">
+              Chart Width
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                value={chartWidth}
+                onChange={(e) => setChartWidth(parseInt(e.target.value))}
+                className="w-full h-8 p-1 border rounded"
+              />
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -1993,12 +2031,20 @@ export const GroupedBarChart: React.FC = ({}) => {
         }}
       >
         <defs>
-          {/* <style>{`
+          <style>{`
             @font-face {
-              font-family: 'MyFont';
-              src: url(${font}) format('truetype');
+              font-family: 'ChartTitleFont';
+              src: url(${chartTitleFont?.ttf}) format('truetype');
             }
-          `}</style> */}
+              @font-face {
+              font-family: 'ChartDescriptionFont';
+              src: url(${chartDescriptionFont?.ttf}) format('truetype');
+            }
+              @font-face {
+              font-family: 'MyFont';
+              src: url(${chartFont?.ttf}) format('truetype');
+            }
+          `}</style>
         </defs>
 
         {/* url(#grid) */}
@@ -2019,7 +2065,7 @@ export const GroupedBarChart: React.FC = ({}) => {
             y={chartTitleSection.name.fontSize}
             textAnchor="middle"
             fill={chartTitleSection.name.color}
-            style={{ fontFamily: "MyFont" }}
+            style={{ fontFamily: "ChartTitleFont, MyFont" }}
             fontSize={chartTitleSection.name.fontSize}
             onClick={(e) => openModal("titleSection", e)}
           >
@@ -2034,7 +2080,7 @@ export const GroupedBarChart: React.FC = ({}) => {
             }
             textAnchor="middle"
             fill={chartTitleSection.description.color}
-            style={{ fontFamily: "MyFont" }}
+            style={{ fontFamily: "ChartDescriptionFont, MyFont" }}
             fontSize={chartTitleSection.description.fontSize}
             onClick={(e) => openModal("titleSection", e)}
           >
