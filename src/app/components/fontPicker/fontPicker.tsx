@@ -51,6 +51,22 @@ const FontPicker = ({
     handleFetch();
   }, []);
 
+  const getfontTtf = async (url: string | undefined) => {
+    console.log("asdasdas");
+    try {
+      const googleFontsResponse = await fetch(`/api/font/ttf`, {
+        method: "POST",
+        body: JSON.stringify({
+          fontUrl: url,
+        }),
+      });
+
+      return await googleFontsResponse.text();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const selectFont = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const font = fontFamilies?.find((x) => x.family === e.target.value);
     setFontVariations(font?.files ?? {});
@@ -59,47 +75,27 @@ const FontPicker = ({
 
     const fontFile = font?.files[selectedVariant];
 
-    console.log("font", font);
+    const ttf = await getfontTtf(fontFile);
 
-    try {
-      const googleFontsResponse = await fetch(`/api/font/ttf`, {
-        method: "POST",
-        body: JSON.stringify({
-          fontUrl: fontFile,
-        }),
-      });
-
-      setFont({
-        ttf: await googleFontsResponse.text(),
-        selectedFontFamily: e.target.value,
-        selectedVariant: "regular",
-        variant: font?.files ?? {},
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    setFont({
+      ttf: ttf ?? "",
+      selectedFontFamily: e.target.value,
+      selectedVariant: "regular",
+      variant: font?.files ?? {},
+    });
   };
 
   const selectVariant = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVariant(e.target.value);
 
-    try {
-      const googleFontsResponse = await fetch(`/api/font/ttf`, {
-        method: "POST",
-        body: JSON.stringify({
-          fontUrl: fontVariations?.[e.target.value],
-        }),
-      });
+    const ttf = await getfontTtf(fontVariations?.[e.target.value]);
 
-      setFont({
-        ttf: await googleFontsResponse.text(),
-        selectedFontFamily: selectedFontFamily,
-        selectedVariant: e.target.value,
-        variant: fontVariations,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    setFont({
+      ttf: ttf ?? "",
+      selectedFontFamily: selectedFontFamily,
+      selectedVariant: e.target.value,
+      variant: fontVariations,
+    });
   };
 
   useEffect(() => {

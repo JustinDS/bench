@@ -486,8 +486,14 @@ export const GroupedBarChart: React.FC = ({}) => {
   );
   const [chartFont, setChartFont] = useState<FontSelection>();
   const [chartTitleFont, setChartTitleFont] = useState<FontSelection>();
+  const [groupNameFont, setGroupNameFont] = useState<FontSelection>();
+  const [groupDescriptionFont, setGroupDescriptionFont] =
+    useState<FontSelection>();
   const [chartDescriptionFont, setChartDescriptionFont] =
     useState<FontSelection>();
+  const [barLabelFont, setBarLabelFont] = useState<FontSelection>();
+  const [barDescriptionFont, setBarDescriptionFont] = useState<FontSelection>();
+  const [barValueFont, setBarValueFont] = useState<FontSelection>();
   const [chartWidth, setChartWidth] = useState(1000);
   const [chartBackgroundWidth, setChartBackgroundWidth] = useState(1200);
   const [chartBackgroundHeight, setChartBackgroundHeight] = useState(500);
@@ -991,6 +997,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Bar label"
               />
             </div>
+
+            <FontPicker
+              setFont={setBarLabelFont}
+              fontSelection={barLabelFont}
+              mainLabel="Bar Label Font"
+              variantLabel="Bar Label Font Variant"
+            />
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Bar Label Color
@@ -1069,6 +1083,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Bar label"
               />
             </div>
+
+            <FontPicker
+              setFont={setBarDescriptionFont}
+              fontSelection={barDescriptionFont}
+              mainLabel="Bar Description Font"
+              variantLabel="Bar Description Font Variant"
+            />
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Bar Deescription Color
@@ -1127,6 +1149,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Bar value"
               />
             </div>
+
+            <FontPicker
+              setFont={setBarValueFont}
+              fontSelection={barValueFont}
+              mainLabel="Bar Value Font"
+              variantLabel="Bar Value Font Variant"
+            />
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Value Prefix
@@ -1345,7 +1375,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       return (
         <div
           ref={modalRef}
-          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72"
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72 h-150 overflow-auto"
           style={{
             left: `${adjustedPosition.x}px`,
             top: `${adjustedPosition.y}px`,
@@ -1388,6 +1418,13 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Group name"
               />
             </div>
+
+            <FontPicker
+              setFont={setGroupNameFont}
+              fontSelection={groupNameFont}
+              mainLabel="Group Name Font"
+              variantLabel="Group Name Font Variant"
+            />
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
@@ -1450,6 +1487,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                 placeholder="Group name"
               />
             </div>
+
+            <FontPicker
+              setFont={setGroupDescriptionFont}
+              fontSelection={groupDescriptionFont}
+              mainLabel="Group Description Font"
+              variantLabel="Group Description Font Variant"
+            />
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Group Description Color
@@ -1560,7 +1605,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       return (
         <div
           ref={modalRef}
-          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72"
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72 h-150 overflow-auto"
           style={{
             left: `${adjustedPosition.x}px`,
             top: `${adjustedPosition.y}px`,
@@ -1746,7 +1791,7 @@ export const GroupedBarChart: React.FC = ({}) => {
       return (
         <div
           ref={modalRef}
-          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72"
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72 h-150 overflow-auto"
           style={{
             left: `${adjustedPosition.x}px`,
             top: `${adjustedPosition.y}px`,
@@ -2034,15 +2079,35 @@ export const GroupedBarChart: React.FC = ({}) => {
           <style>{`
             @font-face {
               font-family: 'ChartTitleFont';
-              src: url(${chartTitleFont?.ttf}) format('truetype');
+              src: url(${chartTitleFont?.ttf ?? ""}) format('truetype');
             }
               @font-face {
               font-family: 'ChartDescriptionFont';
-              src: url(${chartDescriptionFont?.ttf}) format('truetype');
+              src: url(${chartDescriptionFont?.ttf ?? ""}) format('truetype');
             }
               @font-face {
               font-family: 'MyFont';
-              src: url(${chartFont?.ttf}) format('truetype');
+              src: url(${chartFont?.ttf ?? ""}) format('truetype');
+            }
+                            @font-face {
+              font-family: 'GroupNameFont';
+              src: url(${groupNameFont?.ttf ?? ""}) format('truetype');
+            }
+                            @font-face {
+              font-family: 'GroupDescriptionFont';
+              src: url(${groupDescriptionFont?.ttf ?? ""}) format('truetype');
+            }
+                                          @font-face {
+              font-family: 'BarLabelFont';
+              src: url(${barLabelFont?.ttf ?? ""}) format('truetype');
+            }
+                                          @font-face {
+              font-family: 'BarDescriptionFont';
+              src: url(${barDescriptionFont?.ttf ?? ""}) format('truetype');
+            }
+                                          @font-face {
+              font-family: 'BarValueFont';
+              src: url(${barValueFont?.ttf ?? ""}) format('truetype');
             }
           `}</style>
         </defs>
@@ -2270,7 +2335,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   }
                   fill={group.label.color}
                   className="cursor-pointer hover:fill-gray-600"
-                  style={{ fontFamily: "MyFont" }}
+                  style={{ fontFamily: "GroupNameFont, MyFont" }}
                   fontSize={settings.groupLabelFontSize}
                   onClick={(e) => openModal("group", e, group.id)}
                 >
@@ -2287,7 +2352,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   fill={group?.description?.color ?? "#000000"}
                   alignmentBaseline="middle"
                   className="cursor-pointer hover:fill-gray-600"
-                  style={{ fontFamily: "MyFont" }}
+                  style={{ fontFamily: "GroupDescriptionFont, MyFont" }}
                   fontSize={settings.groupDescriptionFontSize}
                   onClick={(e) => openModal("group", e, group.id)}
                 >
@@ -2377,7 +2442,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         fill={bar.label.color}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
-                        style={{ fontFamily: "MyFont" }}
+                        style={{ fontFamily: "BarLabelFont,MyFont" }}
                         fontSize={settings.barLabelFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
@@ -2398,7 +2463,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         fill={bar?.description?.color ?? "#000000"}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
-                        style={{ fontFamily: "MyFont" }}
+                        style={{ fontFamily: "BarDescriptionFont,MyFont" }}
                         fontSize={settings.barDescriptionFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
@@ -2415,7 +2480,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                         fill={bar.value.color}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900"
-                        style={{ fontFamily: "MyFont" }}
+                        style={{ fontFamily: "BarValueFont,MyFont" }}
                         fontSize={settings.barValueFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
@@ -2462,6 +2527,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   y={chartHeight - legendHeight + 15}
                   textAnchor="middle"
                   className=""
+                  style={{ fontFamily: "MyFont" }}
                 >
                   Category Legend
                 </text>
