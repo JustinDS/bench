@@ -5,6 +5,7 @@ import { Button } from "../../ui/button";
 import {
   Copy,
   Download,
+  Palette,
   Plus,
   RotateCcw,
   Sparkles,
@@ -776,6 +777,70 @@ export const GroupedBarChart: React.FC = ({}) => {
     });
   };
 
+  const updateCategory = (
+    categoryId: string,
+    updates: Partial<ChartCategory>
+  ) => {
+    setCategories(
+      categories.map((category) =>
+        category.id === categoryId ? { ...category, ...updates } : category
+      )
+    );
+
+    // Update all bars with this category to use the new color
+    if (updates.color) {
+      setBars(
+        bars.map((bar) =>
+          bar.categoryId === categoryId ? { ...bar, color: updates.color } : bar
+        )
+      );
+    }
+  };
+
+  const addCategory = () => {
+    const newCategory: ChartCategory = {
+      id: Date.now().toString(),
+      label: `Category ${categories.length + 1}`,
+      color: { r: 139, g: 92, b: 246, a: 1 },
+    };
+    setCategories([...categories, newCategory]);
+  };
+
+  const removeCategory = (categoryId: string) => {
+    //if (categories.length === 1) return; // Keep at least one category
+    const remainingCategories = categories.filter((c) => c.id !== categoryId);
+
+    setCategories(remainingCategories);
+
+    if (remainingCategories.length > 0) {
+      const targetCategoryId = remainingCategories[0].id;
+
+      setBars(
+        bars.map((bar) =>
+          bar.categoryId === categoryId
+            ? {
+                ...bar,
+                categoryId: targetCategoryId,
+                color: remainingCategories[0].color,
+              }
+            : bar
+        )
+      );
+    } else {
+      setBars(
+        bars.map((bar) =>
+          bar.categoryId === categoryId
+            ? {
+                ...bar,
+                categoryId: undefined,
+                color: bar.foreGroundColor,
+              }
+            : bar
+        )
+      );
+    }
+  };
+
   const addBar = (groupId?: string) => {
     const targetGroupId = groupId || groups[0]?.id || "default";
     const group = groups.find((g) => g.id === targetGroupId);
@@ -1282,6 +1347,33 @@ export const GroupedBarChart: React.FC = ({}) => {
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
+                Category
+              </Label>
+              <select
+                value={currentBar?.categoryId}
+                onChange={(e) => {
+                  const selectedCategory = categories.find(
+                    (cat) => cat.id === e.target.value
+                  );
+                  updateBar(currentBar.id, {
+                    categoryId: e.target.value,
+                    foreGroundColor:
+                      selectedCategory?.color || currentBar.foreGroundColor,
+                  });
+                }}
+                className="h-8 text-sm border border-input bg-background px-3 py-1 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">None</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
                 Background Color
               </Label>
               <div className="flex gap-2">
@@ -1297,22 +1389,24 @@ export const GroupedBarChart: React.FC = ({}) => {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-gray-500">
-                ForeGround Color
-              </Label>
-              <div className="flex gap-2">
-                <PopoverPicker
-                  color={currentBar.foreGroundColor}
-                  onChange={(e) => {
-                    updateBar(currentBar.id, {
-                      ...currentBar,
-                      foreGroundColor: e,
-                    });
-                  }}
-                />
+            {!currentBar.categoryId ? (
+              <div className="space-y-1">
+                <Label className="text-xs font-medium text-gray-500">
+                  ForeGround Color
+                </Label>
+                <div className="flex gap-2">
+                  <PopoverPicker
+                    color={currentBar.foreGroundColor}
+                    onChange={(e) => {
+                      updateBar(currentBar.id, {
+                        ...currentBar,
+                        foreGroundColor: e,
+                      });
+                    }}
+                  />
+                </div>
               </div>
-            </div>
+            ) : null}
 
             {/* <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">Group</Label>
@@ -2634,6 +2728,61 @@ export const GroupedBarChart: React.FC = ({}) => {
             </CardContent>
           </Card>
         </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="w-5 h-5" />
+              Categories
+            </CardTitle>
+            <CardDescription>
+              Manage color categories across groups
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className="flex items-center gap-2 p-2 bg-gray-50 rounded"
+              >
+                <PopoverPicker
+                  color={category.color}
+                  onChange={(e) => {
+                    updateCategory(category.id, {
+                      ...category,
+                      color: e,
+                    });
+                  }}
+                />
+
+                <Input
+                  value={category.label}
+                  onChange={(e) =>
+                    updateCategory(category.id, { label: e.target.value })
+                  }
+                  className="flex-1 h-8 text-sm"
+                  aria-label={`Edit label for ${category.label}`}
+                />
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeCategory(category.id)}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              onClick={addCategory}
+              className="w-full"
+              size="sm"
+              variant="outline"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Category
+            </Button>
+          </CardContent>
+        </Card>
       </div>
       {/* Dynamic Edit Modal */}
       {renderEditModal()}
