@@ -28,8 +28,7 @@ import { FontSelection } from "@/app/dashboard/page";
 
 interface ChartBar {
   id: string;
-  label: Text;
-  description?: Text;
+  titleDescription: TitleDescriptionSection;
   value: Value;
   backgroundColor: RgbaColor;
   foreGroundColor: RgbaColor;
@@ -39,8 +38,7 @@ interface ChartBar {
 
 interface ChartGroup {
   id: string;
-  label: Text;
-  description?: Text;
+  titleDescription: TitleDescriptionSection;
   backgroundColor: RgbaColor;
   collapsed: boolean;
 }
@@ -63,14 +61,11 @@ interface Value {
   postfix?: string;
 }
 
-interface ChartTitleSection {
-  name: Text;
-  description: Text;
-  gap: number;
-  paddingTop: number;
-  paddingRight: number;
-  paddingBottom: number;
-  paddingLeft: number;
+interface TitleDescriptionSection {
+  label: Text;
+  description?: Text;
+  gap?: number;
+  padding: Padding;
 }
 
 interface Background {
@@ -169,6 +164,7 @@ interface GroupSettings {
   labelFontSize: number;
   descriptionFontSize?: number;
   padding: Padding;
+  //add label and desc into their own type with padding and gap and reuse the type
   labelPosition: GroupLabelPositionKeys;
   roundedCorners: number;
 }
@@ -201,7 +197,7 @@ interface ChartCategory {
 interface ChartTemplate {
   id: string;
   width: number;
-  chartTitleSection: ChartTitleSection;
+  chartTitleSection: TitleDescriptionSection;
   background: Background;
   categories: ChartCategory[];
   groups: ChartGroup[];
@@ -224,16 +220,18 @@ const defaultTemplates: ChartTemplate[] = [
     id: "GpuCpu",
     width: 1000,
     chartTitleSection: {
-      name: { value: "CPU GPU Compare", color: "#000000", fontSize: 16 },
+      label: { value: "CPU GPU Compare", color: "#000000", fontSize: 16 },
       description: {
         value: "Compare AMD and Intel",
         color: "#000000",
         fontSize: 14,
       },
-      paddingTop: 10,
-      paddingRight: 10,
-      paddingBottom: 10,
-      paddingLeft: 10,
+      padding: {
+        top: 10,
+        right: 10,
+        bottom: 10,
+        left: 10,
+      },
       gap: 5,
     },
     background: {
@@ -280,37 +278,85 @@ const defaultTemplates: ChartTemplate[] = [
     groups: [
       {
         id: "HighCPU",
-        label: { value: "High CPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "High CPU", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
         collapsed: false,
       },
       {
         id: "HighGPU",
-        label: { value: "High GPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "High CPU", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
         collapsed: false,
       },
       {
         id: "MediumCPU",
-        label: { value: "Medium CPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Medium CPU", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 16, g: 185, b: 129, a: 0.2 },
         collapsed: false,
       },
       {
         id: "MediumGPU",
-        label: { value: "Medium GPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Medium CPU", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 16, g: 185, b: 129, a: 0.2 },
         collapsed: false,
       },
       {
         id: "LowCPU",
-        label: { value: "Low CPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Low CPU", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 192, g: 132, b: 252, a: 0.2 },
         collapsed: false,
       },
       {
         id: "LowGPU",
-        label: { value: "Low GPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Low CPU", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 192, g: 132, b: 252, a: 0.2 },
         collapsed: false,
       },
@@ -318,8 +364,17 @@ const defaultTemplates: ChartTemplate[] = [
     bars: [
       {
         id: uuidv4(),
-        label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         value: {
@@ -333,7 +388,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 4800,
           color: "#000000",
@@ -341,14 +406,23 @@ const defaultTemplates: ChartTemplate[] = [
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "HighCPU",
       },
       {
         id: uuidv4(),
-        label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 5200,
           color: "#000000",
@@ -356,14 +430,23 @@ const defaultTemplates: ChartTemplate[] = [
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "HighGPU",
       },
       {
         id: uuidv4(),
-        label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 6100,
           color: "#000000",
@@ -371,15 +454,23 @@ const defaultTemplates: ChartTemplate[] = [
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "HighGPU",
       },
       {
         id: uuidv4(),
-        label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         value: {
@@ -393,8 +484,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 4800,
           color: "#000000",
@@ -408,8 +508,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 5200,
           color: "#000000",
@@ -423,8 +532,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 100,
           color: "#000000",
@@ -438,8 +556,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "AMD CPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         value: {
@@ -453,8 +580,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Intel CPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 4800,
           color: "#000000",
@@ -468,8 +604,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "AMD GPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 5200,
           color: "#000000",
@@ -483,8 +628,17 @@ const defaultTemplates: ChartTemplate[] = [
       },
       {
         id: uuidv4(),
-        label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Geforce GPU", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 6100,
           color: "#000000",
@@ -576,9 +730,9 @@ export const GroupedBarChart: React.FC = ({}) => {
     { id: "min", label: "Min", color: { r: 255, g: 165, b: 0, a: 1 } },
   ]);
 
-  const [chartTitleSection, setChartTitleSection] = useState<ChartTitleSection>(
-    {
-      name: {
+  const [chartTitleSection, setChartTitleSection] =
+    useState<TitleDescriptionSection>({
+      label: {
         value: "Chart",
         color: "#000000",
         fontSize: 16,
@@ -588,25 +742,44 @@ export const GroupedBarChart: React.FC = ({}) => {
         color: "#000000",
         fontSize: 14,
       },
-      paddingTop: 20,
-      paddingRight: 10,
-      paddingBottom: 20,
-      paddingLeft: 10,
+      padding: {
+        top: 10,
+        right: 10,
+        bottom: 10,
+        left: 10,
+      },
       gap: 5,
-    }
-  );
+    });
   const [groups, setGroups] = useState<ChartGroup[]>([
     {
       id: "group1",
-      label: { value: "Group A", color: "#000000", fontSize: 16 },
-      description: { value: "Des", color: "#000000", fontSize: 14 },
+      titleDescription: {
+        label: { value: "Group A", color: "#000000", fontSize: 16 },
+        description: { value: "Des", color: "#000000", fontSize: 14 },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
+        gap: 5,
+      },
       backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
       collapsed: false,
     },
     {
       id: "group2",
-      label: { value: "Group B", color: "#000000", fontSize: 16 },
-      description: { value: "Des", color: "#000000", fontSize: 14 },
+      titleDescription: {
+        label: { value: "Group B", color: "#000000", fontSize: 16 },
+        description: { value: "Des", color: "#000000", fontSize: 14 },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
+        gap: 5,
+      },
       backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
       collapsed: false,
     },
@@ -614,7 +787,17 @@ export const GroupedBarChart: React.FC = ({}) => {
   const [bars, setBars] = useState<ChartBar[]>([
     {
       id: "1",
-      label: { value: "Item 1", color: "#000000", fontSize: 16 },
+      titleDescription: {
+        label: { value: "Item 1", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
+        gap: 5,
+      },
       value: {
         value: 400,
         color: "#000000",
@@ -622,7 +805,6 @@ export const GroupedBarChart: React.FC = ({}) => {
         postfix: "",
         prefix: "",
       },
-      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
@@ -630,7 +812,17 @@ export const GroupedBarChart: React.FC = ({}) => {
     },
     {
       id: "2",
-      label: { value: "Item 2", color: "#000000", fontSize: 16 },
+      titleDescription: {
+        label: { value: "Item 2", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
+        gap: 5,
+      },
       value: {
         value: 300,
         color: "#000000",
@@ -638,7 +830,6 @@ export const GroupedBarChart: React.FC = ({}) => {
         postfix: "",
         prefix: "",
       },
-      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group1",
@@ -646,7 +837,17 @@ export const GroupedBarChart: React.FC = ({}) => {
     },
     {
       id: "3",
-      label: { value: "Item 3", color: "#000000", fontSize: 16 },
+      titleDescription: {
+        label: { value: "Item 3", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
+        gap: 5,
+      },
       value: {
         value: 500,
         color: "#000000",
@@ -654,7 +855,6 @@ export const GroupedBarChart: React.FC = ({}) => {
         postfix: "",
         prefix: "",
       },
-      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
@@ -662,7 +862,17 @@ export const GroupedBarChart: React.FC = ({}) => {
     },
     {
       id: "4",
-      label: { value: "Item 4", color: "#000000", fontSize: 16 },
+      titleDescription: {
+        label: { value: "Item 4", color: "#000000", fontSize: 16 },
+        description: { value: "test", color: "#000000", fontSize: 16 },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
+        gap: 5,
+      },
       value: {
         value: 200,
         color: "#000000",
@@ -670,7 +880,6 @@ export const GroupedBarChart: React.FC = ({}) => {
         postfix: "",
         prefix: "",
       },
-      description: { value: "test", color: "#000000", fontSize: 16 },
       backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
       foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
       groupId: "group2",
@@ -769,10 +978,18 @@ export const GroupedBarChart: React.FC = ({}) => {
   const addGroup = () => {
     const newGroup: ChartGroup = {
       id: Date.now().toString(),
-      label: {
-        value: `Group ${groups.length + 1}`,
-        color: "#000000",
-        fontSize: 16,
+      titleDescription: {
+        label: {
+          value: `Group ${groups.length + 1}`,
+          color: "#000000",
+          fontSize: 16,
+        },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
       },
       backgroundColor: { r: 249, g: 250, b: 255, a: 0.4 },
       collapsed: false,
@@ -789,10 +1006,14 @@ export const GroupedBarChart: React.FC = ({}) => {
       // Create a default group if no groups remain
       const defaultGroup: ChartGroup = {
         id: "default",
-        label: {
-          value: `Default Group`,
-          color: "#000000",
-          fontSize: 16,
+        titleDescription: {
+          label: { value: "Default Group", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
         },
         backgroundColor: { r: 249, g: 250, b: 255, a: 0.4 },
         collapsed: false,
@@ -897,10 +1118,18 @@ export const GroupedBarChart: React.FC = ({}) => {
     const group = groups.find((g) => g.id === targetGroupId);
     const newBar: ChartBar = {
       id: Date.now().toString(),
-      label: {
-        value: `Item ${bars.length + 1}`,
-        color: "#000000",
-        fontSize: 16,
+      titleDescription: {
+        label: {
+          value: `Item ${bars.length + 1}`,
+          color: "#000000",
+          fontSize: 16,
+        },
+        padding: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10,
+        },
       },
       value: {
         value: 100,
@@ -929,9 +1158,12 @@ export const GroupedBarChart: React.FC = ({}) => {
       const newBar: ChartBar = {
         ...barToDuplicate,
         id: Date.now().toString(),
-        label: {
-          ...barToDuplicate.label,
-          value: `${barToDuplicate.label.value} Copy`,
+        titleDescription: {
+          ...barToDuplicate.titleDescription,
+          label: {
+            ...barToDuplicate.titleDescription.label,
+            value: `${barToDuplicate.titleDescription.label.value} Copy`,
+          },
         },
       };
       setBars([...bars, newBar]);
@@ -958,13 +1190,29 @@ export const GroupedBarChart: React.FC = ({}) => {
     setGroups([
       {
         id: "group1",
-        label: { value: "Group A", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Group A", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
         collapsed: false,
       },
       {
         id: "group2",
-        label: { value: "Group B", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Group B", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+        },
         backgroundColor: { r: 139, g: 92, b: 246, a: 0.2 },
         collapsed: false,
       },
@@ -972,7 +1220,18 @@ export const GroupedBarChart: React.FC = ({}) => {
     setBars([
       {
         id: "1",
-        label: { value: "Item 1", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Item 1", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
+
         value: {
           value: 400,
           color: "#000000",
@@ -980,14 +1239,24 @@ export const GroupedBarChart: React.FC = ({}) => {
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
+
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group1",
       },
       {
         id: "2",
-        label: { value: "Item 2", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Item 2", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 300,
           color: "#000000",
@@ -995,14 +1264,23 @@ export const GroupedBarChart: React.FC = ({}) => {
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group1",
       },
       {
         id: "3",
-        label: { value: "Item 3", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Item 3", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 500,
           color: "#000000",
@@ -1010,14 +1288,23 @@ export const GroupedBarChart: React.FC = ({}) => {
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group2",
       },
       {
         id: "4",
-        label: { value: "Item 4", color: "#000000", fontSize: 16 },
+        titleDescription: {
+          label: { value: "Item 4", color: "#000000", fontSize: 16 },
+          description: { value: "test", color: "#000000", fontSize: 16 },
+          padding: {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10,
+          },
+          gap: 5,
+        },
         value: {
           value: 200,
           color: "#000000",
@@ -1025,14 +1312,13 @@ export const GroupedBarChart: React.FC = ({}) => {
           postfix: "",
           prefix: "",
         },
-        description: { value: "test", color: "#000000", fontSize: 16 },
         backgroundColor: { r: 249, g: 250, b: 255, a: 1 },
         foreGroundColor: { r: 139, g: 92, b: 246, a: 1 },
         groupId: "group2",
       },
     ]);
     setChartTitleSection({
-      name: {
+      label: {
         value: "Chart",
         color: "#000000",
         fontSize: 16,
@@ -1042,10 +1328,12 @@ export const GroupedBarChart: React.FC = ({}) => {
         color: "#000000",
         fontSize: 14,
       },
-      paddingTop: 10,
-      paddingRight: 10,
-      paddingBottom: 10,
-      paddingLeft: 10,
+      padding: {
+        top: 10,
+        right: 10,
+        bottom: 10,
+        left: 10,
+      },
       gap: 5,
     });
     setChartWidth(1000);
@@ -1106,11 +1394,17 @@ export const GroupedBarChart: React.FC = ({}) => {
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">Label</Label>
               <Input
-                value={currentBar.label.value}
+                value={currentBar.titleDescription.label.value}
                 onChange={(e) =>
                   updateBar(currentBar.id, {
                     ...currentBar,
-                    label: { ...currentBar.label, value: e.target.value },
+                    titleDescription: {
+                      ...currentBar.titleDescription,
+                      label: {
+                        ...currentBar.titleDescription.label,
+                        value: e.target.value,
+                      },
+                    },
                   })
                 }
                 className="h-8 text-sm"
@@ -1132,14 +1426,16 @@ export const GroupedBarChart: React.FC = ({}) => {
               <div className="flex gap-2">
                 <Input
                   type="color"
-                  value={currentBar?.label?.color}
+                  value={currentBar?.titleDescription.label?.color}
                   onChange={(e) =>
                     updateBar(currentBar.id, {
                       ...currentBar,
-                      label: {
-                        color: e.target.value ?? "#000000",
-                        fontSize: currentBar.label?.fontSize ?? 14,
-                        value: currentBar?.label?.value ?? "",
+                      titleDescription: {
+                        ...currentBar.titleDescription,
+                        label: {
+                          ...currentBar.titleDescription.label,
+                          color: e.target.value,
+                        },
                       },
                     })
                   }
@@ -1194,14 +1490,21 @@ export const GroupedBarChart: React.FC = ({}) => {
                 Description
               </Label>
               <Input
-                value={currentBar.description?.value}
+                value={currentBar.titleDescription.description?.value}
                 onChange={(e) =>
                   updateBar(currentBar.id, {
                     ...currentBar,
-                    description: {
-                      color: currentBar.description?.color ?? "#000000",
-                      fontSize: currentBar.description?.fontSize ?? 16,
-                      value: e?.target?.value,
+                    titleDescription: {
+                      ...currentBar.titleDescription,
+                      description: {
+                        value: e.target.value,
+                        color:
+                          currentBar?.titleDescription?.description?.color ??
+                          "#000000",
+                        fontSize:
+                          currentBar?.titleDescription?.description?.fontSize ??
+                          14,
+                      },
                     },
                   })
                 }
@@ -1224,14 +1527,21 @@ export const GroupedBarChart: React.FC = ({}) => {
               <div className="flex gap-2">
                 <Input
                   type="color"
-                  value={currentBar?.description?.color}
+                  value={currentBar.titleDescription?.description?.color}
                   onChange={(e) =>
                     updateBar(currentBar.id, {
                       ...currentBar,
-                      description: {
-                        color: e.target.value ?? "#000000",
-                        fontSize: currentBar.description?.fontSize ?? 14,
-                        value: currentBar?.description?.value ?? "",
+                      titleDescription: {
+                        ...currentBar.titleDescription,
+                        description: {
+                          value:
+                            currentBar?.titleDescription?.description?.value ??
+                            "",
+                          color: e.target.value ?? "#000000",
+                          fontSize:
+                            currentBar?.titleDescription?.description
+                              ?.fontSize ?? 14,
+                        },
                       },
                     })
                   }
@@ -1596,11 +1906,17 @@ export const GroupedBarChart: React.FC = ({}) => {
                 Group Name
               </Label>
               <Input
-                value={currentGroup.label.value}
+                value={currentGroup.titleDescription.label.value}
                 onChange={(e) =>
                   updateGroup(currentGroup.id, {
                     ...currentGroup,
-                    label: { ...currentGroup.label, value: e.target.value },
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      label: {
+                        ...currentGroup.titleDescription.label,
+                        value: e.target.value,
+                      },
+                    },
                   })
                 }
                 className="h-8 text-sm"
@@ -1622,14 +1938,16 @@ export const GroupedBarChart: React.FC = ({}) => {
               <div className="flex gap-2">
                 <Input
                   type="color"
-                  value={currentGroup?.label?.color}
+                  value={currentGroup.titleDescription.label.color}
                   onChange={(e) =>
                     updateGroup(currentGroup.id, {
                       ...currentGroup,
-                      label: {
-                        color: e.target.value ?? "#000000",
-                        fontSize: currentGroup.label?.fontSize ?? 14,
-                        value: currentGroup.label?.value,
+                      titleDescription: {
+                        ...currentGroup.titleDescription,
+                        label: {
+                          ...currentGroup.titleDescription.label,
+                          color: e.target.value,
+                        },
                       },
                     })
                   }
@@ -1664,14 +1982,21 @@ export const GroupedBarChart: React.FC = ({}) => {
                 Group Description
               </Label>
               <Input
-                value={currentGroup?.description?.value ?? ""}
+                value={currentGroup.titleDescription?.description?.value ?? ""}
                 onChange={(e) =>
                   updateGroup(currentGroup.id, {
                     ...currentGroup,
-                    description: {
-                      color: currentGroup.description?.color ?? "#000000",
-                      fontSize: currentGroup.description?.fontSize ?? 14,
-                      value: e.target.value,
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      description: {
+                        value: e.target.value,
+                        color:
+                          currentGroup.titleDescription?.description?.color ??
+                          "#000000",
+                        fontSize:
+                          currentGroup.titleDescription?.description
+                            ?.fontSize ?? 14,
+                      },
                     },
                   })
                 }
@@ -1694,14 +2019,21 @@ export const GroupedBarChart: React.FC = ({}) => {
               <div className="flex gap-2">
                 <Input
                   type="color"
-                  value={currentGroup?.description?.color}
+                  value={currentGroup?.titleDescription?.description?.color}
                   onChange={(e) =>
                     updateGroup(currentGroup.id, {
                       ...currentGroup,
-                      description: {
-                        color: e.target.value ?? "#000000",
-                        fontSize: currentGroup.description?.fontSize ?? 14,
-                        value: currentGroup?.description?.value ?? "",
+                      titleDescription: {
+                        ...currentGroup.titleDescription,
+                        description: {
+                          value:
+                            currentGroup?.titleDescription?.description
+                              ?.value ?? "",
+                          color: e.target.value,
+                          fontSize:
+                            currentGroup.titleDescription?.description
+                              ?.fontSize ?? 14,
+                        },
                       },
                     })
                   }
@@ -1834,7 +2166,7 @@ export const GroupedBarChart: React.FC = ({}) => {
             <div className="flex items-center gap-2">
               <div
                 className="w-4 h-4 rounded"
-                style={{ backgroundColor: chartTitleSection.name.color }}
+                style={{ backgroundColor: chartTitleSection.label.color }}
               />
               <h3 className="font-semibold text-gray-900">
                 Edit Title Section
@@ -1856,11 +2188,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                 Chart Name
               </Label>
               <Input
-                value={chartTitleSection.name.value}
+                value={chartTitleSection.label.value}
                 onChange={(e) =>
                   setChartTitleSection({
                     ...chartTitleSection,
-                    name: { ...chartTitleSection.name, value: e.target.value },
+                    label: {
+                      ...chartTitleSection.label,
+                      value: e.target.value,
+                    },
                   })
                 }
                 className="h-8 text-sm"
@@ -1882,12 +2217,12 @@ export const GroupedBarChart: React.FC = ({}) => {
               <div className="flex gap-2">
                 <Input
                   type="color"
-                  value={chartTitleSection.name.color}
+                  value={chartTitleSection.label.color}
                   onChange={(e) =>
                     setChartTitleSection({
                       ...chartTitleSection,
-                      name: {
-                        ...chartTitleSection.name,
+                      label: {
+                        ...chartTitleSection.label,
                         color: e.target.value,
                       },
                     })
@@ -1903,12 +2238,12 @@ export const GroupedBarChart: React.FC = ({}) => {
               </Label>
               <Input
                 type="number"
-                value={chartTitleSection.name.fontSize}
+                value={chartTitleSection.label.fontSize}
                 onChange={(e) => {
                   setChartTitleSection({
                     ...chartTitleSection,
-                    name: {
-                      ...chartTitleSection.name,
+                    label: {
+                      ...chartTitleSection.label,
                       fontSize: parseInt(e.target.value),
                     },
                   });
@@ -1923,13 +2258,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                 Chart Description
               </Label>
               <Input
-                value={chartTitleSection.description.value}
+                value={chartTitleSection.description?.value}
                 onChange={(e) =>
                   setChartTitleSection({
                     ...chartTitleSection,
                     description: {
-                      ...chartTitleSection.description,
                       value: e.target.value,
+                      color: chartTitleSection.description?.color ?? "#000000",
+                      fontSize: chartTitleSection.description?.fontSize ?? 14,
                     },
                   })
                 }
@@ -1952,13 +2288,14 @@ export const GroupedBarChart: React.FC = ({}) => {
               <div className="flex gap-2">
                 <Input
                   type="color"
-                  value={chartTitleSection.description.color}
+                  value={chartTitleSection.description?.color}
                   onChange={(e) =>
                     setChartTitleSection({
                       ...chartTitleSection,
                       description: {
-                        ...chartTitleSection.description,
+                        value: chartTitleSection.description?.value ?? "",
                         color: e.target.value,
+                        fontSize: chartTitleSection.description?.fontSize ?? 14,
                       },
                     })
                   }
@@ -1972,12 +2309,13 @@ export const GroupedBarChart: React.FC = ({}) => {
               </Label>
               <Input
                 type="number"
-                value={chartTitleSection.description.fontSize}
+                value={chartTitleSection.description?.fontSize}
                 onChange={(e) => {
                   setChartTitleSection({
                     ...chartTitleSection,
                     description: {
-                      ...chartTitleSection.description,
+                      value: chartTitleSection.description?.value ?? "",
+                      color: chartTitleSection.description?.color ?? "#000000",
                       fontSize: parseInt(e.target.value),
                     },
                   });
@@ -2244,11 +2582,11 @@ export const GroupedBarChart: React.FC = ({}) => {
 
     const chartHeight =
       totalGroupBarHeight +
-      chartTitleSection.name.fontSize +
-      chartTitleSection.description.fontSize +
-      chartTitleSection.gap +
-      chartTitleSection.paddingTop +
-      chartTitleSection.paddingBottom +
+      chartTitleSection.label.fontSize +
+      (chartTitleSection.description?.fontSize ?? 0) +
+      (chartTitleSection.gap ?? 0) +
+      chartTitleSection.padding.top +
+      chartTitleSection.padding.bottom +
       legendHeight;
 
     const availableWidth =
@@ -2258,11 +2596,11 @@ export const GroupedBarChart: React.FC = ({}) => {
       labelWidth;
 
     let currentY =
-      chartTitleSection.name.fontSize +
-      chartTitleSection.description.fontSize +
-      chartTitleSection.gap +
-      chartTitleSection.paddingTop +
-      chartTitleSection.paddingBottom;
+      chartTitleSection.label.fontSize +
+      (chartTitleSection.description?.fontSize ?? 0) +
+      (chartTitleSection.gap ?? 0) +
+      chartTitleSection.padding.top +
+      chartTitleSection.padding.bottom;
 
     return (
       <svg
@@ -2332,30 +2670,30 @@ export const GroupedBarChart: React.FC = ({}) => {
           {/* Chart Title */}
           <text
             x={chartWidth / 2}
-            y={chartTitleSection.paddingTop + chartTitleSection.name.fontSize}
+            y={chartTitleSection.padding.top + chartTitleSection.label.fontSize}
             textAnchor="middle"
-            fill={chartTitleSection.name.color}
+            fill={chartTitleSection.label.color}
             style={{ fontFamily: "ChartTitleFont, MyFont" }}
-            fontSize={chartTitleSection.name.fontSize}
+            fontSize={chartTitleSection.label.fontSize}
             onClick={(e) => openModal("titleSection", e)}
           >
-            {chartTitleSection.name.value}
+            {chartTitleSection.label.value}
           </text>
           <text
             x={chartWidth / 2}
             y={
-              chartTitleSection.description.fontSize +
-              chartTitleSection.name.fontSize +
-              chartTitleSection.gap +
-              chartTitleSection.paddingTop
+              (chartTitleSection.description?.fontSize ?? 0) +
+              chartTitleSection.label.fontSize +
+              (chartTitleSection.gap ?? 0) +
+              chartTitleSection.padding.top
             }
             textAnchor="middle"
-            fill={chartTitleSection.description.color}
+            fill={chartTitleSection.description?.color}
             style={{ fontFamily: "ChartDescriptionFont, MyFont" }}
-            fontSize={chartTitleSection.description.fontSize}
+            fontSize={chartTitleSection.description?.fontSize ?? 0}
             onClick={(e) => openModal("titleSection", e)}
           >
-            {chartTitleSection.description.value}
+            {chartTitleSection.description?.value ?? ""}
           </text>
 
           {settings.hideYAxis ? null : (
@@ -2550,14 +2888,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                   textAnchor={
                     groupLabelPosition[settings.group.labelPosition].anchor
                   }
-                  fill={group.label.color}
+                  fill={group.titleDescription.label.color}
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "GroupNameFont, MyFont" }}
                   fontSize={settings.group.labelFontSize}
                   onClick={(e) => openModal("group", e, group.id)}
                 >
                   {/* ▼  */}
-                  {group.label.value}
+                  {group.titleDescription.label.value}
                 </text>
 
                 <text
@@ -2567,7 +2905,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                     groupDescriptionPosition[settings.group.labelPosition]
                       .anchor
                   }
-                  fill={group?.description?.color ?? "#000000"}
+                  fill={group.titleDescription.description?.color ?? "#000000"}
                   alignmentBaseline="middle"
                   className="cursor-pointer hover:fill-gray-600"
                   style={{ fontFamily: "GroupDescriptionFont, MyFont" }}
@@ -2575,7 +2913,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                   onClick={(e) => openModal("group", e, group.id)}
                 >
                   {/* ▼  */}
-                  {group?.description?.value ?? ""}
+                  {group.titleDescription.description?.value ?? ""}
                 </text>
 
                 {/* Group bars */}
@@ -2666,14 +3004,14 @@ export const GroupedBarChart: React.FC = ({}) => {
                             : barY + (settings?.bar.labelFontSize ?? 0)
                         }
                         textAnchor={settings.bar.labelInside ? "start" : "end"}
-                        fill={bar.label.color}
+                        fill={bar.titleDescription.label.color}
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
                         style={{ fontFamily: "BarLabelFont,MyFont" }}
                         fontSize={settings.bar.labelFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
-                        {bar.label.value}
+                        {bar.titleDescription.label.value}
                       </text>
                       <text
                         x={
@@ -2687,14 +3025,16 @@ export const GroupedBarChart: React.FC = ({}) => {
                           (settings?.bar.descriptionFontSize ?? 0)
                         }
                         textAnchor={settings.bar.labelInside ? "start" : "end"}
-                        fill={bar?.description?.color ?? "#000000"}
+                        fill={
+                          bar?.titleDescription?.description?.color ?? "#000000"
+                        }
                         alignmentBaseline="middle"
                         className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
                         style={{ fontFamily: "BarDescriptionFont,MyFont" }}
                         fontSize={settings.bar.descriptionFontSize}
                         onClick={(e) => openModal("bar", e, bar.id)}
                       >
-                        {bar.description?.value}
+                        {bar.titleDescription?.description?.value}
                       </text>
 
                       {/* Bar Value */}
@@ -2840,10 +3180,10 @@ export const GroupedBarChart: React.FC = ({}) => {
                 >
                   <div className="text-left">
                     <div className="font-medium">
-                      {template.chartTitleSection.name.value}
+                      {template.chartTitleSection.label.value}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {template.chartTitleSection.description.value}
+                      {template.chartTitleSection.description?.value ?? ""}
                     </div>
                   </div>
                 </Button>
