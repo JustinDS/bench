@@ -2562,7 +2562,9 @@ export const GroupedBarChart: React.FC = ({}) => {
       ? settings?.group?.descriptionFontSize
       : 0;
 
-    if (settings.group.labelPosition === "replaceBarLabels") {
+    const ignoreLabelHeight =
+      settings.group.labelPosition === "replaceBarLabels";
+    if (ignoreLabelHeight) {
       groupLabelHeight = 0;
       groupDescriptionHeight = 0;
     }
@@ -2575,6 +2577,9 @@ export const GroupedBarChart: React.FC = ({}) => {
         (groupIndex === groupedBars.length - 1 ? 0 : groupSpacing) +
         groupLabelHeight +
         groupDescriptionHeight +
+        (!ignoreLabelHeight ? group.group.titleDescription.padding.top : 0) +
+        (!ignoreLabelHeight ? group.group.titleDescription.padding.bottom : 0) +
+        (!ignoreLabelHeight ? group.group.titleDescription.gap ?? 0 : 0) +
         settings.group.padding.top +
         settings.group.padding.bottom,
       0
@@ -2761,12 +2766,25 @@ export const GroupedBarChart: React.FC = ({}) => {
               );
             }
 
+            const groupTitleDescriptionSectionPaddingTop = ignoreLabelHeight
+              ? 0
+              : group.titleDescription.padding.top;
+            const groupTitleDescriptionSectionGap = ignoreLabelHeight
+              ? 0
+              : group.titleDescription?.gap ?? 0;
+            const groupTitleDescriptionSectionPaddingBottom = ignoreLabelHeight
+              ? 0
+              : group.titleDescription.padding.bottom;
+
             // Render expanded group
             const groupStartY = currentY;
             currentY +=
               groupLabelHeight +
               groupDescriptionHeight +
-              settings.group.padding.top;
+              settings.group.padding.top +
+              groupTitleDescriptionSectionPaddingTop +
+              groupTitleDescriptionSectionGap +
+              groupTitleDescriptionSectionPaddingBottom;
 
             const spacingHeightCentered =
               (barSpacing * (groupBars.length - 1)) / 2;
@@ -2777,9 +2795,12 @@ export const GroupedBarChart: React.FC = ({}) => {
               { x: number; y: number; anchor: string }
             > = {
               left: {
-                x: settings.group.padding.left,
+                x:
+                  settings.group.padding.left +
+                  group.titleDescription.padding.left,
                 y:
                   groupStartY +
+                  groupTitleDescriptionSectionPaddingTop +
                   settings.group.padding.top +
                   groupLabelHeight / 2,
                 anchor: "start",
@@ -2788,23 +2809,32 @@ export const GroupedBarChart: React.FC = ({}) => {
                 x: chartWidth / 2,
                 y:
                   groupStartY +
+                  groupTitleDescriptionSectionPaddingTop +
                   settings.group.padding.top +
                   groupLabelHeight / 2,
                 anchor: "middle",
               },
               right: {
-                x: labelWidth + availableWidth + settings.group.padding.right,
+                x:
+                  labelWidth +
+                  availableWidth +
+                  settings.group.padding.right -
+                  group.titleDescription.padding.right,
                 y:
                   groupStartY +
+                  groupTitleDescriptionSectionPaddingTop +
                   settings.group.padding.top +
                   groupLabelHeight / 2,
                 anchor: "end",
               },
               replaceBarLabels: {
-                x: settings.group.padding.left,
+                x:
+                  settings.group.padding.left +
+                  group.titleDescription.padding.left,
                 y:
                   groupStartY +
                   settings.group.padding.top -
+                  (group.titleDescription?.gap ?? 0) / 2 -
                   (settings.group.descriptionFontSize ?? 0) / 2 +
                   barHeightCentered +
                   spacingHeightCentered,
@@ -2817,9 +2847,13 @@ export const GroupedBarChart: React.FC = ({}) => {
               { x: number; y: number; anchor: string }
             > = {
               left: {
-                x: settings.group.padding.left,
+                x:
+                  settings.group.padding.left +
+                  group.titleDescription.padding.left,
                 y:
                   groupStartY +
+                  groupTitleDescriptionSectionPaddingTop +
+                  groupTitleDescriptionSectionGap +
                   settings.group.padding.top +
                   groupLabelHeight +
                   groupDescriptionHeight / 2,
@@ -2829,25 +2863,36 @@ export const GroupedBarChart: React.FC = ({}) => {
                 x: chartWidth / 2,
                 y:
                   groupStartY +
+                  groupTitleDescriptionSectionPaddingTop +
+                  groupTitleDescriptionSectionGap +
                   settings.group.padding.top +
                   groupLabelHeight +
                   groupDescriptionHeight / 2,
                 anchor: "middle",
               },
               right: {
-                x: labelWidth + availableWidth + settings.group.padding.right,
+                x:
+                  labelWidth +
+                  availableWidth +
+                  settings.group.padding.right -
+                  group.titleDescription.padding.right,
                 y:
                   groupStartY +
+                  groupTitleDescriptionSectionPaddingTop +
+                  groupTitleDescriptionSectionGap +
                   settings.group.padding.top +
                   groupLabelHeight +
                   groupDescriptionHeight / 2,
                 anchor: "end",
               },
               replaceBarLabels: {
-                x: settings.group.padding.left,
+                x:
+                  settings.group.padding.left +
+                  group.titleDescription.padding.left,
                 y:
                   groupStartY +
                   settings.group.padding.top +
+                  (group.titleDescription?.gap ?? 0) / 2 +
                   settings.group.labelFontSize / 2 +
                   barHeightCentered +
                   spacingHeightCentered,
@@ -2861,7 +2906,10 @@ export const GroupedBarChart: React.FC = ({}) => {
               groupBars.length * barHeight +
               (groupBars.length - 1) * barSpacing +
               settings.group.padding.top +
-              settings.group.padding.bottom;
+              settings.group.padding.bottom +
+              groupTitleDescriptionSectionPaddingTop +
+              groupTitleDescriptionSectionPaddingBottom +
+              groupTitleDescriptionSectionGap;
 
             const groupElements = (
               <g key={group.id}>
@@ -2995,13 +3043,20 @@ export const GroupedBarChart: React.FC = ({}) => {
                       <text
                         x={
                           settings.bar.labelInside
-                            ? labelWidth + settings.group.padding.left
-                            : labelWidth + settings.group.padding.left
+                            ? labelWidth +
+                              settings.group.padding.left +
+                              bar.titleDescription.padding.left
+                            : labelWidth +
+                              settings.group.padding.left -
+                              bar.titleDescription.padding.right
                         }
                         y={
                           (settings?.bar.descriptionFontSize ?? 0) === 0
                             ? barY + barHeight / 2
-                            : barY + (settings?.bar.labelFontSize ?? 0)
+                            : barY -
+                              (bar.titleDescription.gap ?? 0) / 2 -
+                              (settings?.bar.valueFontSize ?? 0) / 2 +
+                              barHeight / 2
                         }
                         textAnchor={settings.bar.labelInside ? "start" : "end"}
                         fill={bar.titleDescription.label.color}
@@ -3016,13 +3071,18 @@ export const GroupedBarChart: React.FC = ({}) => {
                       <text
                         x={
                           settings.bar.labelInside
-                            ? labelWidth + settings.group.padding.left
-                            : labelWidth + settings.group.padding.left
+                            ? labelWidth +
+                              settings.group.padding.left +
+                              bar.titleDescription.padding.left
+                            : labelWidth +
+                              settings.group.padding.left -
+                              bar.titleDescription.padding.right
                         }
                         y={
                           barY +
-                          barHeight -
-                          (settings?.bar.descriptionFontSize ?? 0)
+                          (bar.titleDescription.gap ?? 0) / 2 +
+                          (settings?.bar.descriptionFontSize ?? 0) +
+                          barHeight / 2
                         }
                         textAnchor={settings.bar.labelInside ? "start" : "end"}
                         fill={
