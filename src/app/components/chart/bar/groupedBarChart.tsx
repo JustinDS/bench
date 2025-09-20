@@ -2966,7 +2966,8 @@ export const GroupedBarChart: React.FC = ({}) => {
 
                 {/* Group bars */}
                 {groupBars.map((bar, barIndex) => {
-                  const barWidth = (bar.value.value / maxValue) * chartWidth;
+                  const barWidth =
+                    (bar.value.value / maxValue) * availableWidth;
                   const barY = currentY + barIndex * (barHeight + barSpacing);
 
                   const barValuePosition: Record<
@@ -2978,15 +2979,19 @@ export const GroupedBarChart: React.FC = ({}) => {
                       anchor: "start",
                     },
                     onForegroundRight: {
-                      position: barWidth + labelWidth + 10,
+                      position:
+                        barWidth +
+                        labelWidth +
+                        settings.group.padding.left -
+                        10,
                       anchor: "end",
                     },
                     onBackgroundRight: {
-                      position: labelWidth + chartWidth + 10,
+                      position: chartWidth - settings.group.padding.right - 10,
                       anchor: "end",
                     },
                     outside: {
-                      position: chartWidth,
+                      position: chartWidth + 10,
                       anchor: "start",
                     },
                   };
@@ -3005,12 +3010,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       <rect
                         x={labelWidth + settings.group.padding.left}
                         y={barY}
-                        width={
-                          chartWidth -
-                          settings.group.padding.right -
-                          labelWidth -
-                          settings.group.padding.left
-                        }
+                        width={availableWidth}
                         height={barHeight}
                         fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
                         stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
@@ -3024,12 +3024,7 @@ export const GroupedBarChart: React.FC = ({}) => {
                       <rect
                         x={labelWidth + settings.group.padding.left}
                         y={barY}
-                        width={
-                          barWidth -
-                          settings.group.padding.right -
-                          labelWidth -
-                          settings.group.padding.left
-                        }
+                        width={barWidth}
                         height={barHeight}
                         fill={barColor}
                         rx={settings.bar.roundedCorners}
@@ -3164,18 +3159,23 @@ export const GroupedBarChart: React.FC = ({}) => {
                 {/* Legend Items */}
                 {categories.map((category, index) => {
                   const legendItemWidth = 140;
-                  const itemsPerRow = Math.floor(
-                    availableWidth / legendItemWidth
-                  );
+                  const itemsPerRow = Math.floor(chartWidth / legendItemWidth);
                   const totalItems = categories.length;
                   const rows = Math.ceil(totalItems / itemsPerRow);
-                  const startX =
-                    (chartWidth -
-                      Math.min(totalItems, itemsPerRow) * legendItemWidth) /
-                    2;
 
                   const row = Math.floor(index / itemsPerRow);
                   const col = index % itemsPerRow;
+
+                  // items in this specific row
+                  const itemsInRow =
+                    row === rows - 1
+                      ? totalItems - row * itemsPerRow
+                      : itemsPerRow;
+
+                  // recompute startX per row
+                  const rowWidth = itemsInRow * legendItemWidth;
+                  const startX = (chartWidth - rowWidth) / 2;
+
                   const x = startX + col * legendItemWidth;
                   const y = chartHeight - legendHeight + 35 + row * 20;
 
