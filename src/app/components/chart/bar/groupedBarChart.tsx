@@ -913,6 +913,43 @@ export const GroupedBarChart: React.FC = ({}) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportJson = () => {
+    const jsonString = JSON.stringify(
+      {
+        settings,
+        chartFont,
+        chartTitleFont,
+        groupNameFont,
+        groupDescriptionFont,
+        chartDescriptionFont,
+        barValueFont,
+        chartWidth,
+        chartBackgroundWidth,
+        chartBackgroundHeight,
+        chartBackgroundColor,
+        groupSpacing,
+        barSpacing,
+        barHeight,
+        categories,
+        chartTitleSection,
+        groups,
+        bars,
+      },
+      null,
+      2
+    ); // Convert object to formatted JSON string
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `settings.json`; // Set the download filename
+    document.body.appendChild(a); // Append to body (required for Firefox)
+    a.click(); // Programmatically click the anchor to trigger download
+    document.body.removeChild(a); // Clean up the anchor element
+    URL.revokeObjectURL(url); // Release the object URL
+  };
+
   const maxValue = useMemo(
     () => Math.max(...bars.map((bar) => bar.value.value), 1),
     [bars]
@@ -2975,7 +3012,8 @@ export const GroupedBarChart: React.FC = ({}) => {
                     { position: number; anchor: string }
                   > = {
                     onBackgroundLeft: {
-                      position: padding.left + barWidth + 8,
+                      position:
+                        labelWidth + settings.group.padding.left + barWidth + 8,
                       anchor: "start",
                     },
                     onForegroundRight: {
@@ -3259,6 +3297,14 @@ export const GroupedBarChart: React.FC = ({}) => {
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export SVG
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleExportJson}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export JSON
               </Button>
             </CardContent>
           </Card>
