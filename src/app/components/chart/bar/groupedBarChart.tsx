@@ -25,6 +25,7 @@ import { PopoverPicker } from "../../colorPicker/popoverPicker";
 import { v4 as uuidv4 } from "uuid";
 import FontPicker from "../../fontPicker/fontPicker";
 import { FontSelection } from "@/app/dashboard/page";
+import { DashboardProps } from "@/app/dashboard/pageClient";
 
 interface ChartBar {
   id: string;
@@ -669,13 +670,13 @@ const colorOptions = [
   { name: "Violet", value: "#7C3AED" },
 ];
 
-export const GroupedBarChart: React.FC = ({}) => {
+export const GroupedBarChart = ({ font }: DashboardProps) => {
   //const { font } = useFont();
 
   const [chartType, setChartType] = useState<"horizontal" | "vertical">(
     "horizontal"
   );
-  const [chartFont, setChartFont] = useState<FontSelection>();
+  const [chartFont, setChartFont] = useState<FontSelection>(font ?? undefined);
   const [chartTitleFont, setChartTitleFont] = useState<FontSelection>();
   const [groupNameFont, setGroupNameFont] = useState<FontSelection>();
   const [groupDescriptionFont, setGroupDescriptionFont] =

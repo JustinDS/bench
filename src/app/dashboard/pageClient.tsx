@@ -5,11 +5,15 @@ import { ChartInputManager } from "../components/chartInputManager/chartInputMan
 import FontPicker, {
   FontPickerProps,
 } from "../components/fontPicker/fontPicker";
-import { WebFont } from "./page";
+import { FontSelection, WebFont } from "./page";
 import { FontProvider } from "../contexts/fontContext";
 import { GroupedBarChart } from "../components/chart/bar/groupedBarChart";
 
-export default function ClientDashboard() {
+export interface DashboardProps {
+  font: FontSelection;
+}
+
+export default function ClientDashboard({ font }: DashboardProps) {
   return (
     <FontProvider>
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -17,7 +21,7 @@ export default function ClientDashboard() {
         {/* <ChartInputManager /> */}
 
         <div className="pt-10">
-          <GroupedBarChart />
+          <GroupedBarChart font={font} />
         </div>
       </div>
     </FontProvider>

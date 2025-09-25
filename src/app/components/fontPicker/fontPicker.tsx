@@ -48,11 +48,12 @@ const FontPicker = ({
       }
     };
 
-    handleFetch();
+    if (!fontFamilies) {
+      handleFetch();
+    }
   }, []);
 
   const getfontTtf = async (url: string | undefined) => {
-    console.log("asdasdas");
     try {
       const googleFontsResponse = await fetch(`/api/font/ttf`, {
         method: "POST",
@@ -137,23 +138,26 @@ const FontPicker = ({
         </select>
       </div>
 
-      <div className="space-y-1">
-        <Label className="text-xs font-medium text-gray-500">
-          {variantLabel}
-        </Label>
-        <select
-          value={selectedVariant}
-          onChange={(e) => selectVariant(e)}
-          style={{ fontFamily: selectedFontFamily, fontSize: "16px" }}
-          className="flex-1 h-8 text-sm border border-input bg-background px-3 py-1 rounded-md w-full"
-        >
-          {Object.entries(fontVariations).map(([key, value]) => (
-            <option key={key} value={key}>
-              {key}
-            </option>
-          ))}
-        </select>
-      </div>
+      {Object.keys(fontVariations).length !== 0 && (
+        <div className="space-y-1">
+          <Label className="text-xs font-medium text-gray-500">
+            {variantLabel}
+          </Label>
+          <select
+            value={selectedVariant}
+            onChange={(e) => selectVariant(e)}
+            style={{ fontFamily: selectedFontFamily, fontSize: "16px" }}
+            className="flex-1 h-8 text-sm border border-input bg-background px-3 py-1 rounded-md w-full"
+          >
+            {Object.entries(fontVariations).map(([key, value]) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* <p style={{ fontFamily: selectedFontFamily, fontSize: "24px" }}>
         The quick brown fox jumps over the lazy dog.
       </p> */}

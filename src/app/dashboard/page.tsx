@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { ChartInputManager } from "../components/chartInputManager/chartInputManager";
 import FontPicker from "../components/fontPicker/fontPicker";
 import ClientDashboard from "./pageClient";
+import { getURL } from "@/utils/functions/urlHelper";
 
 export interface WebFont {
   family: string;
@@ -25,10 +26,11 @@ export interface WebFontItem {
 }
 
 export interface FontSelection {
-  variant: Variant;
+  variant?: Variant;
   selectedFontFamily: string;
   selectedVariant: string;
-  ttf: string;
+  ttf?: string;
+  fontFamilies?: WebFont[];
 }
 
 export default async function Dashboard() {
@@ -52,30 +54,54 @@ export default async function Dashboard() {
 
   const status = profile?.subscription_status;
 
-  // let googleFonts: WebFontItem = { items: [] };
+  const getfontTtf = async (url: string | undefined) => {
+    try {
+      const googleFontsResponse = await fetch(`${getURL()}/api/font/ttf`, {
+        method: "POST",
+        body: JSON.stringify({
+          fontUrl: url,
+        }),
+      });
 
-  // const apiKey = process.env.GOOGLE_FONTS_API_KEY;
-  // try {
-  //   const googleFontsResponse = await fetch(
-  //     `https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`,
-  //     {
-  //       method: "GET",
-  //     }
-  //   );
+      return await googleFontsResponse.text();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  //   googleFonts = await googleFontsResponse.json();
-  // } catch (error) {
-  //   console.error(error);
-  // }
+  let googleFonts: WebFontItem = { items: [] };
 
-  // const fontFamilies = googleFonts?.items?.map((font) => font);
+  const apiKey = process.env.GOOGLE_FONTS_API_KEY;
+  try {
+    const googleFontsResponse = await fetch(
+      `https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`,
+      {
+        method: "GET",
+      }
+    );
+
+    googleFonts = await googleFontsResponse.json();
+  } catch (error) {
+    console.error(error);
+  }
+
+  const fontFamilies = googleFonts?.items?.map((font) => font);
+  const selectedFontFamily = fontFamilies[0].family;
+  const variants = fontFamilies[0].files;
+  const fontFileURL = fontFamilies[0]?.files["regular"];
+  const ttf = await getfontTtf(fontFileURL);
+
+  const font: FontSelection = {
+    selectedFontFamily: selectedFontFamily,
+    selectedVariant: "regular",
+    fontFamilies: fontFamilies,
+    ttf: ttf,
+    variant: variants,
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <ClientDashboard
-      // fonts={fontFamilies}
-      // selectedFont={fontFamilies[0].family}
-      />
+      <ClientDashboard font={font} />
     </div>
   );
 }

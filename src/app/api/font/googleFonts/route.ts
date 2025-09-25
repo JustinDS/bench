@@ -13,8 +13,6 @@ export async function GET(request: Request) {
 
     const fonts = await googleFontsResponse.json();
 
-    console.log("fonts google", fonts);
-
     return NextResponse.json(fonts);
   } catch (error) {
     console.error(error);
