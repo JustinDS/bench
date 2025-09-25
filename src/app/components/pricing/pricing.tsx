@@ -18,7 +18,7 @@ const premiumFeatures = [
 export default function Pricing() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
 
-  const premiumPrice = billing === "monthly" ? "R500" : "R5000";
+  const premiumPrice = billing === "monthly" ? "R500" : "R4 020";
   const per = billing === "monthly" ? "/mo" : "/yr";
 
   return (
