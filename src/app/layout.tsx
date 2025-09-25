@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import Header from "./components/header";
 import { UserProvider } from "./contexts/UserContext";
+import Footer from "./components/footer/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,26 +34,7 @@ export default function RootLayout({
         <UserProvider>
           <Header />
           {children}
-
-          <footer className="bg-white border-t border-gray-200 py-6 mt-6">
-            <div className="max-w-6xl mx-auto px-4 flex justify-between items-center text-sm text-gray-500">
-              <span>© 2025 GameBench. All rights reserved.</span>
-              <div className="space-x-4">
-                <Link href="#" className="hover:underline">
-                  Privacy
-                </Link>
-                <Link href="#" className="hover:underline">
-                  Terms
-                </Link>
-                <Link href="#" className="hover:underline">
-                  Contact
-                </Link>
-                <Link href="/login" className="hover:underline">
-                  Login
-                </Link>
-              </div>
-            </div>
-          </footer>
+          <Footer />
         </UserProvider>
       </body>
     </html>

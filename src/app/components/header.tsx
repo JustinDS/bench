@@ -24,23 +24,25 @@ export default function Header() {
           Bench
         </Link>
         <nav className="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
-          <Link href="#benchmarks" className="hover:underline">
-            Benchmarks
+          <Link href="/#features" className="hover:underline">
+            Features
           </Link>
-          <Link href="#components" className="hover:underline">
-            Components
-          </Link>
-          <Link href="#about" className="hover:underline">
-            About
+          <Link href="/#pricing" className="hover:underline">
+            Pricing
           </Link>
           {user ? (
-            <Link
-              href="/"
-              className="hover:underline"
-              onClick={() => handleLogout()}
-            >
-              Logout
-            </Link>
+            <div className="flex space-x-6">
+              <Link href="/dashboard" className="hover:underline">
+                Dashboard
+              </Link>
+              <Link
+                href="/"
+                className="hover:underline"
+                onClick={() => handleLogout()}
+              >
+                Logout
+              </Link>
+            </div>
           ) : (
             <Link href="/login" className="hover:underline">
               Login
