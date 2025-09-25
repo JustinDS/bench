@@ -676,7 +676,9 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
   const [chartType, setChartType] = useState<"horizontal" | "vertical">(
     "horizontal"
   );
-  const [chartFont, setChartFont] = useState<FontSelection>(font ?? undefined);
+  const [chartFont, setChartFont] = useState<FontSelection | undefined>(
+    font ?? undefined
+  );
   const [chartTitleFont, setChartTitleFont] = useState<FontSelection>();
   const [groupNameFont, setGroupNameFont] = useState<FontSelection>();
   const [groupDescriptionFont, setGroupDescriptionFont] =
@@ -1851,33 +1853,6 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
               </div>
             ) : null}
 
-            {/* <div className="space-y-1">
-              <Label className="text-xs font-medium text-gray-500">Group</Label>
-              <Select
-                value={currentBar.groupId}
-                onValueChange={(value) =>
-                  updateBar(currentBar.id, { groupId: value })
-                }
-              >
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {groups.map((group) => (
-                    <SelectItem key={group.id} value={group.id}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full border"
-                          style={{ backgroundColor: group.color }}
-                        />
-                        <span className="text-xs">{group.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
-
             <div className="flex gap-2 pt-2">
               <Button
                 variant="outline"
@@ -2148,6 +2123,121 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
               </div>
             </div>
 
+            {/* <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">Gap</Label>
+              <Input
+                type="number"
+                value={chartTitleSection.gap}
+                onChange={(e) => {
+                  setSettings({
+                    ...settings,
+                    group: {
+                      ...settings.group,
+                      : top: parseInt(e.target.value),
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div> */}
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Padding Top
+              </Label>
+              <Input
+                type="number"
+                value={settings.group.padding.top}
+                onChange={(e) => {
+                  setSettings({
+                    ...settings,
+                    group: {
+                      ...settings.group,
+                      padding: {
+                        ...settings.group.padding,
+                        top: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Padding Bottom
+              </Label>
+              <Input
+                type="number"
+                value={settings.group.padding.bottom}
+                onChange={(e) => {
+                  setSettings({
+                    ...settings,
+                    group: {
+                      ...settings.group,
+                      padding: {
+                        ...settings.group.padding,
+                        bottom: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Padding Left
+              </Label>
+              <Input
+                type="number"
+                value={settings.group.padding.left}
+                onChange={(e) => {
+                  setSettings({
+                    ...settings,
+                    group: {
+                      ...settings.group,
+                      padding: {
+                        ...settings.group.padding,
+                        left: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group Padding Right
+              </Label>
+              <Input
+                type="number"
+                value={settings.group.padding.right}
+                onChange={(e) => {
+                  setSettings({
+                    ...settings,
+                    group: {
+                      ...settings.group,
+                      padding: {
+                        ...settings.group.padding,
+                        right: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
                 Background Color
@@ -2371,6 +2461,47 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   setChartTitleSection({
                     ...chartTitleSection,
                     gap: parseInt(e.target.value),
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Padding Top
+              </Label>
+              <Input
+                type="number"
+                value={chartTitleSection.padding.top}
+                onChange={(e) => {
+                  setChartTitleSection({
+                    ...chartTitleSection,
+                    padding: {
+                      ...chartTitleSection.padding,
+                      top: parseInt(e.target.value),
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Padding Bottom
+              </Label>
+              <Input
+                type="number"
+                value={chartTitleSection.padding.bottom}
+                onChange={(e) => {
+                  setChartTitleSection({
+                    ...chartTitleSection,
+                    padding: {
+                      ...chartTitleSection.padding,
+                      bottom: parseInt(e.target.value),
+                    },
                   });
                 }}
                 className="h-8 text-sm"
@@ -3177,7 +3308,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
               groupBars.length * barHeight +
               (groupIndex === groupedBars.length - 1 ? 0 : groupSpacing) +
               (groupBars.length - 1) * barSpacing +
-              settings.group.padding.top;
+              settings.group.padding.bottom;
             return groupElements;
           })}
 
@@ -3198,7 +3329,9 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 {/* Legend Items */}
                 {categories.map((category, index) => {
                   const legendItemWidth = 140;
-                  const itemsPerRow = Math.floor(chartWidth / legendItemWidth);
+                  const itemsPerRow = Math.floor(
+                    labelWidth + chartWidth / legendItemWidth
+                  );
                   const totalItems = categories.length;
                   const rows = Math.ceil(totalItems / itemsPerRow);
 
@@ -3213,7 +3346,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
 
                   // recompute startX per row
                   const rowWidth = itemsInRow * legendItemWidth;
-                  const startX = (chartWidth - rowWidth) / 2;
+                  const startX = (labelWidth + chartWidth - rowWidth) / 2;
 
                   const x = startX + col * legendItemWidth;
                   const y = chartHeight - legendHeight + 35 + row * 20;
