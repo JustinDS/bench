@@ -26,6 +26,7 @@ import { v4 as uuidv4 } from "uuid";
 import FontPicker from "../../fontPicker/fontPicker";
 import { FontSelection } from "@/app/dashboard/page";
 import { DashboardProps } from "@/app/dashboard/pageClient";
+import { setgroups } from "process";
 
 interface ChartBar {
   id: string;
@@ -2123,24 +2124,122 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
               </div>
             </div>
 
-            {/* <div className="space-y-1">
-              <Label className="text-xs font-medium text-gray-500">Gap</Label>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group title description Gap
+              </Label>
               <Input
                 type="number"
-                value={chartTitleSection.gap}
+                value={currentGroup.titleDescription.gap}
                 onChange={(e) => {
-                  setSettings({
-                    ...settings,
-                    group: {
-                      ...settings.group,
-                      : top: parseInt(e.target.value),
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      gap: parseInt(e.target.value),
                     },
                   });
                 }}
                 className="h-8 text-sm"
                 placeholder="Chart Name"
               />
-            </div> */}
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group title description padding top
+              </Label>
+              <Input
+                type="number"
+                value={currentGroup.titleDescription.padding.top}
+                onChange={(e) => {
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      padding: {
+                        ...currentGroup.titleDescription.padding,
+                        top: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group title description padding right
+              </Label>
+              <Input
+                type="number"
+                value={currentGroup.titleDescription.padding.right}
+                onChange={(e) => {
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      padding: {
+                        ...currentGroup.titleDescription.padding,
+                        right: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group title description padding bottom
+              </Label>
+              <Input
+                type="number"
+                value={currentGroup.titleDescription.padding.bottom}
+                onChange={(e) => {
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      padding: {
+                        ...currentGroup.titleDescription.padding,
+                        bottom: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Group title description padding left
+              </Label>
+              <Input
+                type="number"
+                value={currentGroup.titleDescription.padding.left}
+                onChange={(e) => {
+                  updateGroup(currentGroup.id, {
+                    ...currentGroup,
+                    titleDescription: {
+                      ...currentGroup.titleDescription,
+                      padding: {
+                        ...currentGroup.titleDescription.padding,
+                        left: parseInt(e.target.value),
+                      },
+                    },
+                  });
+                }}
+                className="h-8 text-sm"
+                placeholder="Chart Name"
+              />
+            </div>
 
             <div className="space-y-1">
               <Label className="text-xs font-medium text-gray-500">
