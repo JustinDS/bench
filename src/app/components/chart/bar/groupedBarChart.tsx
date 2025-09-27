@@ -1084,6 +1084,26 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     );
   };
 
+  const updateAllGroup = (updates: ChartGroup) => {
+    setGroups(
+      groups.map((group) => {
+        return {
+          ...group,
+          titleDescription: {
+            ...updates.titleDescription,
+            padding: {
+              ...updates.titleDescription.padding,
+              top: updates.titleDescription.padding.top,
+              bottom: updates.titleDescription.padding.bottom,
+              left: updates.titleDescription.padding.left,
+              right: updates.titleDescription.padding.right,
+            },
+          },
+        };
+      })
+    );
+  };
+
   const toggleGroupCollapse = (groupId: string) => {
     updateGroup(groupId, {
       collapsed: !groups.find((g) => g.id === groupId)?.collapsed,
@@ -1191,6 +1211,26 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
 
   const updateBar = (id: string, updates: Partial<ChartBar>) => {
     setBars(bars.map((bar) => (bar.id === id ? { ...bar, ...updates } : bar)));
+  };
+
+  const updateAllBar = (updates: ChartBar) => {
+    setBars(
+      bars.map((bar) => {
+        return {
+          ...bar,
+          titleDescription: {
+            ...updates.titleDescription,
+            padding: {
+              ...updates.titleDescription.padding,
+              top: updates.titleDescription.padding.top,
+              bottom: updates.titleDescription.padding.bottom,
+              left: updates.titleDescription.padding.left,
+              right: updates.titleDescription.padding.right,
+            },
+          },
+        };
+      })
+    );
   };
 
   const duplicateBar = (id: string) => {
@@ -1608,6 +1648,75 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 }
                 className="h-8 text-sm"
                 placeholder="14"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Title Description Padding left
+              </Label>
+              <Input
+                type="number"
+                value={currentBar.titleDescription.padding.left}
+                onChange={(e) =>
+                  updateAllBar({
+                    ...currentBar,
+                    titleDescription: {
+                      ...currentBar.titleDescription,
+                      padding: {
+                        ...currentBar.titleDescription.padding,
+                        left: parseInt(e.target.value),
+                      },
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="10"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Title Description Padding right
+              </Label>
+              <Input
+                type="number"
+                value={currentBar.titleDescription.padding.right}
+                onChange={(e) =>
+                  updateAllBar({
+                    ...currentBar,
+                    titleDescription: {
+                      ...currentBar.titleDescription,
+                      padding: {
+                        ...currentBar.titleDescription.padding,
+                        right: parseInt(e.target.value),
+                      },
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="10"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Title Description Gap
+              </Label>
+              <Input
+                type="number"
+                value={currentBar.titleDescription.gap}
+                onChange={(e) =>
+                  updateAllBar({
+                    ...currentBar,
+                    titleDescription: {
+                      ...currentBar.titleDescription,
+                      gap: parseInt(e.target.value),
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="5"
               />
             </div>
 
@@ -2132,7 +2241,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 type="number"
                 value={currentGroup.titleDescription.gap}
                 onChange={(e) => {
-                  updateGroup(currentGroup.id, {
+                  updateAllGroup({
                     ...currentGroup,
                     titleDescription: {
                       ...currentGroup.titleDescription,
@@ -2141,7 +2250,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2153,7 +2262,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 type="number"
                 value={currentGroup.titleDescription.padding.top}
                 onChange={(e) => {
-                  updateGroup(currentGroup.id, {
+                  updateAllGroup({
                     ...currentGroup,
                     titleDescription: {
                       ...currentGroup.titleDescription,
@@ -2165,7 +2274,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2177,7 +2286,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 type="number"
                 value={currentGroup.titleDescription.padding.right}
                 onChange={(e) => {
-                  updateGroup(currentGroup.id, {
+                  updateAllGroup({
                     ...currentGroup,
                     titleDescription: {
                       ...currentGroup.titleDescription,
@@ -2189,7 +2298,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2201,7 +2310,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 type="number"
                 value={currentGroup.titleDescription.padding.bottom}
                 onChange={(e) => {
-                  updateGroup(currentGroup.id, {
+                  updateAllGroup({
                     ...currentGroup,
                     titleDescription: {
                       ...currentGroup.titleDescription,
@@ -2213,7 +2322,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2225,7 +2334,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 type="number"
                 value={currentGroup.titleDescription.padding.left}
                 onChange={(e) => {
-                  updateGroup(currentGroup.id, {
+                  updateAllGroup({
                     ...currentGroup,
                     titleDescription: {
                       ...currentGroup.titleDescription,
@@ -2237,7 +2346,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2261,7 +2370,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2285,7 +2394,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2309,7 +2418,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
@@ -2333,7 +2442,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   });
                 }}
                 className="h-8 text-sm"
-                placeholder="Chart Name"
+                placeholder="10"
               />
             </div>
 
