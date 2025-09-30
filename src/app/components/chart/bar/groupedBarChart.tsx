@@ -1251,6 +1251,58 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     }
   };
 
+  const draggingIndex = useRef<number | null>(null);
+  const [dragY, setDragY] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (draggingIndex.current !== null && dragY !== null) {
+        const delta = e.clientY - dragY;
+
+        const newIndex = Math.min(
+          bars.length - 1,
+          Math.max(
+            0,
+            draggingIndex.current + Math.round(delta / (barHeight + barSpacing))
+          )
+        );
+
+        console.log("dragging");
+
+        if (newIndex !== draggingIndex.current) {
+          const updated = [...bars];
+          const [moved] = updated.splice(draggingIndex.current, 1);
+          updated.splice(newIndex, 0, moved);
+
+          console.log("updated", updated);
+
+          setBars(updated);
+
+          draggingIndex.current = newIndex;
+          setDragY(e.clientY);
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      draggingIndex.current = null;
+      setDragY(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [bars, dragY]);
+
+  const onMouseDown = (index: number, e: React.MouseEvent) => {
+    draggingIndex.current = index;
+    setDragY(e.clientY);
+  };
+
   const loadTemplate = (template: ChartTemplate) => {
     setChartBackgroundHeight(template.background.height);
     setChartBackgroundWidth(template.background.width);
@@ -3383,7 +3435,11 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                     : `rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`;
 
                   return (
-                    <g key={bar.id}>
+                    <g
+                      key={bar.id}
+                      onMouseDown={(e) => onMouseDown(barIndex, groupIndex, e)}
+                      style={{ cursor: "grab" }}
+                    >
                       {/* Bar background */}
                       <rect
                         x={labelWidth + settings.group.padding.left}
