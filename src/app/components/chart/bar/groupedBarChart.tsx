@@ -166,7 +166,6 @@ interface GroupSettings {
   labelFontSize: number;
   descriptionFontSize?: number;
   padding: Padding;
-  //add label and desc into their own type with padding and gap and reuse the type
   labelPosition: GroupLabelPositionKeys;
   roundedCorners: number;
 }
@@ -196,6 +195,14 @@ interface ChartCategory {
   color: RgbaColor;
 }
 
+interface ChartLegend {
+  label: string;
+  fontSize: number;
+  color: string;
+  padding: Padding;
+  gap: number;
+}
+
 interface ChartTemplate {
   id: string;
   width: number;
@@ -212,7 +219,7 @@ interface ChartTemplate {
 
 interface ModalState {
   isOpen: boolean;
-  type: "bar" | "group" | "titleSection" | "chart" | null;
+  type: "bar" | "group" | "titleSection" | "chart" | "legend" | null;
   itemId?: string | null;
   position: { x: number; y: number };
 }
@@ -729,6 +736,19 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     sort: "des",
   });
 
+  const [chartLegend, setChartLegend] = useState<ChartLegend>({
+    color: "#000000",
+    fontSize: 16,
+    gap: 10,
+    label: "Category Legend",
+    padding: {
+      top: 10,
+      bottom: 10,
+      left: 10,
+      right: 10,
+    },
+  });
+
   const [categories, setCategories] = useState<ChartCategory[]>([
     { id: "max", label: "Max", color: { r: 60, g: 179, b: 113, a: 1 } },
     { id: "min", label: "Min", color: { r: 255, g: 165, b: 0, a: 1 } },
@@ -976,7 +996,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
   };
 
   const openModal = (
-    type: "bar" | "group" | "titleSection" | "chart",
+    type: "bar" | "group" | "titleSection" | "chart" | "legend",
     event: React.MouseEvent,
     itemId?: string
   ) => {
@@ -2540,6 +2560,194 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
       );
     }
 
+    if (modalState.type === "legend") {
+      return (
+        <div
+          ref={modalRef}
+          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-72 h-150 overflow-auto"
+          style={{
+            left: `${adjustedPosition.x}px`,
+            top: `${adjustedPosition.y}px`,
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded"
+                style={{ backgroundColor: chartLegend.color }}
+              />
+              <h3 className="font-semibold text-gray-900">
+                Edit Legend Section
+              </h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeModal}
+              className="h-6 w-6 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Title
+              </Label>
+              <Input
+                value={chartLegend.label}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    label: e.target.value,
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Title"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Title Color
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={chartLegend.color}
+                  onChange={(e) =>
+                    setChartLegend({
+                      ...chartLegend,
+                      color: e.target.value,
+                    })
+                  }
+                  className="w-12 h-8 p-1 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Title Font Size
+              </Label>
+              <Input
+                type="number"
+                value={chartLegend.fontSize}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    fontSize: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Title Font Size"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Title Labels Gap
+              </Label>
+              <Input
+                type="number"
+                value={chartLegend.gap}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    gap: parseInt(e.target.value),
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Title Labels Gap"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Padding Top
+              </Label>
+              <Input
+                type="number"
+                value={chartLegend.padding.top}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    padding: {
+                      ...chartLegend.padding,
+                      top: parseInt(e.target.value),
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Padding Top"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Padding Right
+              </Label>
+              <Input
+                type="number"
+                value={chartLegend.padding.right}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    padding: {
+                      ...chartLegend.padding,
+                      right: parseInt(e.target.value),
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Padding Right"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Padding Bottom
+              </Label>
+              <Input
+                type="number"
+                value={chartLegend.padding.bottom}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    padding: {
+                      ...chartLegend.padding,
+                      bottom: parseInt(e.target.value),
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Padding bottom"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-gray-500">
+                Legend Padding Left
+              </Label>
+              <Input
+                type="number"
+                value={chartLegend.padding.left}
+                onChange={(e) =>
+                  setChartLegend({
+                    ...chartLegend,
+                    padding: {
+                      ...chartLegend.padding,
+                      top: parseInt(e.target.value),
+                    },
+                  })
+                }
+                className="h-8 text-sm"
+                placeholder="Legend Padding Left"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (modalState.type === "titleSection") {
       return (
         <div
@@ -2983,7 +3191,15 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
   };
 
   const renderHorizontalChart = () => {
-    const legendHeight = categories.length > 0 ? 60 : 0;
+    const legendHeight =
+      categories.length > 0
+        ? chartLegend.fontSize +
+          chartLegend.gap +
+          chartLegend.padding.top +
+          chartLegend.padding.bottom +
+          14 + //category Item font size
+          10 //extra buffer
+        : 0;
     const labelWidth = settings.bar.labelWidth;
     const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
     let groupLabelHeight = settings.group.labelFontSize;
@@ -3579,15 +3795,22 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
           {categories.length > 0 ? (
             <>
               {/* Legend */}
-              <g>
+              <g onClick={(e) => openModal("legend", e)}>
                 <text
                   x={chartWidth / 2}
-                  y={chartHeight - legendHeight + 15}
+                  y={
+                    chartHeight -
+                    legendHeight +
+                    chartLegend.fontSize +
+                    chartLegend.padding.top
+                  }
                   textAnchor="middle"
                   className=""
                   style={{ fontFamily: "MyFont" }}
+                  fill={chartLegend.color}
+                  fontSize={chartLegend.fontSize}
                 >
-                  Category Legend
+                  {chartLegend.label}
                 </text>
 
                 {/* Legend Items */}
@@ -3613,7 +3836,14 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                   const startX = (labelWidth + chartWidth - rowWidth) / 2;
 
                   const x = startX + col * legendItemWidth;
-                  const y = chartHeight - legendHeight + 35 + row * 20;
+                  const y =
+                    chartHeight -
+                    legendHeight +
+                    chartLegend.padding.top +
+                    chartLegend.fontSize +
+                    chartLegend.gap +
+                    14 +
+                    row * 20;
 
                   return (
                     <g key={category.id}>
@@ -3625,7 +3855,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                         height={12}
                         fill={`rgba(${category.color?.r},${category.color?.g},${category.color?.b},${category.color?.a})`}
                         rx="2"
-                        className="cursor-pointer hover:opacity-80"
+                        className=""
                       />
 
                       {/* Legend label */}
@@ -3633,7 +3863,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                         x={x + 18}
                         y={y}
                         alignmentBaseline="middle"
-                        className="fill-gray-700 text-xs cursor-pointer hover:fill-gray-900"
+                        className=""
                       >
                         {category.label}
                       </text>
