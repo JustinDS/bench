@@ -1271,57 +1271,56 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     }
   };
 
-  const draggingIndex = useRef<number | null>(null);
-  const [dragY, setDragY] = useState<number | null>(null);
+  const [draggingBarId, setDraggingBarId] = useState<string | null>(null);
+  const dragActiveRef = useRef(false);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (draggingIndex.current !== null && dragY !== null) {
-        const delta = e.clientY - dragY;
+  // Reorder helper: move dragged bar to a position relative to the target (before or after) within the same group
+  const moveBarToTarget = (
+    dragId: string,
+    targetId: string,
+    placeAfter = false
+  ) => {
+    const dragBar = bars.find((b) => b.id === dragId);
+    const targetBar = bars.find((b) => b.id === targetId);
+    if (!dragBar || !targetBar) return;
+    if (dragBar.groupId !== targetBar.groupId) return;
 
-        const newIndex = Math.min(
-          bars.length - 1,
-          Math.max(
-            0,
-            draggingIndex.current + Math.round(delta / (barHeight + barSpacing))
-          )
-        );
+    const groupId = dragBar.groupId;
 
-        console.log("dragging");
-
-        if (newIndex !== draggingIndex.current) {
-          const updated = [...bars];
-          const [moved] = updated.splice(draggingIndex.current, 1);
-          updated.splice(newIndex, 0, moved);
-
-          console.log("updated", updated);
-
-          setBars(updated);
-
-          draggingIndex.current = newIndex;
-          setDragY(e.clientY);
-        }
+    // Build ordered bars for each group using existing groups order to keep layout stable
+    const newBarsByGroup = groups.map((g) => {
+      if (g.id !== groupId) {
+        return bars.filter((b) => b.groupId === g.id);
       }
-    };
 
-    const handleMouseUp = () => {
-      draggingIndex.current = null;
-      setDragY(null);
-    };
+      // For the affected group, remove the dragged bar and insert it at the computed index
+      const groupBars = bars.filter(
+        (b) => b.groupId === groupId && b.id !== dragId
+      );
+      const targetIndex = groupBars.findIndex((b) => b.id === targetId);
+      const insertIndex = Math.max(
+        0,
+        Math.min(groupBars.length, targetIndex + (placeAfter ? 1 : 0))
+      );
+      const newGroupBars = [
+        ...groupBars.slice(0, insertIndex),
+        dragBar,
+        ...groupBars.slice(insertIndex),
+      ];
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+      return newGroupBars;
+    });
 
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [bars, dragY]);
-
-  const onMouseDown = (index: number, e: React.MouseEvent) => {
-    draggingIndex.current = index;
-    setDragY(e.clientY);
+    setBars(newBarsByGroup.flat());
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      dragActiveRef.current = false;
+      setDraggingBarId(null);
+    };
+  }, []);
 
   const loadTemplate = (template: ChartTemplate) => {
     setChartBackgroundHeight(template.background.height);
@@ -3651,11 +3650,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                     : `rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`;
 
                   return (
-                    <g
-                      key={bar.id}
-                      onMouseDown={(e) => onMouseDown(barIndex, groupIndex, e)}
-                      style={{ cursor: "grab" }}
-                    >
+                    <g key={bar.id}>
                       {/* Bar background */}
                       <rect
                         x={labelWidth + settings.group.padding.left}
@@ -3679,9 +3674,63 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                         fill={barColor}
                         rx={settings.bar.roundedCorners}
                         ry={settings.bar.roundedCorners}
-                        className="cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400"
+                        className={`cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400 ${
+                          draggingBarId === bar.id ? "opacity-60" : ""
+                        }`}
                         strokeWidth="0"
-                        onClick={(e) => openModal("bar", e, bar.id)}
+                        data-bar-id={bar.id}
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          try {
+                            (e.target as Element).setPointerCapture?.(
+                              e.pointerId
+                            );
+                          } catch {}
+                          setDraggingBarId(bar.id);
+                          dragActiveRef.current = false;
+
+                          const onMove = (ev: PointerEvent) => {
+                            dragActiveRef.current = true;
+                            const el = document.elementFromPoint(
+                              ev.clientX,
+                              ev.clientY
+                            ) as HTMLElement | null;
+                            const targetEl = el?.closest(
+                              "[data-bar-id]"
+                            ) as HTMLElement | null;
+                            if (targetEl) {
+                              const targetId =
+                                targetEl.getAttribute("data-bar-id");
+                              if (targetId && targetId !== bar.id) {
+                                const rect = targetEl.getBoundingClientRect();
+                                const placeAfter =
+                                  ev.clientY > rect.top + rect.height / 2;
+                                moveBarToTarget(bar.id, targetId, placeAfter);
+                              }
+                            }
+                          };
+
+                          const onUp = () => {
+                            setDraggingBarId(null);
+                            dragActiveRef.current = false;
+                            window.removeEventListener("pointermove", onMove);
+                            window.removeEventListener("pointerup", onUp);
+                          };
+
+                          window.addEventListener("pointermove", onMove);
+                          window.addEventListener("pointerup", onUp);
+                        }}
+                        onClick={(e) => {
+                          if (dragActiveRef.current) {
+                            e.stopPropagation();
+                            return;
+                          }
+                          openModal(
+                            "bar",
+                            e as unknown as React.MouseEvent,
+                            bar.id
+                          );
+                        }}
                       />
 
                       {/* Bar Label */}
