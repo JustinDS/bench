@@ -3189,6 +3189,45 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     return null;
   };
 
+  const handleDragging = (
+    e: React.PointerEvent<SVGRectElement>,
+    barId: string
+  ) => {
+    e.stopPropagation();
+    try {
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+    } catch {}
+    setDraggingBarId(barId);
+    dragActiveRef.current = false;
+
+    const onMove = (ev: PointerEvent) => {
+      dragActiveRef.current = true;
+      const el = document.elementFromPoint(
+        ev.clientX,
+        ev.clientY
+      ) as HTMLElement | null;
+      const targetEl = el?.closest("[data-bar-id]") as HTMLElement | null;
+      if (targetEl) {
+        const targetId = targetEl.getAttribute("data-bar-id");
+        if (targetId && targetId !== barId) {
+          const rect = targetEl.getBoundingClientRect();
+          const placeAfter = ev.clientY > rect.top + rect.height / 2;
+          moveBarToTarget(barId, targetId, placeAfter);
+        }
+      }
+    };
+
+    const onUp = () => {
+      setDraggingBarId(null);
+      dragActiveRef.current = false;
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
   const renderHorizontalChart = () => {
     const legendHeight =
       categories.length > 0
@@ -3265,6 +3304,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
           maxWidth: "100vw",
           height: "auto",
           display: "block",
+          userSelect: "none",
         }}
       >
         <defs>
@@ -3662,7 +3702,19 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                         strokeWidth="1"
                         rx={settings.bar.roundedCorners}
                         ry={settings.bar.roundedCorners}
-                        onClick={(e) => openModal("bar", e, bar.id)}
+                        data-bar-id={bar.id}
+                        onPointerDown={(e) => handleDragging(e, bar.id)}
+                        onClick={(e) => {
+                          if (dragActiveRef.current) {
+                            e.stopPropagation();
+                            return;
+                          }
+                          openModal(
+                            "bar",
+                            e as unknown as React.MouseEvent,
+                            bar.id
+                          );
+                        }}
                       />
 
                       {/* Actual Bar */}
@@ -3679,47 +3731,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                         }`}
                         strokeWidth="0"
                         data-bar-id={bar.id}
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          try {
-                            (e.target as Element).setPointerCapture?.(
-                              e.pointerId
-                            );
-                          } catch {}
-                          setDraggingBarId(bar.id);
-                          dragActiveRef.current = false;
-
-                          const onMove = (ev: PointerEvent) => {
-                            dragActiveRef.current = true;
-                            const el = document.elementFromPoint(
-                              ev.clientX,
-                              ev.clientY
-                            ) as HTMLElement | null;
-                            const targetEl = el?.closest(
-                              "[data-bar-id]"
-                            ) as HTMLElement | null;
-                            if (targetEl) {
-                              const targetId =
-                                targetEl.getAttribute("data-bar-id");
-                              if (targetId && targetId !== bar.id) {
-                                const rect = targetEl.getBoundingClientRect();
-                                const placeAfter =
-                                  ev.clientY > rect.top + rect.height / 2;
-                                moveBarToTarget(bar.id, targetId, placeAfter);
-                              }
-                            }
-                          };
-
-                          const onUp = () => {
-                            setDraggingBarId(null);
-                            dragActiveRef.current = false;
-                            window.removeEventListener("pointermove", onMove);
-                            window.removeEventListener("pointerup", onUp);
-                          };
-
-                          window.addEventListener("pointermove", onMove);
-                          window.addEventListener("pointerup", onUp);
-                        }}
+                        onPointerDown={(e) => handleDragging(e, bar.id)}
                         onClick={(e) => {
                           if (dragActiveRef.current) {
                             e.stopPropagation();
