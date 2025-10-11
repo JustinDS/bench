@@ -944,12 +944,30 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     const jsonString = JSON.stringify(
       {
         settings,
-        chartFont,
-        chartTitleFont,
-        groupNameFont,
-        groupDescriptionFont,
-        chartDescriptionFont,
-        barValueFont,
+        chartFont: {
+          fontFamily: chartFont?.selectedFontFamily,
+          variant: chartFont?.selectedVariant,
+        },
+        chartTitleFont: {
+          fontFamily: chartTitleFont?.selectedFontFamily,
+          variant: chartTitleFont?.selectedVariant,
+        },
+        groupNameFont: {
+          fontFamily: groupNameFont?.selectedFontFamily,
+          variant: groupNameFont?.selectedVariant,
+        },
+        groupDescriptionFont: {
+          fontFamily: groupDescriptionFont?.selectedFontFamily,
+          variant: chartFont?.selectedVariant,
+        },
+        chartDescriptionFont: {
+          fontFamily: chartDescriptionFont?.selectedFontFamily,
+          variant: chartDescriptionFont?.selectedVariant,
+        },
+        barValueFont: {
+          fontFamily: barValueFont?.selectedFontFamily,
+          variant: barValueFont?.selectedVariant,
+        },
         chartWidth,
         chartBackgroundWidth,
         chartBackgroundHeight,
