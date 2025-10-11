@@ -918,6 +918,9 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     position: { x: 0, y: 0 },
   });
 
+  //this might cause hydration issues if it is not the same as what is calculated
+  const rowsInLegend = useRef(1);
+
   const chartRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef(null);
@@ -3235,8 +3238,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
           chartLegend.gap +
           chartLegend.padding.top +
           chartLegend.padding.bottom +
-          14 + //category Item font size
-          10 //extra buffer
+          rowsInLegend.current * 25
         : 0;
     const labelWidth = settings.bar.labelWidth;
     const padding = { top: 20, right: 20, bottom: 20, left: labelWidth + 20 };
@@ -3877,24 +3879,22 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                 {/* Legend Items */}
                 {categories.map((category, index) => {
                   const legendItemWidth = 140;
-                  const itemsPerRow = Math.floor(
-                    labelWidth + chartWidth / legendItemWidth
-                  );
+                  const itemsPerRow = Math.floor(chartWidth / legendItemWidth);
                   const totalItems = categories.length;
-                  const rows = Math.ceil(totalItems / itemsPerRow);
+                  rowsInLegend.current = Math.ceil(totalItems / itemsPerRow);
 
                   const row = Math.floor(index / itemsPerRow);
                   const col = index % itemsPerRow;
 
                   // items in this specific row
                   const itemsInRow =
-                    row === rows - 1
+                    row === rowsInLegend.current - 1
                       ? totalItems - row * itemsPerRow
                       : itemsPerRow;
 
                   // recompute startX per row
                   const rowWidth = itemsInRow * legendItemWidth;
-                  const startX = (labelWidth + chartWidth - rowWidth) / 2;
+                  const startX = (chartWidth - rowWidth) / 2;
 
                   const x = startX + col * legendItemWidth;
                   const y =
@@ -3904,7 +3904,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                     chartLegend.fontSize +
                     chartLegend.gap +
                     14 +
-                    row * 20;
+                    row * 30;
 
                   return (
                     <g key={category.id}>
@@ -3924,7 +3924,7 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
                         x={x + 18}
                         y={y}
                         alignmentBaseline="middle"
-                        className=""
+                        style={{ fontFamily: "MyFont" }}
                       >
                         {category.label}
                       </text>
