@@ -27,6 +27,7 @@ import FontPicker from "../../fontPicker/fontPicker";
 import { FontSelection } from "@/app/dashboard/page";
 import { DashboardProps } from "@/app/dashboard/pageClient";
 import { setgroups } from "process";
+import { toPng } from "html-to-image";
 
 interface ChartBar {
   id: string;
@@ -939,6 +940,23 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  async function exportPng() {
+    const handleExport = async () => {
+      const node = document.getElementById("horizontal_bar");
+      const dataUrl = await toPng(node!, {
+        backgroundColor: "transparent", // ensures alpha is preserved
+        pixelRatio: 3, // optional, higher quality
+      });
+
+      const link = document.createElement("a");
+      link.download = "export.png";
+      link.href = dataUrl;
+      link.click();
+    };
+
+    handleExport();
+  }
 
   const handleExportJson = () => {
     const jsonString = JSON.stringify(
@@ -3311,24 +3329,26 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
       chartTitleSection.padding.bottom;
 
     return (
-      <svg
-        preserveAspectRatio="xMidYMid meet"
-        ref={svgRef}
-        width={chartBackgroundWidth}
-        height={chartHeight}
-        viewBox={`0 0 ${chartBackgroundWidth} ${chartHeight}`}
-        className="border rounded-lg bg-white cursor-pointer"
-        onClick={(e) => openModal("chart", e)}
-        style={{
-          width: "100%",
-          maxWidth: "100vw",
-          height: "auto",
-          display: "block",
-          userSelect: "none",
-        }}
-      >
-        <defs>
-          <style>{`
+      <div className="border rounded-lg z-10">
+        <svg
+          preserveAspectRatio="xMidYMid meet"
+          ref={svgRef}
+          width={chartBackgroundWidth}
+          height={chartHeight}
+          viewBox={`0 0 ${chartBackgroundWidth} ${chartHeight}`}
+          className="cursor-pointer"
+          onClick={(e) => openModal("chart", e)}
+          style={{
+            width: "100%",
+            maxWidth: "100vw",
+            height: "auto",
+            display: "block",
+            userSelect: "none",
+          }}
+          id="horizontal_bar"
+        >
+          <defs>
+            <style>{`
             @font-face {
               font-family: 'ChartTitleFont';
               src: url(${chartTitleFont?.ttf ?? ""}) format('truetype');
@@ -3362,598 +3382,614 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
               src: url(${barValueFont?.ttf ?? ""}) format('truetype');
             }
           `}</style>
-        </defs>
+          </defs>
 
-        {/* url(#grid) */}
-        <rect
-          width={"100%"}
-          height={"100%"}
-          fill={`rgba(${chartBackgroundColor.r},${chartBackgroundColor.g},${chartBackgroundColor.b},${chartBackgroundColor.a})`}
-        />
+          {/* url(#grid) */}
+          <rect
+            width={"100%"}
+            height={"100%"}
+            fill={`rgba(${chartBackgroundColor.r},${chartBackgroundColor.g},${chartBackgroundColor.b},${chartBackgroundColor.a})`}
+          />
 
-        <g
-          transform={`translate(${chartBackgroundWidth / 2 - chartWidth / 2}, ${
-            chartHeight / 2 - chartHeight / 2
-          })`}
-        >
-          {/* Chart Title */}
-          <text
-            x={chartWidth / 2}
-            y={chartTitleSection.padding.top + chartTitleSection.label.fontSize}
-            textAnchor="middle"
-            fill={chartTitleSection.label.color}
-            style={{ fontFamily: "ChartTitleFont, MyFont" }}
-            fontSize={chartTitleSection.label.fontSize}
-            onClick={(e) => openModal("titleSection", e)}
+          <g
+            transform={`translate(${
+              chartBackgroundWidth / 2 - chartWidth / 2
+            }, ${chartHeight / 2 - chartHeight / 2})`}
           >
-            {chartTitleSection.label.value}
-          </text>
-          <text
-            x={chartWidth / 2}
-            y={
-              (chartTitleSection.description?.fontSize ?? 0) +
-              chartTitleSection.label.fontSize +
-              (chartTitleSection.gap ?? 0) +
-              chartTitleSection.padding.top
-            }
-            textAnchor="middle"
-            fill={chartTitleSection.description?.color}
-            style={{ fontFamily: "ChartDescriptionFont, MyFont" }}
-            fontSize={chartTitleSection.description?.fontSize ?? 0}
-            onClick={(e) => openModal("titleSection", e)}
-          >
-            {chartTitleSection.description?.value ?? ""}
-          </text>
+            {/* Chart Title */}
+            <text
+              x={chartWidth / 2}
+              y={
+                chartTitleSection.padding.top + chartTitleSection.label.fontSize
+              }
+              textAnchor="middle"
+              fill={chartTitleSection.label.color}
+              style={{ fontFamily: "ChartTitleFont, MyFont" }}
+              fontSize={chartTitleSection.label.fontSize}
+              onClick={(e) => openModal("titleSection", e)}
+            >
+              {chartTitleSection.label.value}
+            </text>
+            <text
+              x={chartWidth / 2}
+              y={
+                (chartTitleSection.description?.fontSize ?? 0) +
+                chartTitleSection.label.fontSize +
+                (chartTitleSection.gap ?? 0) +
+                chartTitleSection.padding.top
+              }
+              textAnchor="middle"
+              fill={chartTitleSection.description?.color}
+              style={{ fontFamily: "ChartDescriptionFont, MyFont" }}
+              fontSize={chartTitleSection.description?.fontSize ?? 0}
+              onClick={(e) => openModal("titleSection", e)}
+            >
+              {chartTitleSection.description?.value ?? ""}
+            </text>
 
-          {settings.hideYAxis ? null : (
-            <>
-              {/* Y-axis line */}
-              <line
-                x1={padding.left}
-                y1={currentY - 20}
-                x2={padding.left}
-                y2={chartHeight}
-                stroke="#e2e8f0"
-                strokeWidth="2"
-              />
-            </>
-          )}
-
-          {settings.hideXAxis ? null : (
-            <>
-              {/* X-axis line */}
-              <line
-                x1={padding.left}
-                y1={chartHeight}
-                x2={chartWidth - padding.right}
-                y2={chartHeight}
-                stroke="#e2e8f0"
-                strokeWidth="2"
-              />
-              {/* X-axis scale markers */}
-              {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-                const x = padding.left + ratio * availableWidth;
-                const value = Math.round(ratio * maxValue);
-                return (
-                  <g key={ratio}>
-                    <line
-                      x1={x}
-                      y1={chartHeight}
-                      x2={x}
-                      y2={chartHeight + 5}
-                      stroke="#94a3b8"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x={x}
-                      y={chartHeight + 18}
-                      textAnchor="middle"
-                      style={{ fontFamily: "MyFont" }}
-                    >
-                      {value.toLocaleString()}
-                    </text>
-                  </g>
-                );
-              })}
-            </>
-          )}
-
-          {/* Render Groups and Bars */}
-          {groupedBars.map((groupData, groupIndex) => {
-            const { group, bars: groupBars } = groupData;
-
-            if (settings.sort !== "none") {
-              groupBars.sort((a, b) =>
-                settings.sort === "asc"
-                  ? a.value.value - b.value.value
-                  : b.value.value - a.value.value
-              );
-            }
-
-            const groupTitleDescriptionSectionPaddingTop = ignoreLabelHeight
-              ? 0
-              : group.titleDescription.padding.top;
-            const groupTitleDescriptionSectionGap = ignoreLabelHeight
-              ? 0
-              : group.titleDescription?.gap ?? 0;
-            const groupTitleDescriptionSectionPaddingBottom = ignoreLabelHeight
-              ? 0
-              : group.titleDescription.padding.bottom;
-
-            // Render expanded group
-            const groupStartY = currentY;
-            currentY +=
-              groupLabelHeight +
-              groupDescriptionHeight +
-              settings.group.padding.top +
-              groupTitleDescriptionSectionPaddingTop +
-              groupTitleDescriptionSectionGap +
-              groupTitleDescriptionSectionPaddingBottom;
-
-            const spacingHeightCentered =
-              (barSpacing * (groupBars.length - 1)) / 2;
-            const barHeightCentered = (barHeight * groupBars.length) / 2;
-
-            const groupLabelPosition: Record<
-              GroupLabelPositionKeys,
-              { x: number; y: number; anchor: string }
-            > = {
-              left: {
-                x:
-                  settings.group.padding.left +
-                  group.titleDescription.padding.left,
-                y:
-                  groupStartY +
-                  groupTitleDescriptionSectionPaddingTop +
-                  settings.group.padding.top +
-                  groupLabelHeight / 2,
-                anchor: "start",
-              },
-              center: {
-                x: chartWidth / 2,
-                y:
-                  groupStartY +
-                  groupTitleDescriptionSectionPaddingTop +
-                  settings.group.padding.top +
-                  groupLabelHeight / 2,
-                anchor: "middle",
-              },
-              right: {
-                x:
-                  labelWidth +
-                  availableWidth +
-                  settings.group.padding.right -
-                  group.titleDescription.padding.right,
-                y:
-                  groupStartY +
-                  groupTitleDescriptionSectionPaddingTop +
-                  settings.group.padding.top +
-                  groupLabelHeight / 2,
-                anchor: "end",
-              },
-              replaceBarLabels: {
-                x:
-                  settings.group.padding.left +
-                  group.titleDescription.padding.left,
-                y:
-                  groupStartY +
-                  settings.group.padding.top -
-                  (group.titleDescription?.gap ?? 0) / 2 -
-                  (settings.group.descriptionFontSize ?? 0) / 2 +
-                  barHeightCentered +
-                  spacingHeightCentered,
-                anchor: "start",
-              },
-            };
-
-            const groupDescriptionPosition: Record<
-              GroupLabelPositionKeys,
-              { x: number; y: number; anchor: string }
-            > = {
-              left: {
-                x:
-                  settings.group.padding.left +
-                  group.titleDescription.padding.left,
-                y:
-                  groupStartY +
-                  groupTitleDescriptionSectionPaddingTop +
-                  groupTitleDescriptionSectionGap +
-                  settings.group.padding.top +
-                  groupLabelHeight +
-                  groupDescriptionHeight / 2,
-                anchor: "start",
-              },
-              center: {
-                x: chartWidth / 2,
-                y:
-                  groupStartY +
-                  groupTitleDescriptionSectionPaddingTop +
-                  groupTitleDescriptionSectionGap +
-                  settings.group.padding.top +
-                  groupLabelHeight +
-                  groupDescriptionHeight / 2,
-                anchor: "middle",
-              },
-              right: {
-                x:
-                  labelWidth +
-                  availableWidth +
-                  settings.group.padding.right -
-                  group.titleDescription.padding.right,
-                y:
-                  groupStartY +
-                  groupTitleDescriptionSectionPaddingTop +
-                  groupTitleDescriptionSectionGap +
-                  settings.group.padding.top +
-                  groupLabelHeight +
-                  groupDescriptionHeight / 2,
-                anchor: "end",
-              },
-              replaceBarLabels: {
-                x:
-                  settings.group.padding.left +
-                  group.titleDescription.padding.left,
-                y:
-                  groupStartY +
-                  settings.group.padding.top +
-                  (group.titleDescription?.gap ?? 0) / 2 +
-                  settings.group.labelFontSize / 2 +
-                  barHeightCentered +
-                  spacingHeightCentered,
-                anchor: "start",
-              },
-            };
-
-            const groupRegionHeight =
-              groupLabelHeight +
-              groupDescriptionHeight +
-              groupBars.length * barHeight +
-              (groupBars.length - 1) * barSpacing +
-              settings.group.padding.top +
-              settings.group.padding.bottom +
-              groupTitleDescriptionSectionPaddingTop +
-              groupTitleDescriptionSectionPaddingBottom +
-              groupTitleDescriptionSectionGap;
-
-            const groupElements = (
-              <g key={group.id}>
-                {/* Group background */}
-                <rect
-                  x={0}
-                  y={groupStartY}
-                  width={chartWidth}
-                  height={groupRegionHeight}
-                  fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
-                  stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
-                  strokeWidth="1"
-                  rx={settings.group.roundedCorners}
-                  ry={settings.group.roundedCorners}
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={(e) => openModal("group", e, group.id)}
+            {settings.hideYAxis ? null : (
+              <>
+                {/* Y-axis line */}
+                <line
+                  x1={padding.left}
+                  y1={currentY - 20}
+                  x2={padding.left}
+                  y2={chartHeight}
+                  stroke="#e2e8f0"
+                  strokeWidth="2"
                 />
+              </>
+            )}
 
-                {/* Group label */}
-                <text
-                  x={groupLabelPosition[settings.group.labelPosition].x}
-                  y={groupLabelPosition[settings.group.labelPosition].y}
-                  alignmentBaseline="middle"
-                  textAnchor={
-                    groupLabelPosition[settings.group.labelPosition].anchor
-                  }
-                  fill={group.titleDescription.label.color}
-                  className="cursor-pointer hover:fill-gray-600"
-                  style={{ fontFamily: "GroupNameFont, MyFont" }}
-                  fontSize={settings.group.labelFontSize}
-                  onClick={(e) => openModal("group", e, group.id)}
-                >
-                  {/* ▼  */}
-                  {group.titleDescription.label.value}
-                </text>
-
-                <text
-                  x={groupDescriptionPosition[settings.group.labelPosition].x}
-                  y={groupDescriptionPosition[settings.group.labelPosition].y}
-                  textAnchor={
-                    groupDescriptionPosition[settings.group.labelPosition]
-                      .anchor
-                  }
-                  fill={group.titleDescription.description?.color ?? "#000000"}
-                  alignmentBaseline="middle"
-                  className="cursor-pointer hover:fill-gray-600"
-                  style={{ fontFamily: "GroupDescriptionFont, MyFont" }}
-                  fontSize={settings.group.descriptionFontSize}
-                  onClick={(e) => openModal("group", e, group.id)}
-                >
-                  {/* ▼  */}
-                  {group.titleDescription.description?.value ?? ""}
-                </text>
-
-                {/* Group bars */}
-                {groupBars.map((bar, barIndex) => {
-                  const barWidth =
-                    (bar.value.value / maxValue) * availableWidth;
-                  const barY = currentY + barIndex * (barHeight + barSpacing);
-
-                  const barValuePosition: Record<
-                    BarValuePositionKeys,
-                    { position: number; anchor: string }
-                  > = {
-                    onBackgroundLeft: {
-                      position:
-                        labelWidth + settings.group.padding.left + barWidth + 8,
-                      anchor: "start",
-                    },
-                    onForegroundRight: {
-                      position:
-                        barWidth +
-                        labelWidth +
-                        settings.group.padding.left -
-                        10,
-                      anchor: "end",
-                    },
-                    onBackgroundRight: {
-                      position: chartWidth - settings.group.padding.right - 10,
-                      anchor: "end",
-                    },
-                    outside: {
-                      position: chartWidth + 10,
-                      anchor: "start",
-                    },
-                  };
-
-                  const catColor = categories.find(
-                    (x) => x.id === bar.categoryId
-                  )?.color;
-
-                  const barColor = bar.categoryId
-                    ? `rgba(${catColor?.r},${catColor?.g},${catColor?.b},${catColor?.a})`
-                    : `rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`;
-
+            {settings.hideXAxis ? null : (
+              <>
+                {/* X-axis line */}
+                <line
+                  x1={padding.left}
+                  y1={chartHeight}
+                  x2={chartWidth - padding.right}
+                  y2={chartHeight}
+                  stroke="#e2e8f0"
+                  strokeWidth="2"
+                />
+                {/* X-axis scale markers */}
+                {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                  const x = padding.left + ratio * availableWidth;
+                  const value = Math.round(ratio * maxValue);
                   return (
-                    <g key={bar.id}>
-                      {/* Bar background */}
-                      <rect
-                        x={labelWidth + settings.group.padding.left}
-                        y={barY}
-                        width={availableWidth}
-                        height={barHeight}
-                        fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
-                        stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
+                    <g key={ratio}>
+                      <line
+                        x1={x}
+                        y1={chartHeight}
+                        x2={x}
+                        y2={chartHeight + 5}
+                        stroke="#94a3b8"
                         strokeWidth="1"
-                        rx={settings.bar.roundedCorners}
-                        ry={settings.bar.roundedCorners}
-                        data-bar-id={bar.id}
-                        onPointerDown={(e) => handleDragging(e, bar.id)}
-                        onClick={(e) => {
-                          if (dragActiveRef.current) {
-                            e.stopPropagation();
-                            return;
-                          }
-                          openModal(
-                            "bar",
-                            e as unknown as React.MouseEvent,
-                            bar.id
-                          );
-                        }}
                       />
-
-                      {/* Actual Bar */}
-                      <rect
-                        x={labelWidth + settings.group.padding.left}
-                        y={barY}
-                        width={barWidth}
-                        height={barHeight}
-                        fill={barColor}
-                        rx={settings.bar.roundedCorners}
-                        ry={settings.bar.roundedCorners}
-                        className={`cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400 ${
-                          draggingBarId === bar.id ? "opacity-60" : ""
-                        }`}
-                        strokeWidth="0"
-                        data-bar-id={bar.id}
-                        onPointerDown={(e) => handleDragging(e, bar.id)}
-                        onClick={(e) => {
-                          if (dragActiveRef.current) {
-                            e.stopPropagation();
-                            return;
-                          }
-                          openModal(
-                            "bar",
-                            e as unknown as React.MouseEvent,
-                            bar.id
-                          );
-                        }}
-                      />
-
-                      {/* Bar Label */}
                       <text
-                        x={
-                          settings.bar.labelInside
-                            ? labelWidth +
-                              settings.group.padding.left +
-                              bar.titleDescription.padding.left
-                            : labelWidth +
-                              settings.group.padding.left -
-                              bar.titleDescription.padding.right
-                        }
-                        y={
-                          (settings?.bar.descriptionFontSize ?? 0) === 0
-                            ? barY + barHeight / 2
-                            : barY -
-                              (bar.titleDescription.gap ?? 0) / 2 -
-                              (settings?.bar.valueFontSize ?? 0) / 2 +
-                              barHeight / 2
-                        }
-                        textAnchor={settings.bar.labelInside ? "start" : "end"}
-                        fill={bar.titleDescription.label.color}
-                        alignmentBaseline="middle"
-                        className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
-                        style={{ fontFamily: "BarLabelFont,MyFont" }}
-                        fontSize={settings.bar.labelFontSize}
-                        onClick={(e) => openModal("bar", e, bar.id)}
-                      >
-                        {bar.titleDescription.label.value}
-                      </text>
-                      <text
-                        x={
-                          settings.bar.labelInside
-                            ? labelWidth +
-                              settings.group.padding.left +
-                              bar.titleDescription.padding.left
-                            : labelWidth +
-                              settings.group.padding.left -
-                              bar.titleDescription.padding.right
-                        }
-                        y={
-                          barY +
-                          (bar.titleDescription.gap ?? 0) / 2 +
-                          (settings?.bar.descriptionFontSize ?? 0) +
-                          barHeight / 2
-                        }
-                        textAnchor={settings.bar.labelInside ? "start" : "end"}
-                        fill={
-                          bar?.titleDescription?.description?.color ?? "#000000"
-                        }
-                        alignmentBaseline="middle"
-                        className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
-                        style={{ fontFamily: "BarDescriptionFont,MyFont" }}
-                        fontSize={settings.bar.descriptionFontSize}
-                        onClick={(e) => openModal("bar", e, bar.id)}
-                      >
-                        {bar.titleDescription?.description?.value}
-                      </text>
-
-                      {/* Bar Value */}
-                      <text
-                        x={
-                          barValuePosition[settings.bar.valuePosition].position
-                        }
-                        y={barY + barHeight / 2}
-                        textAnchor={
-                          barValuePosition[settings.bar.valuePosition].anchor
-                        }
-                        fill={bar.value.color}
-                        alignmentBaseline="middle"
-                        className="cursor-pointer hover:fill-gray-900"
-                        style={{ fontFamily: "BarValueFont,MyFont" }}
-                        fontSize={settings.bar.valueFontSize}
-                        onClick={(e) => openModal("bar", e, bar.id)}
-                      >
-                        {`${
-                          bar?.value?.prefix ?? ""
-                        }${bar.value.value.toLocaleString()}${
-                          bar?.value?.postfix ?? ""
-                        }`}
-                      </text>
-
-                      {/* Hover indicator */}
-                      <rect
-                        x={padding.left - 2}
-                        y={barY - 2}
-                        width={barWidth + 4}
-                        height={barHeight + 4}
-                        fill="none"
-                        stroke="transparent"
-                        strokeWidth="2"
-                        rx={settings.bar.roundedCorners}
-                        ry={settings.bar.roundedCorners}
-                        className="pointer-events-none opacity-0 hover:opacity-100 hover:stroke-blue-400 transition-all"
-                      />
-                    </g>
-                  );
-                })}
-              </g>
-            );
-
-            currentY +=
-              groupBars.length * barHeight +
-              (groupIndex === groupedBars.length - 1 ? 0 : groupSpacing) +
-              (groupBars.length - 1) * barSpacing +
-              settings.group.padding.bottom;
-            return groupElements;
-          })}
-
-          {categories.length > 0 ? (
-            <>
-              {/* Legend */}
-              <g onClick={(e) => openModal("legend", e)}>
-                <text
-                  x={chartWidth / 2}
-                  y={
-                    chartHeight -
-                    legendHeight +
-                    chartLegend.fontSize +
-                    chartLegend.padding.top
-                  }
-                  textAnchor="middle"
-                  className=""
-                  style={{ fontFamily: "MyFont" }}
-                  fill={chartLegend.color}
-                  fontSize={chartLegend.fontSize}
-                >
-                  {chartLegend.label}
-                </text>
-
-                {/* Legend Items */}
-                {categories.map((category, index) => {
-                  const legendItemWidth = 140;
-                  const itemsPerRow = Math.floor(chartWidth / legendItemWidth);
-                  const totalItems = categories.length;
-                  rowsInLegend.current = Math.ceil(totalItems / itemsPerRow);
-
-                  const row = Math.floor(index / itemsPerRow);
-                  const col = index % itemsPerRow;
-
-                  // items in this specific row
-                  const itemsInRow =
-                    row === rowsInLegend.current - 1
-                      ? totalItems - row * itemsPerRow
-                      : itemsPerRow;
-
-                  // recompute startX per row
-                  const rowWidth = itemsInRow * legendItemWidth;
-                  const startX = (chartWidth - rowWidth) / 2;
-
-                  const x = startX + col * legendItemWidth;
-                  const y =
-                    chartHeight -
-                    legendHeight +
-                    chartLegend.padding.top +
-                    chartLegend.fontSize +
-                    chartLegend.gap +
-                    14 +
-                    row * 30;
-
-                  return (
-                    <g key={category.id}>
-                      {/* Legend color swatch */}
-                      <rect
                         x={x}
-                        y={y - 6}
-                        width={12}
-                        height={12}
-                        fill={`rgba(${category.color?.r},${category.color?.g},${category.color?.b},${category.color?.a})`}
-                        rx="2"
-                        className=""
-                      />
-
-                      {/* Legend label */}
-                      <text
-                        x={x + 18}
-                        y={y}
-                        alignmentBaseline="middle"
+                        y={chartHeight + 18}
+                        textAnchor="middle"
                         style={{ fontFamily: "MyFont" }}
                       >
-                        {category.label}
+                        {value.toLocaleString()}
                       </text>
                     </g>
                   );
                 })}
-              </g>
-            </>
-          ) : null}
-        </g>
-      </svg>
+              </>
+            )}
+
+            {/* Render Groups and Bars */}
+            {groupedBars.map((groupData, groupIndex) => {
+              const { group, bars: groupBars } = groupData;
+
+              if (settings.sort !== "none") {
+                groupBars.sort((a, b) =>
+                  settings.sort === "asc"
+                    ? a.value.value - b.value.value
+                    : b.value.value - a.value.value
+                );
+              }
+
+              const groupTitleDescriptionSectionPaddingTop = ignoreLabelHeight
+                ? 0
+                : group.titleDescription.padding.top;
+              const groupTitleDescriptionSectionGap = ignoreLabelHeight
+                ? 0
+                : group.titleDescription?.gap ?? 0;
+              const groupTitleDescriptionSectionPaddingBottom =
+                ignoreLabelHeight ? 0 : group.titleDescription.padding.bottom;
+
+              // Render expanded group
+              const groupStartY = currentY;
+              currentY +=
+                groupLabelHeight +
+                groupDescriptionHeight +
+                settings.group.padding.top +
+                groupTitleDescriptionSectionPaddingTop +
+                groupTitleDescriptionSectionGap +
+                groupTitleDescriptionSectionPaddingBottom;
+
+              const spacingHeightCentered =
+                (barSpacing * (groupBars.length - 1)) / 2;
+              const barHeightCentered = (barHeight * groupBars.length) / 2;
+
+              const groupLabelPosition: Record<
+                GroupLabelPositionKeys,
+                { x: number; y: number; anchor: string }
+              > = {
+                left: {
+                  x:
+                    settings.group.padding.left +
+                    group.titleDescription.padding.left,
+                  y:
+                    groupStartY +
+                    groupTitleDescriptionSectionPaddingTop +
+                    settings.group.padding.top +
+                    groupLabelHeight / 2,
+                  anchor: "start",
+                },
+                center: {
+                  x: chartWidth / 2,
+                  y:
+                    groupStartY +
+                    groupTitleDescriptionSectionPaddingTop +
+                    settings.group.padding.top +
+                    groupLabelHeight / 2,
+                  anchor: "middle",
+                },
+                right: {
+                  x:
+                    labelWidth +
+                    availableWidth +
+                    settings.group.padding.right -
+                    group.titleDescription.padding.right,
+                  y:
+                    groupStartY +
+                    groupTitleDescriptionSectionPaddingTop +
+                    settings.group.padding.top +
+                    groupLabelHeight / 2,
+                  anchor: "end",
+                },
+                replaceBarLabels: {
+                  x:
+                    settings.group.padding.left +
+                    group.titleDescription.padding.left,
+                  y:
+                    groupStartY +
+                    settings.group.padding.top -
+                    (group.titleDescription?.gap ?? 0) / 2 -
+                    (settings.group.descriptionFontSize ?? 0) / 2 +
+                    barHeightCentered +
+                    spacingHeightCentered,
+                  anchor: "start",
+                },
+              };
+
+              const groupDescriptionPosition: Record<
+                GroupLabelPositionKeys,
+                { x: number; y: number; anchor: string }
+              > = {
+                left: {
+                  x:
+                    settings.group.padding.left +
+                    group.titleDescription.padding.left,
+                  y:
+                    groupStartY +
+                    groupTitleDescriptionSectionPaddingTop +
+                    groupTitleDescriptionSectionGap +
+                    settings.group.padding.top +
+                    groupLabelHeight +
+                    groupDescriptionHeight / 2,
+                  anchor: "start",
+                },
+                center: {
+                  x: chartWidth / 2,
+                  y:
+                    groupStartY +
+                    groupTitleDescriptionSectionPaddingTop +
+                    groupTitleDescriptionSectionGap +
+                    settings.group.padding.top +
+                    groupLabelHeight +
+                    groupDescriptionHeight / 2,
+                  anchor: "middle",
+                },
+                right: {
+                  x:
+                    labelWidth +
+                    availableWidth +
+                    settings.group.padding.right -
+                    group.titleDescription.padding.right,
+                  y:
+                    groupStartY +
+                    groupTitleDescriptionSectionPaddingTop +
+                    groupTitleDescriptionSectionGap +
+                    settings.group.padding.top +
+                    groupLabelHeight +
+                    groupDescriptionHeight / 2,
+                  anchor: "end",
+                },
+                replaceBarLabels: {
+                  x:
+                    settings.group.padding.left +
+                    group.titleDescription.padding.left,
+                  y:
+                    groupStartY +
+                    settings.group.padding.top +
+                    (group.titleDescription?.gap ?? 0) / 2 +
+                    settings.group.labelFontSize / 2 +
+                    barHeightCentered +
+                    spacingHeightCentered,
+                  anchor: "start",
+                },
+              };
+
+              const groupRegionHeight =
+                groupLabelHeight +
+                groupDescriptionHeight +
+                groupBars.length * barHeight +
+                (groupBars.length - 1) * barSpacing +
+                settings.group.padding.top +
+                settings.group.padding.bottom +
+                groupTitleDescriptionSectionPaddingTop +
+                groupTitleDescriptionSectionPaddingBottom +
+                groupTitleDescriptionSectionGap;
+
+              const groupElements = (
+                <g key={group.id}>
+                  {/* Group background */}
+                  <rect
+                    x={0}
+                    y={groupStartY}
+                    width={chartWidth}
+                    height={groupRegionHeight}
+                    fill={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+                    stroke={`rgba(${group.backgroundColor.r},${group.backgroundColor.g},${group.backgroundColor.b},${group.backgroundColor.a})`}
+                    strokeWidth="1"
+                    rx={settings.group.roundedCorners}
+                    ry={settings.group.roundedCorners}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={(e) => openModal("group", e, group.id)}
+                  />
+
+                  {/* Group label */}
+                  <text
+                    x={groupLabelPosition[settings.group.labelPosition].x}
+                    y={groupLabelPosition[settings.group.labelPosition].y}
+                    alignmentBaseline="middle"
+                    textAnchor={
+                      groupLabelPosition[settings.group.labelPosition].anchor
+                    }
+                    fill={group.titleDescription.label.color}
+                    className="cursor-pointer hover:fill-gray-600"
+                    style={{ fontFamily: "GroupNameFont, MyFont" }}
+                    fontSize={settings.group.labelFontSize}
+                    onClick={(e) => openModal("group", e, group.id)}
+                  >
+                    {/* ▼  */}
+                    {group.titleDescription.label.value}
+                  </text>
+
+                  <text
+                    x={groupDescriptionPosition[settings.group.labelPosition].x}
+                    y={groupDescriptionPosition[settings.group.labelPosition].y}
+                    textAnchor={
+                      groupDescriptionPosition[settings.group.labelPosition]
+                        .anchor
+                    }
+                    fill={
+                      group.titleDescription.description?.color ?? "#000000"
+                    }
+                    alignmentBaseline="middle"
+                    className="cursor-pointer hover:fill-gray-600"
+                    style={{ fontFamily: "GroupDescriptionFont, MyFont" }}
+                    fontSize={settings.group.descriptionFontSize}
+                    onClick={(e) => openModal("group", e, group.id)}
+                  >
+                    {/* ▼  */}
+                    {group.titleDescription.description?.value ?? ""}
+                  </text>
+
+                  {/* Group bars */}
+                  {groupBars.map((bar, barIndex) => {
+                    const barWidth =
+                      (bar.value.value / maxValue) * availableWidth;
+                    const barY = currentY + barIndex * (barHeight + barSpacing);
+
+                    const barValuePosition: Record<
+                      BarValuePositionKeys,
+                      { position: number; anchor: string }
+                    > = {
+                      onBackgroundLeft: {
+                        position:
+                          labelWidth +
+                          settings.group.padding.left +
+                          barWidth +
+                          8,
+                        anchor: "start",
+                      },
+                      onForegroundRight: {
+                        position:
+                          barWidth +
+                          labelWidth +
+                          settings.group.padding.left -
+                          10,
+                        anchor: "end",
+                      },
+                      onBackgroundRight: {
+                        position:
+                          chartWidth - settings.group.padding.right - 10,
+                        anchor: "end",
+                      },
+                      outside: {
+                        position: chartWidth + 10,
+                        anchor: "start",
+                      },
+                    };
+
+                    const catColor = categories.find(
+                      (x) => x.id === bar.categoryId
+                    )?.color;
+
+                    const barColor = bar.categoryId
+                      ? `rgba(${catColor?.r},${catColor?.g},${catColor?.b},${catColor?.a})`
+                      : `rgba(${bar.foreGroundColor.r},${bar.foreGroundColor.g},${bar.foreGroundColor.b},${bar.foreGroundColor.a})`;
+
+                    return (
+                      <g key={bar.id}>
+                        {/* Bar background */}
+                        <rect
+                          x={labelWidth + settings.group.padding.left}
+                          y={barY}
+                          width={availableWidth}
+                          height={barHeight}
+                          fill={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
+                          stroke={`rgba(${bar.backgroundColor.r},${bar.backgroundColor.g},${bar.backgroundColor.b},${bar.backgroundColor.a})`}
+                          strokeWidth="1"
+                          rx={settings.bar.roundedCorners}
+                          ry={settings.bar.roundedCorners}
+                          data-bar-id={bar.id}
+                          onPointerDown={(e) => handleDragging(e, bar.id)}
+                          onClick={(e) => {
+                            if (dragActiveRef.current) {
+                              e.stopPropagation();
+                              return;
+                            }
+                            openModal(
+                              "bar",
+                              e as unknown as React.MouseEvent,
+                              bar.id
+                            );
+                          }}
+                        />
+
+                        {/* Actual Bar */}
+                        <rect
+                          x={labelWidth + settings.group.padding.left}
+                          y={barY}
+                          width={barWidth}
+                          height={barHeight}
+                          fill={barColor}
+                          rx={settings.bar.roundedCorners}
+                          ry={settings.bar.roundedCorners}
+                          className={`cursor-pointer transition-all duration-200 hover:opacity-80 hover:stroke-gray-400 ${
+                            draggingBarId === bar.id ? "opacity-60" : ""
+                          }`}
+                          strokeWidth="0"
+                          data-bar-id={bar.id}
+                          onPointerDown={(e) => handleDragging(e, bar.id)}
+                          onClick={(e) => {
+                            if (dragActiveRef.current) {
+                              e.stopPropagation();
+                              return;
+                            }
+                            openModal(
+                              "bar",
+                              e as unknown as React.MouseEvent,
+                              bar.id
+                            );
+                          }}
+                        />
+
+                        {/* Bar Label */}
+                        <text
+                          x={
+                            settings.bar.labelInside
+                              ? labelWidth +
+                                settings.group.padding.left +
+                                bar.titleDescription.padding.left
+                              : labelWidth +
+                                settings.group.padding.left -
+                                bar.titleDescription.padding.right
+                          }
+                          y={
+                            (settings?.bar.descriptionFontSize ?? 0) === 0
+                              ? barY + barHeight / 2
+                              : barY -
+                                (bar.titleDescription.gap ?? 0) / 2 -
+                                (settings?.bar.labelFontSize ?? 0) / 2 +
+                                barHeight / 2
+                          }
+                          textAnchor={
+                            settings.bar.labelInside ? "start" : "end"
+                          }
+                          fill={bar.titleDescription.label.color}
+                          alignmentBaseline="middle"
+                          className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
+                          style={{ fontFamily: "BarLabelFont,MyFont" }}
+                          fontSize={settings.bar.labelFontSize}
+                          onClick={(e) => openModal("bar", e, bar.id)}
+                        >
+                          {bar.titleDescription.label.value}
+                        </text>
+                        <text
+                          x={
+                            settings.bar.labelInside
+                              ? labelWidth +
+                                settings.group.padding.left +
+                                bar.titleDescription.padding.left
+                              : labelWidth +
+                                settings.group.padding.left -
+                                bar.titleDescription.padding.right
+                          }
+                          y={
+                            barY +
+                            (bar.titleDescription.gap ?? 0) / 2 +
+                            (settings?.bar.descriptionFontSize ?? 0) +
+                            barHeight / 2
+                          }
+                          textAnchor={
+                            settings.bar.labelInside ? "start" : "end"
+                          }
+                          fill={
+                            bar?.titleDescription?.description?.color ??
+                            "#000000"
+                          }
+                          alignmentBaseline="middle"
+                          className="cursor-pointer hover:fill-gray-900 hover:font-semibold transition-all"
+                          style={{ fontFamily: "BarDescriptionFont,MyFont" }}
+                          fontSize={settings.bar.descriptionFontSize}
+                          onClick={(e) => openModal("bar", e, bar.id)}
+                        >
+                          {bar.titleDescription?.description?.value}
+                        </text>
+
+                        {/* Bar Value */}
+                        <text
+                          x={
+                            barValuePosition[settings.bar.valuePosition]
+                              .position
+                          }
+                          y={barY + barHeight / 2}
+                          textAnchor={
+                            barValuePosition[settings.bar.valuePosition].anchor
+                          }
+                          fill={bar.value.color}
+                          alignmentBaseline="middle"
+                          className="cursor-pointer hover:fill-gray-900"
+                          style={{ fontFamily: "BarValueFont,MyFont" }}
+                          fontSize={settings.bar.valueFontSize}
+                          onClick={(e) => openModal("bar", e, bar.id)}
+                        >
+                          {`${
+                            bar?.value?.prefix ?? ""
+                          }${bar.value.value.toLocaleString()}${
+                            bar?.value?.postfix ?? ""
+                          }`}
+                        </text>
+
+                        {/* Hover indicator */}
+                        <rect
+                          x={padding.left - 2}
+                          y={barY - 2}
+                          width={barWidth + 4}
+                          height={barHeight + 4}
+                          fill="none"
+                          stroke="transparent"
+                          strokeWidth="2"
+                          rx={settings.bar.roundedCorners}
+                          ry={settings.bar.roundedCorners}
+                          className="pointer-events-none opacity-0 hover:opacity-100 hover:stroke-blue-400 transition-all"
+                        />
+                      </g>
+                    );
+                  })}
+                </g>
+              );
+
+              currentY +=
+                groupBars.length * barHeight +
+                (groupIndex === groupedBars.length - 1 ? 0 : groupSpacing) +
+                (groupBars.length - 1) * barSpacing +
+                settings.group.padding.bottom;
+              return groupElements;
+            })}
+
+            {categories.length > 0 ? (
+              <>
+                {/* Legend */}
+                <g onClick={(e) => openModal("legend", e)}>
+                  <text
+                    x={chartWidth / 2}
+                    y={
+                      chartHeight -
+                      legendHeight +
+                      chartLegend.fontSize +
+                      chartLegend.padding.top
+                    }
+                    textAnchor="middle"
+                    className=""
+                    style={{ fontFamily: "MyFont" }}
+                    fill={chartLegend.color}
+                    fontSize={chartLegend.fontSize}
+                  >
+                    {chartLegend.label}
+                  </text>
+
+                  {/* Legend Items */}
+                  {categories.map((category, index) => {
+                    const legendItemWidth = 140;
+                    const itemsPerRow = Math.floor(
+                      chartWidth / legendItemWidth
+                    );
+                    const totalItems = categories.length;
+                    rowsInLegend.current = Math.ceil(totalItems / itemsPerRow);
+
+                    const row = Math.floor(index / itemsPerRow);
+                    const col = index % itemsPerRow;
+
+                    // items in this specific row
+                    const itemsInRow =
+                      row === rowsInLegend.current - 1
+                        ? totalItems - row * itemsPerRow
+                        : itemsPerRow;
+
+                    // recompute startX per row
+                    const rowWidth = itemsInRow * legendItemWidth;
+                    const startX = (chartWidth - rowWidth) / 2;
+
+                    const x = startX + col * legendItemWidth;
+                    const y =
+                      chartHeight -
+                      legendHeight +
+                      chartLegend.padding.top +
+                      chartLegend.fontSize +
+                      chartLegend.gap +
+                      14 +
+                      row * 30;
+
+                    return (
+                      <g key={category.id}>
+                        {/* Legend color swatch */}
+                        <rect
+                          x={x}
+                          y={y - 6}
+                          width={12}
+                          height={12}
+                          fill={`rgba(${category.color?.r},${category.color?.g},${category.color?.b},${category.color?.a})`}
+                          rx="2"
+                          className=""
+                        />
+
+                        {/* Legend label */}
+                        <text
+                          x={x + 18}
+                          y={y}
+                          alignmentBaseline="middle"
+                          style={{ fontFamily: "MyFont" }}
+                        >
+                          {category.label}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              </>
+            ) : null}
+          </g>
+        </svg>
+      </div>
     );
   };
 
@@ -4004,6 +4040,10 @@ export const GroupedBarChart = ({ font }: DashboardProps) => {
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export SVG
+              </Button>
+              <Button variant="outline" className="w-full" onClick={exportPng}>
+                <Download className="w-4 h-4 mr-2" />
+                Export PNG
               </Button>
               <Button
                 variant="outline"
