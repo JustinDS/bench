@@ -19,22 +19,29 @@ import { Manufacturers } from "@/lib/types/database/manufacturers";
 import { Models } from "@/lib/types/database/models";
 import { PartnerSeries } from "@/lib/types/database/PartnerSeries";
 import { Products } from "@/lib/types/database/products";
+import { Series } from "@/lib/types/database/series";
 
 const productsSchema = z.object({
   model_id: z.coerce.number<number>().min(1),
   manufacturer_id: z.coerce.number<number>().min(1),
-  partner_series_id: z.coerce.number<number>().min(1),
+  partner_series_id: z.coerce.number<number>().optional().nullable(),
   name: z.string().min(1),
 });
 
 type productsFormData = z.infer<typeof productsSchema>;
 
-export default function ProductsManager() {
+interface ProductsManagerProps {
+  componentId: number;
+}
+
+export default function ProductsManager({ componentId }: ProductsManagerProps) {
   const supabase = createClient();
   const [models, setModels] = useState<Models[]>([]);
   const [manufacturer, setManufacturer] = useState<Manufacturers[]>([]);
   const [partnerSeries, setPartnerSeries] = useState<PartnerSeries[]>([]);
   const [products, setProducts] = useState<Products[]>([]);
+  const [series, setSeries] = useState<Series[]>([]);
+  const [selectedSeries, setSelectedSeries] = useState<number>();
 
   const {
     register,
@@ -59,23 +66,34 @@ export default function ProductsManager() {
         .select("id, manufacturer_id, name");
       const { data: products } = await supabase
         .from("products")
-        .select("id, manufacturer_id, model_id, partner_series_id, name");
+        .select(
+          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name))"
+        )
+        .eq("models.series.component_id", componentId)
+        .not("models.series", "is", null)
+        .not("models", "is", null);
+      const { data: series } = await supabase
+        .from("series")
+        .select("id, vendor_id, component_id, name")
+        .eq("component_id", componentId);
 
       setModels(models ?? []);
       setManufacturer(manufacturer ?? []);
       setPartnerSeries(partnerSeries ?? []);
       setProducts(products ?? []);
+      setSeries(series ?? []);
     };
     loadData();
   }, []);
 
+  console.log("products", products);
   const onSubmit = async (data: productsFormData) => {
     const { data: modelData, error: modelError } = await supabase
       .from("products")
       .insert({
         model_id: data.model_id,
         manufacturer_id: data.manufacturer_id,
-        partner_series_id: data.partner_series_id,
+        partner_series_id: data.partner_series_id || null,
         name: data.name,
       })
       .select()
@@ -95,9 +113,17 @@ export default function ProductsManager() {
   const selectedPartnerSeries = watch("partner_series_id");
   const selectedModel = watch("model_id");
 
+  const filteredmodels = models.filter((s) => s.series_id === selectedSeries);
+
   const filteredPartnerSeries = partnerSeries.filter(
     (s) => s.manufacturer_id === Number(selectedManufacturer)
   );
+
+  const displayPartnerSeries = partnerSeries.find(
+    (x) => x.id === selectedPartnerSeries
+  )?.name
+    ? ` ${partnerSeries.find((x) => x.id === selectedPartnerSeries)?.name}`
+    : "";
 
   return (
     <>
@@ -111,6 +137,21 @@ export default function ProductsManager() {
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-lg space-y-4 pt-5"
       >
+        <div>
+          <Label>Series</Label>
+          <Select onValueChange={(val) => setSelectedSeries(Number(val))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Series" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              {series.map((v) => (
+                <SelectItem key={v.id} value={String(v.id)}>
+                  {v.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <Label>Manufacturer</Label>
           <Select
@@ -151,7 +192,7 @@ export default function ProductsManager() {
           </div>
         )}
 
-        {selectedPartnerSeries && (
+        {filteredmodels && (
           <div>
             <Label>Model</Label>
             <Select onValueChange={(val) => setValue("model_id", Number(val))}>
@@ -159,7 +200,7 @@ export default function ProductsManager() {
                 <SelectValue placeholder="Select Model" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                {models.map((v) => (
+                {filteredmodels.map((v) => (
                   <SelectItem key={v.id} value={String(v.id)}>
                     {v.name}
                   </SelectItem>
@@ -169,23 +210,26 @@ export default function ProductsManager() {
           </div>
         )}
 
-        {selectedManufacturer && selectedPartnerSeries && selectedModel && (
+        {selectedManufacturer && selectedModel && (
           <div>
             <Label>Product Name</Label>
             <Input
               {...register("name")}
-              placeholder="GeForce, Radeon, Ryzen 9, Core i9, etc."
+              placeholder="ASUS TUF Gaming RTX 4070"
               value={`${
-                manufacturer.find((x) => x.id === selectedManufacturer)?.name
-              } ${
-                partnerSeries.find((x) => x.id === selectedPartnerSeries)?.name
-              } ${models.find((x) => x.id === selectedModel)?.name}`}
+                componentId === 1
+                  ? series.find((x) => x.id === selectedSeries)?.name
+                  : manufacturer.find((x) => x.id === selectedManufacturer)
+                      ?.name
+              }${displayPartnerSeries} ${
+                models.find((x) => x.id === selectedModel)?.name
+              }`}
             />
           </div>
         )}
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Adding..." : "Add Series"}
+          {isSubmitting ? "Adding..." : "Add Product"}
         </Button>
       </form>
     </>
