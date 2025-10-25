@@ -30,7 +30,7 @@ const productsSchema = z.object({
 
 type productsFormData = z.infer<typeof productsSchema>;
 
-interface ProductsManagerProps {
+export interface ProductsManagerProps {
   componentId: number;
 }
 

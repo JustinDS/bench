@@ -25,7 +25,7 @@ const modelSchema = z.object({
 
 type ModelFormData = z.infer<typeof modelSchema>;
 
-export default function SeriesManager() {
+export default function ModelsManager() {
   const supabase = createClient();
   const [models, setModels] = useState<Models[]>([]);
   const [series, setSeries] = useState<Series[]>([]);

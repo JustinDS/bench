@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,41 +17,41 @@ import {
 } from "@/app/components/ui/select";
 import { Products } from "@/lib/types/database/products";
 import { CpuVariants } from "@/lib/types/database/cpuVariants";
-import { GpuVariants } from "@/lib/types/database/gpuVariants";
 
-const gpuVariantSchema = z.object({
+const cpuVariantSchema = z.object({
   product_id: z.coerce.number<number>().min(1),
-  memory_type: z.coerce.string<string>().min(1),
-  vram_gb: z.coerce.number<number>().min(1),
-  core_clock_mhz: z.coerce.number<number>().min(1),
-  boost_clock_mhz: z.coerce.number<number>().min(1),
-  power_draw_watts: z.coerce.number<number>().min(1),
+  cores: z.coerce.number<number>().min(1),
+  threads: z.coerce.number<number>().min(1),
+  base_clock_ghz: z.coerce.number<number>().min(1),
+  boost_clock_ghz: z.coerce.number<number>().min(1),
+  tdp_watts: z.coerce.number<number>().min(1),
+  socket_type: z.coerce.string<string>().min(1),
 });
 
-type GpuVariantFormData = z.infer<typeof gpuVariantSchema>;
+type CpuVariantFormData = z.infer<typeof cpuVariantSchema>;
 
-export default function GpuManager() {
+export default function CpuManager() {
   const supabase = createClient();
   const [products, setProducts] = useState<Products[]>([]);
-  const [gpuVariants, setGpuVariants] = useState<GpuVariants[]>([]);
+  const [cpuVariants, setCpuVariants] = useState<CpuVariants[]>([]);
 
   const {
     register,
     handleSubmit,
     setValue,
     formState: { isSubmitting, errors },
-  } = useForm<GpuVariantFormData>({
-    resolver: zodResolver(gpuVariantSchema),
+  } = useForm<CpuVariantFormData>({
+    resolver: zodResolver(cpuVariantSchema),
   });
 
   useEffect(() => {
     const loadData = async () => {
-      const { data: gpuVariants } = await supabase
-        .from("gpu_variants")
+      const { data: cpuVariants } = await supabase
+        .from("cpu_variants")
         .select(
-          "id, product_id, memory_type, vram_gb, core_clock_mhz, boost_clock_mhz, power_draw_watts, products:products(id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name)))"
+          "id, product_id, cores, threads, base_clock_ghz, base_clock_ghz, boost_clock_ghz, tdp_watts, socket_type,products:products(id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name)))"
         )
-        .eq("products.models.series.component_id", 6)
+        .eq("products.models.series.component_id", 1)
         .not("products.models.series", "is", null)
         .not("products.models", "is", null)
         .not("products", "is", null);
@@ -60,61 +60,63 @@ export default function GpuManager() {
         .select(
           "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name))"
         )
-        .eq("models.series.component_id", 6)
+        .eq("models.series.component_id", 1)
         .not("models.series", "is", null)
         .not("models", "is", null);
 
-      setGpuVariants((gpuVariants as unknown as GpuVariants[]) ?? []);
+      setCpuVariants((cpuVariants as unknown as CpuVariants[]) ?? []);
       setProducts(products ?? []);
     };
     loadData();
   }, []);
 
-  const onSubmit = async (data: GpuVariantFormData) => {
+  const onSubmit = async (data: CpuVariantFormData) => {
     const { data: modelData, error: modelError } = await supabase
-      .from("gpu_variants")
+      .from("cpu_variants")
       .insert({
         product_id: data.product_id,
-        memory_type: data.memory_type,
-        vram_gb: data.vram_gb,
-        core_clock_mhz: data.core_clock_mhz,
-        boost_clock_mhz: data.boost_clock_mhz,
-        power_draw_watts: data.power_draw_watts,
+        cores: data.cores,
+        threads: data.threads,
+        base_clock_ghz: data.base_clock_ghz,
+        boost_clock_ghz: data.boost_clock_ghz,
+        tdp_watts: data.tdp_watts,
+        socket_type: data.socket_type,
       })
       .select()
       .single();
 
     if (modelError) {
       console.error(modelError);
-      return alert("Error inserting Gpu Variant");
+      return alert("Error inserting Cpu Variant");
     }
 
-    setGpuVariants((prev) => [...prev, modelData]);
-
+    setCpuVariants((prev) => [...prev, modelData]);
     alert("Gpu Variant added successfully!");
   };
+
+  console.log("cpuVariants", cpuVariants);
 
   return (
     <>
       <div>
-        GPU Variants:
-        <div className="grid grid-cols-4">
-          {gpuVariants.map((x, i) => {
-            return (
+        CPU Variants:
+        {cpuVariants.map((x, i) => {
+          return (
+            <>
               <div
-                className="p-4 border border-solid w-fit mt-5"
-                key={`${i}-gpuManager`}
+                className="flex flex-col p-4 border border-solid w-fit"
+                key={`${i}-cpuManager`}
               >
                 <div>{x?.products?.name}</div>
-                <div>{x.vram_gb} gb vram</div>
-                <div>{x.core_clock_mhz}mhz core clock</div>
-                <div>{x.boost_clock_mhz}mhz boost clock</div>
-                <div>{x.memory_type}</div>
-                <div>{x.power_draw_watts}W</div>
+                <div>{x.cores} cores</div>
+                <div>{x.threads} threads</div>
+                <div>{x.base_clock_ghz}ghz base clock </div>
+                <div>{x.boost_clock_ghz}ghz boost clock </div>
+                <div>{x.socket_type} socket</div>
               </div>
-            );
-          })}
-        </div>
+            </>
+          );
+        })}
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -138,29 +140,33 @@ export default function GpuManager() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label>VRAM</Label>
-            <Input type="number" {...register("vram_gb")} />
+            <Label>Cores</Label>
+            <Input type="number" {...register("cores")} />
           </div>
           <div>
-            <Label>Memory Type</Label>
-            <Input type="string" {...register("memory_type")} />
+            <Label>Threads</Label>
+            <Input type="string" {...register("threads")} />
           </div>
           <div>
-            <Label>Core Clock (mhz)</Label>
-            <Input type="number" step="0.1" {...register("core_clock_mhz")} />
+            <Label>Base Clock (ghz)</Label>
+            <Input type="number" step="0.1" {...register("base_clock_ghz")} />
           </div>
           <div>
-            <Label>Boost Clock (mhz)</Label>
-            <Input type="number" step="0.1" {...register("boost_clock_mhz")} />
+            <Label>Boost Clock (ghz)</Label>
+            <Input type="number" step="0.1" {...register("boost_clock_ghz")} />
           </div>
           <div>
             <Label>Power Draw (Watts)</Label>
-            <Input type="number" {...register("power_draw_watts")} />
+            <Input type="number" {...register("tdp_watts")} />
+          </div>
+          <div>
+            <Label>Socket</Label>
+            <Input type="string" {...register("socket_type")} />
           </div>
         </div>
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Adding..." : "Add GPU Variant"}
+          {isSubmitting ? "Adding..." : "Add CPU Variant"}
         </Button>
       </form>
     </>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import Link from "next/link";
+import AdminClient from "./pageClient";
+import { randomUUID } from "crypto";
 
 export default async function Admin() {
   const supabase = await createClient();
@@ -13,12 +14,5 @@ export default async function Admin() {
     redirect("/login");
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col">
-      <Link href={"admin/gpu"}>Add GPU</Link>
-      <Link href={"admin/cpu"}>Add CPU</Link>
-      <Link href={"admin/ram"}>Add RAM</Link>
-      <Link href={"admin/vendor"}>Add Vendor</Link>
-    </div>
-  );
+  return <AdminClient key={randomUUID()} />;
 }

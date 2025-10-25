@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import CPU from "./pageClient";
+import GPU from "./pageClient";
 
 export default async function Admin() {
   const supabase = await createClient();
@@ -15,7 +15,7 @@ export default async function Admin() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <CPU />
+      <GPU />
     </div>
   );
 }

@@ -33,7 +33,7 @@ export default function ComponentManager() {
     const loadData = async () => {
       const { data: components } = await supabase
         .from("components")
-        .select("id, created_at, name");
+        .select("id, name");
       setComponents(components ?? []);
     };
     loadData();
