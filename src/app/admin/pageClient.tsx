@@ -208,7 +208,7 @@ export default function AdminClient() {
             className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group mb-6 flex flex-col gap-4 cursor-pointer"
           >
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-medium">CPU's</CardTitle>
+              <CardTitle className="text-lg font-medium">{"CPU's"}</CardTitle>
               <Group className="stroke-blue-300" />
             </CardHeader>
             {/* <CardContent>Manage Your Categories</CardContent> */}
@@ -220,7 +220,7 @@ export default function AdminClient() {
             className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group mb-6 flex flex-col gap-4 cursor-pointer"
           >
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-medium">GPU's</CardTitle>
+              <CardTitle className="text-lg font-medium">{"GPU's"}</CardTitle>
               <Group className="stroke-blue-300" />
             </CardHeader>
             {/* <CardContent>Manage Your Categories</CardContent> */}
