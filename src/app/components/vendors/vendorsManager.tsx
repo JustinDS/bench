@@ -40,7 +40,7 @@ export default function VendorsManager() {
 
   const onSubmit = async (data: VendorFormData) => {
     const { data: modelData, error: modelError } = await supabase
-      .from("vendor")
+      .from("vendors")
       .insert({
         name: data.name,
       })

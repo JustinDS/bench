@@ -17,6 +17,7 @@ import {
 } from "@/app/components/ui/select";
 import { Series } from "@/lib/types/database/series";
 import { Models } from "@/lib/types/database/models";
+import { Vendors } from "@/lib/types/database/vendors";
 
 const modelSchema = z.object({
   series_id: z.coerce.number<number>().min(1),
@@ -29,6 +30,9 @@ export default function ModelsManager() {
   const supabase = createClient();
   const [models, setModels] = useState<Models[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
+  const [vendors, setVendors] = useState<Vendors[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState<number>();
+
   const {
     register,
     handleSubmit,
@@ -46,7 +50,11 @@ export default function ModelsManager() {
       const { data: series } = await supabase
         .from("series")
         .select("id, component_id, vendor_id, name");
+      const { data: vendors } = await supabase
+        .from("vendors")
+        .select("id, name");
 
+      setVendors(vendors ?? []);
       setSeries(series ?? []);
       setModels(models ?? []);
     };
@@ -86,13 +94,13 @@ export default function ModelsManager() {
         className="max-w-lg space-y-4 pt-5"
       >
         <div>
-          <Label>Series</Label>
-          <Select onValueChange={(val) => setValue("series_id", Number(val))}>
+          <Label>Vendor</Label>
+          <Select onValueChange={(val) => setSelectedVendor(Number(val))}>
             <SelectTrigger>
-              <SelectValue placeholder="Select Series" />
+              <SelectValue placeholder="Select Vendor" />
             </SelectTrigger>
             <SelectContent className="bg-white">
-              {series.map((v) => (
+              {vendors.map((v) => (
                 <SelectItem key={v.id} value={String(v.id)}>
                   {v.name}
                 </SelectItem>
@@ -100,6 +108,26 @@ export default function ModelsManager() {
             </SelectContent>
           </Select>
         </div>
+
+        {selectedVendor && (
+          <div>
+            <Label>Series</Label>
+            <Select onValueChange={(val) => setValue("series_id", Number(val))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Series" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {series
+                  .filter((x) => x.vendor_id === selectedVendor)
+                  .map((v) => (
+                    <SelectItem key={v.id} value={String(v.id)}>
+                      {v.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <div>
           <Label>Model Name</Label>

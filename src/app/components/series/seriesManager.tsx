@@ -96,22 +96,6 @@ export default function SeriesManager() {
         className="max-w-lg space-y-4 pt-5"
       >
         <div>
-          <Label>Vendor</Label>
-          <Select onValueChange={(val) => setValue("vendor_id", Number(val))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Vendor" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {vendors.map((v) => (
-                <SelectItem key={v.id} value={String(v.id)}>
-                  {v.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
           <Label>Component</Label>
           <Select
             onValueChange={(val) => setValue("component_id", Number(val))}
@@ -123,6 +107,22 @@ export default function SeriesManager() {
               {components.map((s) => (
                 <SelectItem key={s.id} value={String(s.id)}>
                   {s.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Vendor</Label>
+          <Select onValueChange={(val) => setValue("vendor_id", Number(val))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Vendor" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              {vendors.map((v) => (
+                <SelectItem key={v.id} value={String(v.id)}>
+                  {v.name}
                 </SelectItem>
               ))}
             </SelectContent>

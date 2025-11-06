@@ -17,11 +17,14 @@ import {
 } from "@/app/components/ui/select";
 import { Products } from "@/lib/types/database/products";
 import { CpuVariants } from "@/lib/types/database/cpuVariants";
+import { ComponentType } from "@/lib/types/database/components";
 
 const cpuVariantSchema = z.object({
   product_id: z.coerce.number<number>().min(1),
-  cores: z.coerce.number<number>().min(1),
-  threads: z.coerce.number<number>().min(1),
+  p_cores: z.coerce.number<number>().min(1),
+  p_threads: z.coerce.number<number>().min(1),
+  e_cores: z.coerce.number<number>().min(1),
+  e_threads: z.coerce.number<number>().min(1),
   base_clock_ghz: z.coerce.number<number>().min(1),
   boost_clock_ghz: z.coerce.number<number>().min(1),
   tdp_watts: z.coerce.number<number>().min(1),
@@ -49,18 +52,19 @@ export default function CpuManager() {
       const { data: cpuVariants } = await supabase
         .from("cpu_variants")
         .select(
-          "id, product_id, cores, threads, base_clock_ghz, base_clock_ghz, boost_clock_ghz, tdp_watts, socket_type,products:products(id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name)))"
+          "id, product_id, p_cores, p_threads, e_cores, e_threads, base_clock_ghz, base_clock_ghz, boost_clock_ghz, tdp_watts, socket_type,products:products(id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name, components:components(id, name, type))))"
         )
-        .eq("products.models.series.component_id", 1)
+        .eq("products.models.series.components.type", ComponentType.CPU)
         .not("products.models.series", "is", null)
         .not("products.models", "is", null)
         .not("products", "is", null);
       const { data: products } = await supabase
         .from("products")
         .select(
-          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name))"
+          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name, components:components(id, name, type)))"
         )
-        .eq("models.series.component_id", 1)
+        .eq("models.series.components.type", ComponentType.CPU)
+        .not("models.series.components", "is", null)
         .not("models.series", "is", null)
         .not("models", "is", null);
 
@@ -75,8 +79,10 @@ export default function CpuManager() {
       .from("cpu_variants")
       .insert({
         product_id: data.product_id,
-        cores: data.cores,
-        threads: data.threads,
+        p_cores: data.p_cores,
+        p_threads: data.p_threads,
+        e_cores: data.e_cores,
+        e_threads: data.e_threads,
         base_clock_ghz: data.base_clock_ghz,
         boost_clock_ghz: data.boost_clock_ghz,
         tdp_watts: data.tdp_watts,
@@ -108,8 +114,10 @@ export default function CpuManager() {
                 key={`${i}-cpuManager`}
               >
                 <div>{x?.products?.name}</div>
-                <div>{x.cores} cores</div>
-                <div>{x.threads} threads</div>
+                <div>{x.p_cores} p cores</div>
+                <div>{x.p_threads} p threads</div>
+                <div>{x.e_cores} e cores</div>
+                <div>{x.e_threads} e threads</div>
                 <div>{x.base_clock_ghz}ghz base clock </div>
                 <div>{x.boost_clock_ghz}ghz boost clock </div>
                 <div>{x.socket_type} socket</div>
@@ -140,12 +148,20 @@ export default function CpuManager() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label>Cores</Label>
-            <Input type="number" {...register("cores")} />
+            <Label>p Cores</Label>
+            <Input type="number" {...register("p_cores")} />
           </div>
           <div>
-            <Label>Threads</Label>
-            <Input type="string" {...register("threads")} />
+            <Label>p Threads</Label>
+            <Input type="string" {...register("p_threads")} />
+          </div>
+          <div>
+            <Label>e Cores</Label>
+            <Input type="number" {...register("e_cores")} />
+          </div>
+          <div>
+            <Label>e Threads</Label>
+            <Input type="string" {...register("e_threads")} />
           </div>
           <div>
             <Label>Base Clock (ghz)</Label>

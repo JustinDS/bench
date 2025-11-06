@@ -18,6 +18,7 @@ import {
 import { Products } from "@/lib/types/database/products";
 import { CpuVariants } from "@/lib/types/database/cpuVariants";
 import { GpuVariants } from "@/lib/types/database/gpuVariants";
+import { ComponentType } from "@/lib/types/database/components";
 
 const gpuVariantSchema = z.object({
   product_id: z.coerce.number<number>().min(1),
@@ -49,18 +50,19 @@ export default function GpuManager() {
       const { data: gpuVariants } = await supabase
         .from("gpu_variants")
         .select(
-          "id, product_id, memory_type, vram_gb, core_clock_mhz, boost_clock_mhz, power_draw_watts, products:products(id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name)))"
+          "id, product_id, memory_type, vram_gb, core_clock_mhz, boost_clock_mhz, power_draw_watts, products:products(id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name, components:components(id, name, type))))"
         )
-        .eq("products.models.series.component_id", 6)
+        .eq("products.models.series.components.type", ComponentType.GPU)
         .not("products.models.series", "is", null)
         .not("products.models", "is", null)
         .not("products", "is", null);
       const { data: products } = await supabase
         .from("products")
         .select(
-          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name))"
+          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name, components:components(id, name, type)))"
         )
-        .eq("models.series.component_id", 6)
+        .eq("models.series.components.type", ComponentType.GPU)
+        .not("models.series.components", "is", null)
         .not("models.series", "is", null)
         .not("models", "is", null);
 

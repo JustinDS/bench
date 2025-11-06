@@ -22,6 +22,7 @@ import SeriesManager from "../components/series/seriesManager";
 import ProductsManager, {
   ProductsManagerProps,
 } from "../components/products/productsManager";
+import { ComponentType } from "@/lib/types/database/components";
 
 const None: React.FC = () => null;
 
@@ -79,8 +80,14 @@ const focusComponents: FocusComponentsMap = {
   series: { component: SeriesManager, props: {} },
   models: { component: ModelManager, props: {} },
   partnerSeries: { component: PartnerSeriesManager, props: {} },
-  cpuProducts: { component: ProductsManager, props: { componentId: 1 } },
-  gpuProducts: { component: ProductsManager, props: { componentId: 6 } },
+  cpuProducts: {
+    component: ProductsManager,
+    props: { componentType: ComponentType.CPU },
+  },
+  gpuProducts: {
+    component: ProductsManager,
+    props: { componentType: ComponentType.GPU },
+  },
   cpus: { component: CpuManager, props: {} },
   gpus: { component: GpuManager, props: {} },
   none: { component: None, props: {} },
@@ -110,13 +117,11 @@ export default function AdminClient() {
 
         {activeFocus === "none" && (
           <Card
-            onClick={() => setActiveFocus("manufacturers")}
+            onClick={() => setActiveFocus("vendors")}
             className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group mb-6 flex flex-col gap-4 cursor-pointer"
           >
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-medium">
-                Manufacturers
-              </CardTitle>
+              <CardTitle className="text-lg font-medium">Vendors</CardTitle>
               <Group className="stroke-blue-300" />
             </CardHeader>
             {/* <CardContent>Manage Your Categories</CardContent> */}
@@ -125,11 +130,13 @@ export default function AdminClient() {
 
         {activeFocus === "none" && (
           <Card
-            onClick={() => setActiveFocus("vendors")}
+            onClick={() => setActiveFocus("manufacturers")}
             className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group mb-6 flex flex-col gap-4 cursor-pointer"
           >
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-medium">Vendors</CardTitle>
+              <CardTitle className="text-lg font-medium">
+                Manufacturers
+              </CardTitle>
               <Group className="stroke-blue-300" />
             </CardHeader>
             {/* <CardContent>Manage Your Categories</CardContent> */}
@@ -235,7 +242,10 @@ export default function AdminClient() {
           >
             <X />
           </div>
-          <ActiveComponent key={activeFocus} componentId={props.componentId} />
+          <ActiveComponent
+            key={activeFocus}
+            componentType={props.componentType}
+          />
         </Card>
       )}
     </div>

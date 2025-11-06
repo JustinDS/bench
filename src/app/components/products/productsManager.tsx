@@ -20,6 +20,7 @@ import { Models } from "@/lib/types/database/models";
 import { PartnerSeries } from "@/lib/types/database/PartnerSeries";
 import { Products } from "@/lib/types/database/products";
 import { Series } from "@/lib/types/database/series";
+import { ComponentType } from "@/lib/types/database/components";
 
 const productsSchema = z.object({
   model_id: z.coerce.number<number>().min(1),
@@ -31,10 +32,12 @@ const productsSchema = z.object({
 type productsFormData = z.infer<typeof productsSchema>;
 
 export interface ProductsManagerProps {
-  componentId: number;
+  componentType: number;
 }
 
-export default function ProductsManager({ componentId }: ProductsManagerProps) {
+export default function ProductsManager({
+  componentType,
+}: ProductsManagerProps) {
   const supabase = createClient();
   const [models, setModels] = useState<Models[]>([]);
   const [manufacturer, setManufacturer] = useState<Manufacturers[]>([]);
@@ -67,15 +70,21 @@ export default function ProductsManager({ componentId }: ProductsManagerProps) {
       const { data: products } = await supabase
         .from("products")
         .select(
-          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name))"
+          "id, manufacturer_id, model_id, partner_series_id, name, models:models(id, name, series_id, series:series(id, vendor_id, component_id, name, components:components(id, name, type)))"
         )
-        .eq("models.series.component_id", componentId)
+        .eq("models.series.components.type", componentType)
+        .not("models.series.components", "is", null)
         .not("models.series", "is", null)
         .not("models", "is", null);
       const { data: series } = await supabase
         .from("series")
-        .select("id, vendor_id, component_id, name")
-        .eq("component_id", componentId);
+        .select(
+          "id, vendor_id, component_id, name, components:components(id, name, type)"
+        )
+        .eq("components.type", componentType)
+        .not("components", "is", null);
+
+      console.log("products", products);
 
       setModels(models ?? []);
       setManufacturer(manufacturer ?? []);
@@ -138,21 +147,6 @@ export default function ProductsManager({ componentId }: ProductsManagerProps) {
         className="max-w-lg space-y-4 pt-5"
       >
         <div>
-          <Label>Series</Label>
-          <Select onValueChange={(val) => setSelectedSeries(Number(val))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Series" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {series.map((v) => (
-                <SelectItem key={v.id} value={String(v.id)}>
-                  {v.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
           <Label>Manufacturer</Label>
           <Select
             onValueChange={(val) => setValue("manufacturer_id", Number(val))}
@@ -162,6 +156,21 @@ export default function ProductsManager({ componentId }: ProductsManagerProps) {
             </SelectTrigger>
             <SelectContent className="bg-white">
               {manufacturer.map((v) => (
+                <SelectItem key={v.id} value={String(v.id)}>
+                  {v.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Series</Label>
+          <Select onValueChange={(val) => setSelectedSeries(Number(val))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Series" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              {series.map((v) => (
                 <SelectItem key={v.id} value={String(v.id)}>
                   {v.name}
                 </SelectItem>
@@ -215,15 +224,20 @@ export default function ProductsManager({ componentId }: ProductsManagerProps) {
             <Label>Product Name</Label>
             <Input
               {...register("name")}
-              placeholder="ASUS TUF Gaming RTX 4070"
+              placeholder={
+                componentType === ComponentType.CPU
+                  ? "Ryzen 9 7950X3D"
+                  : "ASUS TUF Gaming RTX 4070"
+              }
               value={`${
-                componentId === 1
-                  ? series.find((x) => x.id === selectedSeries)?.name
+                componentType === ComponentType.CPU
+                  ? partnerSeries.find((x) => x.id === selectedPartnerSeries)
+                      ?.name
                   : manufacturer.find((x) => x.id === selectedManufacturer)
                       ?.name
-              }${displayPartnerSeries} ${
-                models.find((x) => x.id === selectedModel)?.name
-              }`}
+              }${
+                componentType === ComponentType.CPU ? "" : displayPartnerSeries
+              } ${models.find((x) => x.id === selectedModel)?.name}`}
             />
           </div>
         )}
