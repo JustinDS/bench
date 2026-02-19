@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   if (event.event === PaystackEvents.SUBSCRIPTION_CREATE) {
     const subscriptionStartedAt = new Date(
-      event.data.paid_at || event.data.createdAt
+      event.data.paid_at || event.data.createdAt,
     );
     const baseExpiry = add(subscriptionStartedAt, { months: 1 });
     const graceDays = 3; // Or fetch from DB if user-specific
@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
       .update({
         role: UserRole.Premium,
         subscription_code: event.data.subscription_code,
-        subscription_started_at: subscriptionStartedAt,
-        subscription_expires_at: subscriptionExpiresAt,
+        subscription_started_at: subscriptionStartedAt.toDateString(),
+        subscription_expires_at: subscriptionExpiresAt.toDateString(),
         email_token: event.data.email_token,
         subscription_status: SubscriptionStatus.active,
       })
