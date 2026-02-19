@@ -14,7 +14,7 @@ export async function signUpForFree() {
   await adminSupabase
     .from("profiles")
     .update({ role: UserRole.Free })
-    .eq("id", (await supabase.auth.getUser()).data.user?.id);
+    .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "");
 
   revalidatePath("/dashboard", "page");
   redirect("/dashboard");
@@ -29,7 +29,7 @@ export async function signUpForPremium() {
   await adminSupabase
     .from("profiles")
     .update({ role: UserRole.Premium })
-    .eq("id", (await supabase.auth.getUser()).data.user?.id);
+    .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "");
 
   revalidatePath("/dashboard", "page");
   redirect("/dashboard");
