@@ -65,6 +65,12 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
   const brandId = watch("component.brand_id");
 
   useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("❌ Validation errors:", errors);
+    }
+  }, [errors]);
+
+  useEffect(() => {
     loadLookupData();
   }, []);
 
@@ -105,8 +111,10 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
   }
 
   async function onSubmit(data: GPUFormData) {
+    console.log("📤 Submitting:", data);
     try {
       setLoading(true);
+      debugger;
 
       if (isEditing && gpu) {
         await updateComponent(gpu.id, data.component);
@@ -120,6 +128,7 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
           data.specs,
         );
       }
+      console.log("✅ Success!");
 
       onClose();
     } catch (error) {
@@ -129,6 +138,12 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
       setLoading(false);
     }
   }
+
+  console.log("Brand ID:", watch("component.brand_id"));
+  console.log("Model:", watch("component.model"));
+  console.log("Categories loaded:", categories.length);
+  console.log("category_id", watch("component.category_id"));
+  console.log("partner_id", watch("component.partner_id"));
 
   return (
     <div

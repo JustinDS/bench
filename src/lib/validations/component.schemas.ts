@@ -4,8 +4,20 @@ import { z } from "zod";
 export const componentSchema = z.object({
   category_id: z.string().uuid("Invalid category"),
   brand_id: z.string().uuid("Invalid brand"),
-  partner_id: z.string().uuid().nullable().optional(),
-  series_id: z.string().uuid().nullable().optional(),
+  partner_id: z
+    .string()
+    .uuid()
+    .nullable()
+    .optional()
+    .or(z.literal("")) // Allow empty string
+    .transform((val) => (val === "" ? null : val)),
+  series_id: z
+    .string()
+    .uuid()
+    .nullable()
+    .optional()
+    .or(z.literal("")) // Allow empty string
+    .transform((val) => (val === "" ? null : val)),
   model: z.string().min(1, "Model is required").max(100),
   product_name: z.string().min(1, "Product name is required"),
   is_admin_approved: z.boolean().nullable().optional(),
@@ -15,36 +27,18 @@ export type ComponentFormData = z.infer<typeof componentSchema>;
 
 // GPU Specs Schema
 export const gpuSpecsSchema = z.object({
-  component_id: z.string().uuid(),
-  chip_series: z.string().max(50).min(1).nullable().optional(),
-  chip_model: z.string().max(50).min(1).nullable().optional(),
-  vram_size: z.coerce
-    .number<number>()
-    .int()
-    .min(1)
-    .positive()
-    .nullable()
-    .optional(),
+  component_id: z.string().uuid().nullable().optional(),
+  chip_series: z.string().max(50).nullable().optional(),
+  chip_model: z.string().max(50).nullable().optional(),
+  vram_size: z.coerce.number<number>().int().positive().nullable().optional(),
   vram_type: z
     .enum(["GDDR6", "GDDR6X", "GDDR7", "HBM2", "HBM3"])
     .nullable()
     .optional(),
-  base_clock: z.coerce
-    .number<number>()
-    .int()
-    .min(1)
-    .positive()
-    .nullable()
-    .optional(),
-  boost_clock: z.coerce
-    .number<number>()
-    .int()
-    .min(1)
-    .positive()
-    .nullable()
-    .optional(),
-  tdp: z.coerce.number<number>().int().min(1).positive().nullable().optional(),
-  pcie_version: z.string().max(10).min(1).nullable().optional(),
+  base_clock: z.coerce.number<number>().int().positive().nullable().optional(),
+  boost_clock: z.coerce.number<number>().int().positive().nullable().optional(),
+  tdp: z.coerce.number<number>().int().positive().nullable().optional(),
+  pcie_version: z.string().max(10).nullable().optional(),
 });
 
 export type GPUSpecsFormData = z.infer<typeof gpuSpecsSchema>;
@@ -59,32 +53,15 @@ export type GPUFormData = z.infer<typeof gpuFormSchema>;
 
 // CPU Specs Schema
 export const cpuSpecsSchema = z.object({
-  component_id: z.string().uuid(),
-  chip_series: z.string().max(50).min(1).nullable().optional(),
-  chip_model: z.string().max(50).min(1).nullable().optional(),
-  socket_type: z.string().max(50).min(1).nullable().optional(),
-  cores: z.coerce
-    .number<number>()
-    .int()
-    .positive()
-    .min(1)
-    .nullable()
-    .optional(),
-  threads: z.coerce
-    .number<number>()
-    .int()
-    .positive()
-    .min(1)
-    .nullable()
-    .optional(),
-  base_clock: z.coerce.number<number>().positive().min(1).nullable().optional(),
-  boost_clock: z.coerce
-    .number<number>()
-    .positive()
-    .min(1)
-    .nullable()
-    .optional(),
-  tdp: z.coerce.number<number>().int().positive().min(1).nullable().optional(),
+  component_id: z.string().uuid().nullable().optional(),
+  chip_series: z.string().max(50).nullable().optional(),
+  chip_model: z.string().max(50).nullable().optional(),
+  socket_type: z.string().max(50).nullable().optional(),
+  cores: z.coerce.number<number>().int().positive().nullable().optional(),
+  threads: z.coerce.number<number>().int().positive().nullable().optional(),
+  base_clock: z.coerce.number<number>().positive().nullable().optional(),
+  boost_clock: z.coerce.number<number>().positive().nullable().optional(),
+  tdp: z.coerce.number<number>().int().positive().nullable().optional(),
   integrated_graphics: z.boolean().nullable().optional(),
 });
 
