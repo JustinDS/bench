@@ -1,23 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getGPUs, getBrands, getPartners } from "@/lib/supabase/components";
-import type {
-  Brand,
-  GPUWithSpecs,
-  Partner,
-} from "@/types/databaseConvenient.types";
+import {
+  getGPUs,
+  getChipBrands,
+  getBoardManufacturers,
+} from "@/lib/supabase/components";
+import type { GPUWithSpecs } from "@/types/databaseConvenient.types";
 import type { GPUFilter } from "@/lib/validations/component.schemas";
 import { GPUFormModal } from "./gpu-form-modal";
+import { Plus, Search, Filter } from "lucide-react";
+import {
+  getBoardManufacturersForComponentType,
+  getChipBrandsForComponentType,
+} from "@/lib/supabase/component-types";
+import { ComponentType } from "@/lib/types/component-types";
 
 export function GPUList() {
   const [gpus, setGpus] = useState<GPUWithSpecs[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [chipBrands, setChipBrands] = useState<any[]>([]);
+  const [boardManufacturers, setBoardManufacturers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<GPUFilter>({ is_admin_approved: true });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedGPU, setSelectedGPU] = useState<GPUWithSpecs | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -26,14 +33,20 @@ export function GPUList() {
   async function loadData() {
     try {
       setLoading(true);
-      const [gpuData, brandData, partnerData] = await Promise.all([
-        getGPUs(filter),
-        getBrands(),
-        getPartners(),
-      ]);
+      const [gpuData] = await Promise.all([getGPUs(filter)]);
+
+      const filteredBrands = await getChipBrandsForComponentType(
+        ComponentType.GPU,
+      );
+      const filteredPartners = await getBoardManufacturersForComponentType(
+        ComponentType.GPU,
+      );
+
+      console.log("gpuData", gpuData);
+
       setGpus(gpuData as GPUWithSpecs[]);
-      setBrands(brandData);
-      setPartners(partnerData);
+      setChipBrands(filteredBrands);
+      setBoardManufacturers(filteredPartners);
     } catch (error) {
       console.error("Error loading GPUs:", error);
     } finally {
@@ -58,87 +71,96 @@ export function GPUList() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a0b2e] to-[#16001e] px-8 py-16 font-mono">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-12 flex items-center justify-between border-b-2 border-emerald-400/20 pb-8">
-          <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-6xl font-black uppercase tracking-tight text-transparent">
-            Graphics Cards
-          </h1>
-          <button
-            onClick={handleCreate}
-            className="rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-8 py-4 text-base font-bold uppercase tracking-wider text-[#0a0e27] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,255,157,0.4)]"
-          >
-            + Add New GPU
-          </button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Mobile First */}
+      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4 sm:py-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Graphics Cards
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">{gpus.length} GPUs</p>
+            </div>
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 transition-all"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add GPU</span>
+              <span className="sm:hidden">Add</span>
+            </button>
+          </div>
         </div>
+      </header>
 
-        {/* Filters */}
-        <div className="mb-8 grid gap-6 rounded-xl border border-emerald-400/10 bg-white/[0.02] p-8 backdrop-blur-md md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
-              Search
-            </label>
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Search & Filters - Mobile Optimized */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              className="rounded-md border border-emerald-400/20 bg-black/30 px-4 py-3 text-sm text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
               placeholder="Search GPUs..."
               value={filter.search || ""}
               onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
-              Brand
-            </label>
+          {/* Filter Toggle - Mobile */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:hidden"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+          </button>
+
+          {/* Filters - Collapsible on Mobile, Always Visible on Desktop */}
+          <div
+            className={`grid gap-4 sm:grid-cols-3 ${showFilters ? "block" : "hidden sm:grid"}`}
+          >
             <select
-              className="rounded-md border border-emerald-400/20 bg-black/30 px-4 py-3 text-sm text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-              value={filter.brand_id || ""}
+              value={filter.chip_brand_id || ""}
               onChange={(e) =>
-                setFilter({ ...filter, brand_id: e.target.value || undefined })
+                setFilter({
+                  ...filter,
+                  chip_brand_id: e.target.value || undefined,
+                })
               }
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="">All Brands</option>
-              {brands.map((brand) => (
+              {chipBrands.map((brand) => (
                 <option key={brand.id} value={brand.id}>
                   {brand.name}
                 </option>
               ))}
             </select>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
-              Partner
-            </label>
             <select
-              className="rounded-md border border-emerald-400/20 bg-black/30 px-4 py-3 text-sm text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-              value={filter.partner_id || ""}
+              value={filter.board_manufacturer_id || ""}
               onChange={(e) =>
                 setFilter({
                   ...filter,
-                  partner_id: e.target.value || undefined,
+                  board_manufacturer_id: e.target.value || undefined,
                 })
               }
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
-              <option value="">All Partners</option>
-              {partners.map((partner) => (
-                <option key={partner.id} value={partner.id}>
-                  {partner.name}
+              <option value="">All Manufacturers</option>
+              {boardManufacturers.map((boardManufacturer) => (
+                <option key={boardManufacturer.id} value={boardManufacturer.id}>
+                  {boardManufacturer.name}
                 </option>
               ))}
             </select>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
-              Min VRAM (GB)
-            </label>
             <input
               type="number"
-              className="rounded-md border border-emerald-400/20 bg-black/30 px-4 py-3 text-sm text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-              placeholder="e.g. 8"
+              placeholder="Min VRAM (GB)"
               value={filter.min_vram || ""}
               onChange={(e) =>
                 setFilter({
@@ -148,94 +170,149 @@ export function GPUList() {
                     : undefined,
                 })
               }
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
         </div>
 
-        {/* Table */}
+        {/* GPU Cards/List */}
         {loading ? (
-          <div className="py-16 text-center text-xl text-emerald-400">
-            Loading graphics cards...
+          <div className="flex items-center justify-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
           </div>
         ) : gpus.length === 0 ? (
-          <div className="py-16 text-center text-lg text-white/50">
-            No graphics cards found. Add your first one!
+          <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center">
+            <p className="text-sm text-gray-500">No GPUs found</p>
+            <button
+              onClick={handleCreate}
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+              <Plus className="h-4 w-4" />
+              Add your first GPU
+            </button>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-emerald-400/10 bg-white/[0.02] backdrop-blur-md">
-            <table className="w-full border-collapse">
-              <thead className="bg-emerald-400/10">
-                <tr>
-                  <th className="border-b-2 border-emerald-400/20 px-6 py-5 text-left text-sm font-bold uppercase tracking-widest text-emerald-400">
-                    Product Name
-                  </th>
-                  <th className="border-b-2 border-emerald-400/20 px-6 py-5 text-left text-sm font-bold uppercase tracking-widest text-emerald-400">
-                    Brand
-                  </th>
-                  <th className="border-b-2 border-emerald-400/20 px-6 py-5 text-left text-sm font-bold uppercase tracking-widest text-emerald-400">
-                    Partner
-                  </th>
-                  <th className="border-b-2 border-emerald-400/20 px-6 py-5 text-left text-sm font-bold uppercase tracking-widest text-emerald-400">
-                    Model
-                  </th>
-                  <th className="border-b-2 border-emerald-400/20 px-6 py-5 text-left text-sm font-bold uppercase tracking-widest text-emerald-400">
-                    VRAM
-                  </th>
-                  <th className="border-b-2 border-emerald-400/20 px-6 py-5 text-left text-sm font-bold uppercase tracking-widest text-emerald-400">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {gpus.map((gpu) => (
-                  <tr
-                    key={gpu.id}
-                    className="transition-all hover:bg-emerald-400/5"
-                  >
-                    <td className="border-b border-white/5 px-6 py-5 text-[15px] text-white/90">
-                      {gpu.product_name}
-                    </td>
-                    <td className="border-b border-white/5 px-6 py-5">
-                      <span className="inline-block rounded bg-cyan-400/20 px-3 py-1.5 text-[13px] font-semibold text-cyan-400">
-                        {gpu.brand?.name || "N/A"}
+          <div className="space-y-4">
+            {/* Mobile: Cards, Desktop: Table */}
+            <div className="block sm:hidden space-y-3">
+              {gpus.map((gpu) => (
+                <div
+                  key={gpu.id}
+                  className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">
+                        {gpu.product_name}
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-500">{gpu.model}</p>
+                    </div>
+                    <button
+                      onClick={() => handleEdit(gpu)}
+                      className="ml-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Edit
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                      {gpu.chipBrand?.name}
+                    </span>
+                    {gpu.boardManufacturer && (
+                      <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                        {gpu.boardManufacturer.name}
                       </span>
-                    </td>
-                    <td className="border-b border-white/5 px-6 py-5">
-                      {gpu.partner ? (
-                        <span className="inline-block rounded bg-orange-500/20 px-3 py-1.5 text-[13px] font-semibold text-orange-500">
-                          {gpu.partner.name}
-                        </span>
-                      ) : (
-                        <span className="text-white/30">—</span>
-                      )}
-                    </td>
-                    <td className="border-b border-white/5 px-6 py-5 text-[15px] text-white/90">
-                      {gpu.model}
-                    </td>
-                    <td className="border-b border-white/5 px-6 py-5">
-                      {gpu.gpu_specs ? (
-                        <span className="inline-block rounded bg-purple-500/20 px-3 py-1.5 text-[13px] font-semibold text-purple-400">
-                          {gpu.gpu_specs.vram_size}GB {gpu.gpu_specs.vram_type}
-                        </span>
-                      ) : (
-                        <span className="text-white/30">—</span>
-                      )}
-                    </td>
-                    <td className="border-b border-white/5 px-6 py-5">
-                      <button
-                        onClick={() => handleEdit(gpu)}
-                        className="rounded border border-emerald-400 bg-transparent px-4 py-2 text-[13px] font-semibold uppercase tracking-wider text-emerald-400 transition-all hover:bg-emerald-400 hover:text-[#0a0e27]"
-                      >
-                        Edit
-                      </button>
-                    </td>
+                    )}
+                    {gpu.gpu_specs && (
+                      <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700">
+                        {gpu.gpu_specs.vram_size}GB {gpu.gpu_specs.vram_type}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: Table */}
+            <div className="hidden sm:block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-teal-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-white">
+                      Product
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-white">
+                      Brand
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-white">
+                      Manufacturer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-white">
+                      VRAM
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wide text-white">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {gpus.map((gpu) => (
+                    <tr
+                      key={gpu.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {gpu.product_name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {gpu.model}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                        {gpu.chipBrand?.name && (
+                          <span className="inline-flex items-center rounded-md bg-blue-200 px-2.5 py-0.5 text-xs font-medium text-gray-900">
+                            {gpu.chipBrand?.name}
+                          </span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 ">
+                        {(gpu.boardManufacturer?.name && (
+                          <span className="inline-flex items-center rounded-md bg-green-200 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+                            {gpu.boardManufacturer?.name}
+                          </span>
+                        )) ||
+                          "—"}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        {gpu.gpu_specs ? (
+                          <span className="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+                            {gpu.gpu_specs.vram_size}GB{" "}
+                            {gpu.gpu_specs.vram_type}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleEdit(gpu)}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
-      </div>
+      </main>
 
       {isFormOpen && (
         <GPUFormModal gpu={selectedGPU} onClose={handleFormClose} />

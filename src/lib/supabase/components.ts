@@ -24,10 +24,10 @@ export async function getCategories() {
   return data;
 }
 
-export async function getBrands() {
+export async function getChipBrands() {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .from("brands")
+    .from("chip_brands")
     .select("*")
     .order("name", { ascending: true });
 
@@ -35,10 +35,10 @@ export async function getBrands() {
   return data;
 }
 
-export async function getPartners() {
+export async function getBoardManufacturers() {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .from("partners")
+    .from("board_manufacturers")
     .select("*")
     .order("name", { ascending: true });
 
@@ -46,12 +46,14 @@ export async function getPartners() {
   return data;
 }
 
-export async function getSeriesByBrand(brandId: string) {
+export async function getManufacturerSeriesByBoardManufacturer(
+  manufacturerId: string,
+) {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .from("product_series")
+    .from("manufacturer_series")
     .select("*")
-    .eq("brand_id", brandId)
+    .eq("board_manufacturer_id", manufacturerId)
     .order("name", { ascending: true });
 
   if (error) throw error;
@@ -70,9 +72,9 @@ export async function getComponents(filter?: ComponentFilter) {
       `
       *,
       category:component_categories(*),
-      brand:brands(*),
-      partner:partners(*),
-      series:product_series(*)
+      chipBrands:chip_brands(*),
+      boardManufacturers:board_manufacturers(*),
+      manufacturerSeries:manufacturer_series(*)
     `,
     )
     .order("created_at", { ascending: false });
@@ -80,11 +82,11 @@ export async function getComponents(filter?: ComponentFilter) {
   if (filter?.category_id) {
     query = query.eq("category_id", filter.category_id);
   }
-  if (filter?.brand_id) {
-    query = query.eq("brand_id", filter.brand_id);
+  if (filter?.chip_brand_id) {
+    query = query.eq("chip_brand_id", filter.chip_brand_id);
   }
-  if (filter?.partner_id) {
-    query = query.eq("partner_id", filter.partner_id);
+  if (filter?.board_manufacturer_id) {
+    query = query.eq("board_manufacturer_id", filter.board_manufacturer_id);
   }
   if (filter?.is_admin_approved !== undefined) {
     query = query.eq("is_admin_approved", filter.is_admin_approved);
@@ -108,9 +110,9 @@ export async function getComponentById(id: string) {
       `
       *,
       category:component_categories(*),
-      brand:brands(*),
-      partner:partners(*),
-      series:product_series(*)
+      chipBrands:chip_brands(*),
+      boardManufacturers:board_manufacturers(*),
+      manufacturerSeries:manufacturer_series(*)
     `,
     )
     .eq("id", id)
@@ -146,6 +148,8 @@ export async function updateComponent(
     .select()
     .single();
 
+  debugger;
+
   if (error) throw error;
   return data;
 }
@@ -169,9 +173,9 @@ export async function getGPUs(filter?: GPUFilter) {
       `
       *,
       category:component_categories(*),
-      brand:brands(*),
-      partner:partners(*),
-      series:product_series(*),
+      chipBrand:chip_brands(*),
+      boardManufacturer:board_manufacturers(*),
+      manufacturerSeries:manufacturer_series(*),
       gpu_specs(*)
     `,
     )
@@ -188,8 +192,10 @@ export async function getGPUs(filter?: GPUFilter) {
     .order("created_at", { ascending: false });
 
   // Apply base component filters
-  if (filter?.brand_id) query = query.eq("brand_id", filter.brand_id);
-  if (filter?.partner_id) query = query.eq("partner_id", filter.partner_id);
+  if (filter?.chip_brand_id)
+    query = query.eq("chip_brand_id", filter.chip_brand_id);
+  if (filter?.board_manufacturer_id)
+    query = query.eq("board_manufacturer_id", filter.board_manufacturer_id);
   if (filter?.is_admin_approved !== undefined)
     query = query.eq("is_admin_approved", filter.is_admin_approved);
   if (filter?.search) {
@@ -230,9 +236,9 @@ export async function getGPUById(id: string) {
       `
       *,
       category:component_categories(*),
-      brand:brands(*),
-      partner:partners(*),
-      series:product_series(*),
+      chipBrands:chip_brands(*),
+      boardManufacturers:board_manufacturers(*),
+      manufacturerSeries:manufacturer_series(*),
       gpu_specs(*)
     `,
     )
@@ -303,16 +309,17 @@ export async function getCPUs(filter?: ComponentFilter) {
       `
       *,
       category:component_categories(*),
-      brand:brands(*),
-      partner:partners(*),
-      series:product_series(*),
+      chipBrands:chip_brands(*),
+      boardManufacturers:board_manufacturers(*),
+      manufacturerSeries:manufacturer_series(*),
       cpu_specs(*)
     `,
     )
     .eq("category_id", category.id)
     .order("created_at", { ascending: false });
 
-  if (filter?.brand_id) query = query.eq("brand_id", filter.brand_id);
+  if (filter?.chip_brand_id)
+    query = query.eq("chip_brand_id", filter.chip_brand_id);
   if (filter?.is_admin_approved !== undefined)
     query = query.eq("is_admin_approved", filter.is_admin_approved);
   if (filter?.search) {
@@ -383,16 +390,17 @@ export async function getRAM(filter?: RAMFilter) {
       `
       *,
       category:component_categories(*),
-      brand:brands(*),
-      partner:partners(*),
-      series:product_series(*),
+      chipBrands:chip_brands(*),
+      boardManufacturers:board_manufacturers(*),
+      manufacturerSeries:manufacturer_series(*),
       ram_specs(*)
     `,
     )
     .eq("category_id", category.id)
     .order("created_at", { ascending: false });
 
-  if (filter?.brand_id) query = query.eq("brand_id", filter.brand_id);
+  if (filter?.chip_brand_id)
+    query = query.eq("chip_brand_id", filter.chip_brand_id);
   if (filter?.is_admin_approved !== undefined)
     query = query.eq("is_admin_approved", filter.is_admin_approved);
   if (filter?.search) {

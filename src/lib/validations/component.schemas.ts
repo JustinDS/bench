@@ -3,21 +3,9 @@ import { z } from "zod";
 // Base component schema
 export const componentSchema = z.object({
   category_id: z.string().uuid("Invalid category"),
-  brand_id: z.string().uuid("Invalid brand"),
-  partner_id: z
-    .string()
-    .uuid()
-    .nullable()
-    .optional()
-    .or(z.literal("")) // Allow empty string
-    .transform((val) => (val === "" ? null : val)),
-  series_id: z
-    .string()
-    .uuid()
-    .nullable()
-    .optional()
-    .or(z.literal("")) // Allow empty string
-    .transform((val) => (val === "" ? null : val)),
+  chip_brand_id: z.string().uuid("Invalid chip brand"),
+  board_manufacturer_id: z.string().uuid().nullable(),
+  manufacturer_series_id: z.string().uuid().nullable(),
   model: z.string().min(1, "Model is required").max(100),
   product_name: z.string().min(1, "Product name is required"),
   is_admin_approved: z.boolean().nullable().optional(),
@@ -27,7 +15,7 @@ export type ComponentFormData = z.infer<typeof componentSchema>;
 
 // GPU Specs Schema
 export const gpuSpecsSchema = z.object({
-  component_id: z.string().uuid().nullable().optional(),
+  component_id: z.string().uuid().optional(),
   chip_series: z.string().max(50).nullable().optional(),
   chip_model: z.string().max(50).nullable().optional(),
   vram_size: z.coerce.number<number>().int().positive().nullable().optional(),
@@ -112,8 +100,8 @@ export type RAMFormData = z.infer<typeof ramFormSchema>;
 // Filter schemas for search/filter functionality
 export const componentFilterSchema = z.object({
   category_id: z.string().uuid().optional(),
-  brand_id: z.string().uuid().optional(),
-  partner_id: z.string().uuid().optional(),
+  chip_brand_id: z.string().uuid().optional(),
+  board_manufacturer_id: z.string().uuid().optional(),
   search: z.string().optional(),
   is_admin_approved: z.boolean().optional(),
 });

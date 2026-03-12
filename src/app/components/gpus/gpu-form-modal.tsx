@@ -12,17 +12,16 @@ import {
   updateComponent,
   updateGPUSpecs,
   getCategories,
-  getBrands,
-  getPartners,
-  getSeriesByBrand,
 } from "@/lib/supabase/components";
-import type {
-  Brand,
-  ComponentCategory,
-  GPUWithSpecs,
-  Partner,
-  ProductSeries,
-} from "@/types/databaseConvenient.types";
+import type { GPUWithSpecs } from "@/types/databaseConvenient.types";
+import z from "zod";
+import {
+  getChipBrandsForComponentType,
+  getBoardManufacturersForComponentType,
+  getManufacturerSeriesForComponentType,
+  getSeriesByManufacturerAndComponentType,
+} from "@/lib/supabase/component-types";
+import { ComponentType } from "@/lib/types/component-types";
 
 interface GPUFormModalProps {
   gpu?: GPUWithSpecs | null;
@@ -30,12 +29,16 @@ interface GPUFormModalProps {
 }
 
 export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
-  const [categories, setCategories] = useState<ComponentCategory[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [series, setSeries] = useState<ProductSeries[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [chipBrands, setChipBrands] = useState<any[]>([]);
+  const [boardManufacturers, setBoardManufacturers] = useState<any[]>([]);
+  const [manufacturerSeries, setManufacturerSeries] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [selectedChipBrand, setSelectedChipBrand] = useState<string>("");
+  const [selectedBoardManufacturer, setSelectedBoardManufacturer] =
+    useState<string>("");
+  const [selectedManufacturerSeries, setSelectedManufacturerSeries] =
+    useState<string>("");
 
   const isEditing = !!gpu;
 
@@ -50,71 +53,96 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
       ? ({
           component: {
             category_id: gpu.category_id,
-            brand_id: gpu.brand_id,
-            partner_id: gpu.partner_id,
-            series_id: gpu.series_id,
+            chip_brand_id: gpu.chip_brand_id,
+            board_manufacturer_id: gpu.board_manufacturer_id ?? null,
+            manufacturer_series_id: gpu.manufacturer_series_id ?? null,
             model: gpu.model,
             product_name: gpu.product_name,
-            is_admin_approved: gpu.is_admin_approved,
+            is_admin_approved: gpu.is_admin_approved ?? false,
           },
           specs: gpu.gpu_specs ? gpu.gpu_specs : {},
-        } as GPUFormData)
-      : undefined,
+        } as z.infer<typeof gpuFormSchema>)
+      : {
+          component: {
+            is_admin_approved: false,
+          },
+        },
   });
 
-  const brandId = watch("component.brand_id");
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log("❌ Validation errors:", errors);
-    }
-  }, [errors]);
+  const chipBrandId = watch("component.chip_brand_id");
+  const manufacturerId = watch("component.board_manufacturer_id");
+  const manufacturerSeriesId = watch("component.manufacturer_series_id");
 
   useEffect(() => {
     loadLookupData();
   }, []);
 
   useEffect(() => {
-    if (brandId && brandId !== selectedBrand) {
-      setSelectedBrand(brandId);
-      loadSeries(brandId);
+    if (
+      manufacturerSeriesId &&
+      manufacturerSeriesId !== selectedManufacturerSeries
+    ) {
+      setSelectedManufacturerSeries(manufacturerSeriesId);
     }
-  }, [brandId]);
+  }, [manufacturerSeriesId]);
+
+  useEffect(() => {
+    if (manufacturerId && manufacturerId !== selectedBoardManufacturer) {
+      setSelectedBoardManufacturer(manufacturerId);
+      loadManufacturerSeries(manufacturerId);
+    }
+  }, [manufacturerId]);
+
+  useEffect(() => {
+    if (chipBrandId && chipBrandId !== selectedChipBrand) {
+      setSelectedChipBrand(chipBrandId);
+    }
+  }, [chipBrandId]);
 
   async function loadLookupData() {
     try {
-      const [catData, brandData, partnerData] = await Promise.all([
-        getCategories(),
-        getBrands(),
-        getPartners(),
-      ]);
+      // Get categories (unfiltered)
+      const catData = await getCategories();
       setCategories(catData);
-      setBrands(brandData);
-      setPartners(partnerData);
 
-      if (gpu?.brand_id) {
-        const seriesData = await getSeriesByBrand(gpu.brand_id);
-        setSeries(seriesData);
+      // Get ONLY brands and partners valid for GPUs from database
+      const [brandChipData, boardManufacturerData] = await Promise.all([
+        getChipBrandsForComponentType(ComponentType.GPU),
+        getBoardManufacturersForComponentType(ComponentType.GPU),
+      ]);
+
+      setChipBrands(brandChipData);
+      setBoardManufacturers(boardManufacturerData);
+
+      if (gpu?.board_manufacturer_id) {
+        const manufacturerSeriesData =
+          await getSeriesByManufacturerAndComponentType(
+            gpu.board_manufacturer_id,
+            ComponentType.GPU,
+          );
+
+        setManufacturerSeries(manufacturerSeriesData);
       }
     } catch (error) {
       console.error("Error loading lookup data:", error);
     }
   }
 
-  async function loadSeries(brandId: string) {
+  async function loadManufacturerSeries(boardManufacturerId: string) {
     try {
-      const seriesData = await getSeriesByBrand(brandId);
-      setSeries(seriesData);
+      const seriesData = await getSeriesByManufacturerAndComponentType(
+        boardManufacturerId,
+        ComponentType.GPU,
+      );
+      setManufacturerSeries(seriesData);
     } catch (error) {
       console.error("Error loading series:", error);
     }
   }
 
   async function onSubmit(data: GPUFormData) {
-    console.log("📤 Submitting:", data);
     try {
       setLoading(true);
-      debugger;
 
       if (isEditing && gpu) {
         await updateComponent(gpu.id, data.component);
@@ -125,10 +153,9 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
 
         await createGPU(
           { ...data.component, category_id: gpuCategory.id },
-          data.specs,
+          { ...data.specs, component_id: data.specs.component_id! },
         );
       }
-      console.log("✅ Success!");
 
       onClose();
     } catch (error) {
@@ -139,276 +166,389 @@ export function GPUFormModal({ gpu, onClose }: GPUFormModalProps) {
     }
   }
 
-  console.log("Brand ID:", watch("component.brand_id"));
-  console.log("Model:", watch("component.model"));
-  console.log("Categories loaded:", categories.length);
-  console.log("category_id", watch("component.category_id"));
-  console.log("partner_id", watch("component.partner_id"));
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-8 backdrop-blur-sm animate-in fade-in duration-300"
-      onClick={onClose}
-    >
+    <>
+      {/* Backdrop */}
       <div
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border-2 border-emerald-400/30 bg-gradient-to-br from-[#1a0b2e] to-[#16001e] font-mono shadow-[0_25px_50px_rgba(0,255,157,0.2)] animate-in slide-in-from-bottom-8 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b-2 border-emerald-400/20 p-8">
-          <h2 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-3xl font-black uppercase tracking-wide text-transparent">
-            {isEditing ? "Edit GPU" : "Add New GPU"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-4xl leading-none text-white/60 transition-colors hover:text-red-400"
-          >
-            ×
-          </button>
-        </div>
+        className="fixed inset-0 z-50 bg-black/50 transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Body */}
-          <div className="p-8">
-            {/* Component Information */}
-            <div className="mb-10">
-              <h3 className="mb-6 border-b border-emerald-400/20 pb-2 text-xl font-bold uppercase tracking-widest text-emerald-400">
-                Component Information
-              </h3>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Brand *
-                  </label>
-                  <select
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    {...register("component.brand_id")}
-                  >
-                    <option value="">Select Brand</option>
-                    {brands.map((brand) => (
-                      <option key={brand.id} value={brand.id}>
-                        {brand.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.component?.brand_id && (
-                    <span className="mt-1 text-[13px] text-red-400">
-                      {errors.component.brand_id.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Partner (Optional)
-                  </label>
-                  <select
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    {...register("component.partner_id")}
-                  >
-                    <option value="">Select Partner</option>
-                    {partners.map((partner) => (
-                      <option key={partner.id} value={partner.id}>
-                        {partner.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Series (Optional)
-                  </label>
-                  <select
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white transition-all disabled:opacity-50 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    {...register("component.series_id")}
-                    disabled={!brandId}
-                  >
-                    <option value="">Select Series</option>
-                    {series.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Model *
-                  </label>
-                  <input
-                    type="text"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. RTX 5080"
-                    {...register("component.model")}
-                  />
-                  {errors.component?.model && (
-                    <span className="mt-1 text-[13px] text-red-400">
-                      {errors.component.model.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2 md:col-span-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. ASUS ROG STRIX RTX 5080"
-                    {...register("component.product_name")}
-                  />
-                  {errors.component?.product_name && (
-                    <span className="mt-1 text-[13px] text-red-400">
-                      {errors.component.product_name.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="h-5 w-5 cursor-pointer accent-emerald-400"
-                    {...register("component.is_admin_approved")}
-                  />
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Admin Approved
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* GPU Specifications */}
-            <div className="mb-10">
-              <h3 className="mb-6 border-b border-emerald-400/20 pb-2 text-xl font-bold uppercase tracking-widest text-emerald-400">
-                GPU Specifications
-              </h3>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Chip Series
-                  </label>
-                  <input
-                    type="text"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. RTX 5000"
-                    {...register("specs.chip_series")}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Chip Model
-                  </label>
-                  <input
-                    type="text"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. RTX 5080"
-                    {...register("specs.chip_model")}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    VRAM Size (GB)
-                  </label>
-                  <input
-                    type="number"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. 16"
-                    {...register("specs.vram_size")}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    VRAM Type
-                  </label>
-                  <select
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    {...register("specs.vram_type")}
-                  >
-                    <option value="">Select Type</option>
-                    <option value="GDDR6">GDDR6</option>
-                    <option value="GDDR6X">GDDR6X</option>
-                    <option value="GDDR7">GDDR7</option>
-                    <option value="HBM2">HBM2</option>
-                    <option value="HBM3">HBM3</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Base Clock (MHz)
-                  </label>
-                  <input
-                    type="number"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. 2200"
-                    {...register("specs.base_clock")}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    Boost Clock (MHz)
-                  </label>
-                  <input
-                    type="number"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. 2600"
-                    {...register("specs.boost_clock")}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    TDP (Watts)
-                  </label>
-                  <input
-                    type="number"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. 320"
-                    {...register("specs.tdp")}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                    PCIe Version
-                  </label>
-                  <input
-                    type="text"
-                    className="rounded-lg border border-emerald-400/20 bg-black/40 px-4 py-3.5 text-[15px] text-white placeholder-white/30 transition-all focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/10"
-                    placeholder="e.g. 4.0 or 5.0"
-                    {...register("specs.pcie_version")}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="flex justify-end gap-4 border-t-2 border-emerald-400/20 p-8">
+      {/* Modal Container */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="relative w-full max-w-2xl bg-white rounded-lg shadow-xl my-8"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {isEditing ? "Edit Graphics Card" : "Add Graphics Card"}
+            </h3>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-white/20 bg-white/5 px-8 py-3.5 text-[15px] font-bold uppercase tracking-wider text-white/70 transition-all hover:bg-white/10 hover:text-white"
+              className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 transition-colors"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-8 py-3.5 text-[15px] font-bold uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,255,157,0.4)] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? "Saving..." : isEditing ? "Update GPU" : "Create GPU"}
+              <span className="sr-only">Close</span>
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
           </div>
-        </form>
+
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Body - Scrollable */}
+            <div className="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-4">
+              {/* Error Display */}
+              {Object.keys(errors).length > 0 && (
+                <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                  <div className="flex">
+                    <svg
+                      className="h-5 w-5 text-red-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800">
+                        Please fix the following errors:
+                      </h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <ul className="list-disc space-y-1 pl-5">
+                          {errors.component?.chip_brand_id && (
+                            <li>{errors.component.chip_brand_id.message}</li>
+                          )}
+                          {errors.component?.model && (
+                            <li>{errors.component.model.message}</li>
+                          )}
+                          {errors.component?.product_name && (
+                            <li>{errors.component.product_name.message}</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Component Information */}
+              <div className="mb-6">
+                <h4 className="mb-4 text-sm font-semibold text-gray-900">
+                  Component Information
+                </h4>
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="brand"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Brand <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="brand"
+                        {...register("component.chip_brand_id")}
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        value={selectedChipBrand}
+                      >
+                        <option value="">Select Brand</option>
+                        {chipBrands.map((brand) => (
+                          <option key={brand.id} value={brand.id}>
+                            {brand.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="partner"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Manufacturer
+                      </label>
+                      <select
+                        id="partner"
+                        {...register("component.board_manufacturer_id")}
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        value={selectedBoardManufacturer}
+                      >
+                        <option value="">Select Manufacturer</option>
+                        {boardManufacturers.map((boardManufacturer) => (
+                          <option
+                            key={boardManufacturer.id}
+                            value={boardManufacturer.id}
+                          >
+                            {boardManufacturer.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="series"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Series
+                      </label>
+                      <select
+                        id="series"
+                        {...register("component.manufacturer_series_id")}
+                        disabled={!manufacturerId}
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        value={selectedManufacturerSeries}
+                      >
+                        <option value="">Select Manufacturer Series</option>
+                        {manufacturerSeries.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="model"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Model <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="model"
+                        {...register("component.model")}
+                        placeholder="e.g. RTX 5080"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="product_name"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Product Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="product_name"
+                      {...register("component.product_name")}
+                      placeholder="e.g. ASUS ROG STRIX RTX 5080"
+                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="is_admin_approved"
+                      {...register("component.is_admin_approved")}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="is_admin_approved"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
+                      Admin Approved
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* GPU Specifications */}
+              <div>
+                <h4 className="mb-4 text-sm font-semibold text-gray-900">
+                  Specifications
+                </h4>
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="chip_series"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Chip Series
+                      </label>
+                      <input
+                        type="text"
+                        id="chip_series"
+                        {...register("specs.chip_series")}
+                        placeholder="e.g. RTX 5000"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="chip_model"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Chip Model
+                      </label>
+                      <input
+                        type="text"
+                        id="chip_model"
+                        {...register("specs.chip_model")}
+                        placeholder="e.g. RTX 5080"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="vram_size"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        VRAM Size (GB)
+                      </label>
+                      <input
+                        type="number"
+                        id="vram_size"
+                        {...register("specs.vram_size")}
+                        placeholder="e.g. 16"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="vram_type"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        VRAM Type
+                      </label>
+                      <select
+                        id="vram_type"
+                        {...register("specs.vram_type")}
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select Type</option>
+                        <option value="GDDR6">GDDR6</option>
+                        <option value="GDDR6X">GDDR6X</option>
+                        <option value="GDDR7">GDDR7</option>
+                        <option value="HBM2">HBM2</option>
+                        <option value="HBM3">HBM3</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label
+                        htmlFor="base_clock"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Base Clock (MHz)
+                      </label>
+                      <input
+                        type="number"
+                        id="base_clock"
+                        {...register("specs.base_clock")}
+                        placeholder="e.g. 2200"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="boost_clock"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Boost Clock (MHz)
+                      </label>
+                      <input
+                        type="number"
+                        id="boost_clock"
+                        {...register("specs.boost_clock")}
+                        placeholder="e.g. 2600"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="tdp"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        TDP (Watts)
+                      </label>
+                      <input
+                        type="number"
+                        id="tdp"
+                        {...register("specs.tdp")}
+                        placeholder="e.g. 320"
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="pcie_version"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      PCIe Version
+                    </label>
+                    <input
+                      type="text"
+                      id="pcie_version"
+                      {...register("specs.pcie_version")}
+                      placeholder="e.g. 4.0 or 5.0"
+                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex flex-col-reverse gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading
+                  ? "Saving..."
+                  : isEditing
+                    ? "Update GPU"
+                    : "Create GPU"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
