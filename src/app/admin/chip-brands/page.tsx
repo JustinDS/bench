@@ -2,60 +2,60 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  getAllBrands, 
-  getBrandComponentTypes, 
-  addBrandComponentType, 
-  removeBrandComponentType 
+  getAllChipBrands, 
+  getChipBrandComponentTypes, 
+  addChipBrandComponentType, 
+  removeChipBrandComponentType 
 } from '@/lib/supabase/component-types'
 import { ComponentType, getComponentTypeLabel, getAllComponentTypes } from '@/lib/types/component-types'
 
-export default function BrandsAdminPage() {
-  const [brands, setBrands] = useState<any[]>([])
-  const [selectedBrand, setSelectedBrand] = useState<any>(null)
-  const [brandTypes, setBrandTypes] = useState<ComponentType[]>([])
+export default function ChipBrandsAdminPage() {
+  const [chipBrands, setChipBrands] = useState<any[]>([])
+  const [selectedChipBrand, setSelectedChipBrand] = useState<any>(null)
+  const [chipBrandTypes, setChipBrandTypes] = useState<ComponentType[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    loadBrands()
+    loadChipBrands()
   }, [])
 
-  async function loadBrands() {
+  async function loadChipBrands() {
     try {
       setLoading(true)
-      const data = await getAllBrands()
-      setBrands(data)
+      const data = await getAllChipBrands()
+      setChipBrands(data)
     } catch (error) {
-      console.error('Error loading brands:', error)
+      console.error('Error loading chip brands:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleBrandSelect(brand: any) {
+  async function handleChipBrandSelect(chipBrand: any) {
     try {
-      setSelectedBrand(brand)
-      const types = await getBrandComponentTypes(brand.id)
-      setBrandTypes(types)
+      setSelectedChipBrand(chipBrand)
+      const types = await getChipBrandComponentTypes(chipBrand.id)
+      setChipBrandTypes(types)
     } catch (error) {
-      console.error('Error loading brand types:', error)
+      console.error('Error loading chip brand types:', error)
     }
   }
 
   async function handleToggleType(componentType: ComponentType) {
-    if (!selectedBrand) return
+    if (!selectedChipBrand) return
 
     try {
       setSaving(true)
       
-      if (brandTypes.includes(componentType)) {
+      if (chipBrandTypes.includes(componentType)) {
         // Remove
-        await removeBrandComponentType(selectedBrand.id, componentType)
-        setBrandTypes(brandTypes.filter(t => t !== componentType))
+        await removeChipBrandComponentType(selectedChipBrand.id, componentType)
+        setChipBrandTypes(chipBrandTypes.filter(t => t !== componentType))
       } else {
         // Add
-        await addBrandComponentType(selectedBrand.id, componentType)
-        setBrandTypes([...brandTypes, componentType])
+        await addChipBrandComponentType(selectedChipBrand.id, componentType)
+        setChipBrandTypes([...chipBrandTypes, componentType])
       }
     } catch (error) {
       console.error('Error toggling component type:', error)
@@ -72,35 +72,39 @@ export default function BrandsAdminPage() {
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Brand Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Chip Brand Management</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Configure which component types each brand supports
+            Configure which component types each chip brand supports
+          </p>
+          <p className="mt-1 text-xs text-gray-400">
+            Examples: NVIDIA (GPU chips), AMD (GPU/CPU chips), Corsair (RAM/PSU/Cooling)
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Brand List */}
+          {/* Chip Brand List */}
           <div className="lg:col-span-1">
             <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
               <div className="border-b border-gray-200 px-4 py-3">
-                <h2 className="text-sm font-semibold text-gray-900">Brands</h2>
+                <h2 className="text-sm font-semibold text-gray-900">Chip Brands</h2>
+                <p className="mt-1 text-xs text-gray-500">{chipBrands.length} total</p>
               </div>
               <div className="max-h-[600px] overflow-y-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-sm text-gray-500">Loading brands...</div>
+                  <div className="p-8 text-center text-sm text-gray-500">Loading chip brands...</div>
                 ) : (
                   <div className="divide-y divide-gray-200">
-                    {brands.map((brand) => (
+                    {chipBrands.map((chipBrand) => (
                       <button
-                        key={brand.id}
-                        onClick={() => handleBrandSelect(brand)}
+                        key={chipBrand.id}
+                        onClick={() => handleChipBrandSelect(chipBrand)}
                         className={`w-full px-4 py-3 text-left text-sm transition-colors hover:bg-gray-50 ${
-                          selectedBrand?.id === brand.id ? 'bg-blue-50 font-medium text-blue-700' : 'text-gray-900'
+                          selectedChipBrand?.id === chipBrand.id ? 'bg-blue-50 font-medium text-blue-700' : 'text-gray-900'
                         }`}
                       >
-                        {brand.name}
+                        {chipBrand.name}
                       </button>
                     ))}
                   </div>
@@ -111,16 +115,16 @@ export default function BrandsAdminPage() {
 
           {/* Component Types Configuration */}
           <div className="lg:col-span-2">
-            {selectedBrand ? (
+            {selectedChipBrand ? (
               <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-lg font-semibold text-gray-900">{selectedBrand.name}</h2>
-                  <p className="mt-1 text-sm text-gray-500">Select which component types this brand supports</p>
+                  <h2 className="text-lg font-semibold text-gray-900">{selectedChipBrand.name}</h2>
+                  <p className="mt-1 text-sm text-gray-500">Select which component types this chip brand supports</p>
                 </div>
                 <div className="p-6">
                   <div className="grid gap-3 sm:grid-cols-2">
                     {allComponentTypes.map((componentType) => {
-                      const isSelected = brandTypes.includes(componentType)
+                      const isSelected = chipBrandTypes.includes(componentType)
                       return (
                         <button
                           key={componentType}
@@ -161,11 +165,11 @@ export default function BrandsAdminPage() {
                   {/* Summary */}
                   <div className="mt-6 rounded-lg bg-gray-50 p-4">
                     <p className="text-sm font-medium text-gray-700">
-                      Selected: {brandTypes.length} component type{brandTypes.length !== 1 ? 's' : ''}
+                      Selected: {chipBrandTypes.length} component type{chipBrandTypes.length !== 1 ? 's' : ''}
                     </p>
-                    {brandTypes.length > 0 && (
+                    {chipBrandTypes.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {brandTypes.map((type) => (
+                        {chipBrandTypes.map((type) => (
                           <span
                             key={type}
                             className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
@@ -194,8 +198,8 @@ export default function BrandsAdminPage() {
                       d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                     />
                   </svg>
-                  <h3 className="mt-4 text-sm font-medium text-gray-900">No brand selected</h3>
-                  <p className="mt-1 text-sm text-gray-500">Select a brand from the list to configure its component types</p>
+                  <h3 className="mt-4 text-sm font-medium text-gray-900">No chip brand selected</h3>
+                  <p className="mt-1 text-sm text-gray-500">Select a chip brand from the list to configure its component types</p>
                 </div>
               </div>
             )}

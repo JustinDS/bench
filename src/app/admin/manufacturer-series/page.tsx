@@ -2,22 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  getAllSeries, 
-  getAllBrands,
-  getSeriesComponentTypes, 
-  addSeriesComponentType, 
-  removeSeriesComponentType 
+  getAllManufacturerSeries, 
+  getAllBoardManufacturers,
+  getManufacturerSeriesComponentTypes, 
+  addManufacturerSeriesComponentType, 
+  removeManufacturerSeriesComponentType 
 } from '@/lib/supabase/component-types'
 import { ComponentType, getComponentTypeLabel, getAllComponentTypes } from '@/lib/types/component-types'
 
-export default function SeriesAdminPage() {
+export default function ManufacturerSeriesAdminPage() {
   const [series, setSeries] = useState<any[]>([])
-  const [brands, setBrands] = useState<any[]>([])
+  const [manufacturers, setManufacturers] = useState<any[]>([])
   const [selectedSeries, setSelectedSeries] = useState<any>(null)
   const [seriesTypes, setSeriesTypes] = useState<ComponentType[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [filterBrand, setFilterBrand] = useState<string>('')
+  const [filterManufacturer, setFilterManufacturer] = useState<string>('')
 
   useEffect(() => {
     loadData()
@@ -26,12 +26,12 @@ export default function SeriesAdminPage() {
   async function loadData() {
     try {
       setLoading(true)
-      const [seriesData, brandData] = await Promise.all([
-        getAllSeries(),
-        getAllBrands(),
+      const [seriesData, manufacturerData] = await Promise.all([
+        getAllManufacturerSeries(),
+        getAllBoardManufacturers(),
       ])
       setSeries(seriesData)
-      setBrands(brandData)
+      setManufacturers(manufacturerData)
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -42,7 +42,7 @@ export default function SeriesAdminPage() {
   async function handleSeriesSelect(seriesItem: any) {
     try {
       setSelectedSeries(seriesItem)
-      const types = await getSeriesComponentTypes(seriesItem.id)
+      const types = await getManufacturerSeriesComponentTypes(seriesItem.id)
       setSeriesTypes(types)
     } catch (error) {
       console.error('Error loading series types:', error)
@@ -57,11 +57,11 @@ export default function SeriesAdminPage() {
       
       if (seriesTypes.includes(componentType)) {
         // Remove
-        await removeSeriesComponentType(selectedSeries.id, componentType)
+        await removeManufacturerSeriesComponentType(selectedSeries.id, componentType)
         setSeriesTypes(seriesTypes.filter(t => t !== componentType))
       } else {
         // Add
-        await addSeriesComponentType(selectedSeries.id, componentType)
+        await addManufacturerSeriesComponentType(selectedSeries.id, componentType)
         setSeriesTypes([...seriesTypes, componentType])
       }
     } catch (error) {
@@ -74,14 +74,14 @@ export default function SeriesAdminPage() {
 
   const allComponentTypes = getAllComponentTypes()
   
-  // Filter series by brand if selected
-  const filteredSeries = filterBrand
-    ? series.filter(s => s.brand_id === filterBrand)
+  // Filter series by manufacturer if selected
+  const filteredSeries = filterManufacturer
+    ? series.filter(s => s.board_manufacturer_id === filterManufacturer)
     : series
 
-  // Get brand name helper
-  const getBrandName = (brandId: string) => {
-    return brands.find(b => b.id === brandId)?.name || 'Unknown'
+  // Get manufacturer name helper
+  const getManufacturerName = (manufacturerId: string) => {
+    return manufacturers.find(m => m.id === manufacturerId)?.name || 'Unknown'
   }
 
   return (
@@ -89,9 +89,12 @@ export default function SeriesAdminPage() {
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Series Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Manufacturer Series Management</h1>
           <p className="mt-1 text-sm text-gray-500">
             Configure which component types each product series supports
+          </p>
+          <p className="mt-1 text-xs text-gray-400">
+            Examples: ROG STRIX (ASUS - GPUs/Motherboards), NITRO+ (Sapphire - GPUs only)
           </p>
         </div>
       </div>
@@ -104,19 +107,22 @@ export default function SeriesAdminPage() {
               <div className="border-b border-gray-200 px-4 py-3">
                 <h2 className="mb-3 text-sm font-semibold text-gray-900">Product Series</h2>
                 
-                {/* Brand Filter */}
+                {/* Manufacturer Filter */}
                 <select
-                  value={filterBrand}
-                  onChange={(e) => setFilterBrand(e.target.value)}
+                  value={filterManufacturer}
+                  onChange={(e) => setFilterManufacturer(e.target.value)}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                 >
-                  <option value="">All Brands</option>
-                  {brands.map((brand) => (
-                    <option key={brand.id} value={brand.id}>
-                      {brand.name}
+                  <option value="">All Manufacturers</option>
+                  {manufacturers.map((manufacturer) => (
+                    <option key={manufacturer.id} value={manufacturer.id}>
+                      {manufacturer.name}
                     </option>
                   ))}
                 </select>
+                <p className="mt-2 text-xs text-gray-500">
+                  {filteredSeries.length} series {filterManufacturer ? 'in manufacturer' : 'total'}
+                </p>
               </div>
               <div className="max-h-[600px] overflow-y-auto">
                 {loading ? (
@@ -139,7 +145,7 @@ export default function SeriesAdminPage() {
                           {seriesItem.name}
                         </div>
                         <div className="mt-0.5 text-xs text-gray-500">
-                          {getBrandName(seriesItem.brand_id)}
+                          {getManufacturerName(seriesItem.board_manufacturer_id)}
                         </div>
                       </button>
                     ))}
@@ -155,7 +161,7 @@ export default function SeriesAdminPage() {
               <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="border-b border-gray-200 px-6 py-4">
                   <h2 className="text-lg font-semibold text-gray-900">{selectedSeries.name}</h2>
-                  <p className="mt-0.5 text-sm text-gray-500">{getBrandName(selectedSeries.brand_id)}</p>
+                  <p className="mt-0.5 text-sm text-gray-500">{getManufacturerName(selectedSeries.board_manufacturer_id)}</p>
                   <p className="mt-2 text-sm text-gray-500">Select which component types this series applies to</p>
                 </div>
                 <div className="p-6">
@@ -218,7 +224,7 @@ export default function SeriesAdminPage() {
                     )}
                   </div>
 
-                  {/* Examples */}
+                  {/* Warning if no types selected */}
                   {seriesTypes.length === 0 && (
                     <div className="mt-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                       <div className="flex">

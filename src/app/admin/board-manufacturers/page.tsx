@@ -2,60 +2,60 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  getAllPartners, 
-  getPartnerComponentTypes, 
-  addPartnerComponentType, 
-  removePartnerComponentType 
+  getAllBoardManufacturers, 
+  getBoardManufacturerComponentTypes, 
+  addBoardManufacturerComponentType, 
+  removeBoardManufacturerComponentType 
 } from '@/lib/supabase/component-types'
 import { ComponentType, getComponentTypeLabel, getAllComponentTypes } from '@/lib/types/component-types'
 
-export default function PartnersAdminPage() {
-  const [partners, setPartners] = useState<any[]>([])
-  const [selectedPartner, setSelectedPartner] = useState<any>(null)
-  const [partnerTypes, setPartnerTypes] = useState<ComponentType[]>([])
+export default function BoardManufacturersAdminPage() {
+  const [boardManufacturers, setBoardManufacturers] = useState<any[]>([])
+  const [selectedManufacturer, setSelectedManufacturer] = useState<any>(null)
+  const [manufacturerTypes, setManufacturerTypes] = useState<ComponentType[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    loadPartners()
+    loadBoardManufacturers()
   }, [])
 
-  async function loadPartners() {
+  async function loadBoardManufacturers() {
     try {
       setLoading(true)
-      const data = await getAllPartners()
-      setPartners(data)
+      const data = await getAllBoardManufacturers()
+      setBoardManufacturers(data)
     } catch (error) {
-      console.error('Error loading partners:', error)
+      console.error('Error loading board manufacturers:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  async function handlePartnerSelect(partner: any) {
+  async function handleManufacturerSelect(manufacturer: any) {
     try {
-      setSelectedPartner(partner)
-      const types = await getPartnerComponentTypes(partner.id)
-      setPartnerTypes(types)
+      setSelectedManufacturer(manufacturer)
+      const types = await getBoardManufacturerComponentTypes(manufacturer.id)
+      setManufacturerTypes(types)
     } catch (error) {
-      console.error('Error loading partner types:', error)
+      console.error('Error loading board manufacturer types:', error)
     }
   }
 
   async function handleToggleType(componentType: ComponentType) {
-    if (!selectedPartner) return
+    if (!selectedManufacturer) return
 
     try {
       setSaving(true)
       
-      if (partnerTypes.includes(componentType)) {
+      if (manufacturerTypes.includes(componentType)) {
         // Remove
-        await removePartnerComponentType(selectedPartner.id, componentType)
-        setPartnerTypes(partnerTypes.filter(t => t !== componentType))
+        await removeBoardManufacturerComponentType(selectedManufacturer.id, componentType)
+        setManufacturerTypes(manufacturerTypes.filter(t => t !== componentType))
       } else {
         // Add
-        await addPartnerComponentType(selectedPartner.id, componentType)
-        setPartnerTypes([...partnerTypes, componentType])
+        await addBoardManufacturerComponentType(selectedManufacturer.id, componentType)
+        setManufacturerTypes([...manufacturerTypes, componentType])
       }
     } catch (error) {
       console.error('Error toggling component type:', error)
@@ -72,35 +72,39 @@ export default function PartnersAdminPage() {
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Partner/Manufacturer Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Board Manufacturer Management</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Configure which component types each partner/manufacturer supports
+            Configure which component types each board manufacturer produces
+          </p>
+          <p className="mt-1 text-xs text-gray-400">
+            Examples: ASUS (GPUs/Motherboards), MSI (GPUs/Motherboards), Sapphire (GPUs only)
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Partner List */}
+          {/* Board Manufacturer List */}
           <div className="lg:col-span-1">
             <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
               <div className="border-b border-gray-200 px-4 py-3">
-                <h2 className="text-sm font-semibold text-gray-900">Partners</h2>
+                <h2 className="text-sm font-semibold text-gray-900">Board Manufacturers</h2>
+                <p className="mt-1 text-xs text-gray-500">{boardManufacturers.length} total</p>
               </div>
               <div className="max-h-[600px] overflow-y-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-sm text-gray-500">Loading partners...</div>
+                  <div className="p-8 text-center text-sm text-gray-500">Loading manufacturers...</div>
                 ) : (
                   <div className="divide-y divide-gray-200">
-                    {partners.map((partner) => (
+                    {boardManufacturers.map((manufacturer) => (
                       <button
-                        key={partner.id}
-                        onClick={() => handlePartnerSelect(partner)}
+                        key={manufacturer.id}
+                        onClick={() => handleManufacturerSelect(manufacturer)}
                         className={`w-full px-4 py-3 text-left text-sm transition-colors hover:bg-gray-50 ${
-                          selectedPartner?.id === partner.id ? 'bg-purple-50 font-medium text-purple-700' : 'text-gray-900'
+                          selectedManufacturer?.id === manufacturer.id ? 'bg-purple-50 font-medium text-purple-700' : 'text-gray-900'
                         }`}
                       >
-                        {partner.name}
+                        {manufacturer.name}
                       </button>
                     ))}
                   </div>
@@ -111,16 +115,16 @@ export default function PartnersAdminPage() {
 
           {/* Component Types Configuration */}
           <div className="lg:col-span-2">
-            {selectedPartner ? (
+            {selectedManufacturer ? (
               <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-lg font-semibold text-gray-900">{selectedPartner.name}</h2>
-                  <p className="mt-1 text-sm text-gray-500">Select which component types this partner manufactures</p>
+                  <h2 className="text-lg font-semibold text-gray-900">{selectedManufacturer.name}</h2>
+                  <p className="mt-1 text-sm text-gray-500">Select which component types this manufacturer produces</p>
                 </div>
                 <div className="p-6">
                   <div className="grid gap-3 sm:grid-cols-2">
                     {allComponentTypes.map((componentType) => {
-                      const isSelected = partnerTypes.includes(componentType)
+                      const isSelected = manufacturerTypes.includes(componentType)
                       return (
                         <button
                           key={componentType}
@@ -161,11 +165,11 @@ export default function PartnersAdminPage() {
                   {/* Summary */}
                   <div className="mt-6 rounded-lg bg-gray-50 p-4">
                     <p className="text-sm font-medium text-gray-700">
-                      Selected: {partnerTypes.length} component type{partnerTypes.length !== 1 ? 's' : ''}
+                      Selected: {manufacturerTypes.length} component type{manufacturerTypes.length !== 1 ? 's' : ''}
                     </p>
-                    {partnerTypes.length > 0 && (
+                    {manufacturerTypes.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {partnerTypes.map((type) => (
+                        {manufacturerTypes.map((type) => (
                           <span
                             key={type}
                             className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700"
@@ -194,8 +198,8 @@ export default function PartnersAdminPage() {
                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                     />
                   </svg>
-                  <h3 className="mt-4 text-sm font-medium text-gray-900">No partner selected</h3>
-                  <p className="mt-1 text-sm text-gray-500">Select a partner from the list to configure its component types</p>
+                  <h3 className="mt-4 text-sm font-medium text-gray-900">No manufacturer selected</h3>
+                  <p className="mt-1 text-sm text-gray-500">Select a manufacturer from the list to configure its component types</p>
                 </div>
               </div>
             )}
