@@ -309,8 +309,8 @@ export async function getCPUs(filter?: ComponentFilter) {
       `
       *,
       category:component_categories(*),
-      chipBrands:chip_brands(*),
-      boardManufacturers:board_manufacturers(*),
+      chipBrand:chip_brands(*),
+      boardManufacturer:board_manufacturers(*),
       manufacturerSeries:manufacturer_series(*),
       cpu_specs(*)
     `,

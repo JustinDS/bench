@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 type BoardManufacturer = {
-  id: string;
+  id: string | null;
   name: string;
-  created_at: string;
+  created_at: string | null;
 };
 
 export default function BoardManufacturersCRUDPage() {
@@ -73,7 +73,7 @@ export default function BoardManufacturersCRUDPage() {
           .update({
             name: formData.name.trim(),
           })
-          .eq("id", editingManufacturer.id);
+          .eq("id", editingManufacturer.id as string);
 
         if (error) throw error;
       } else {
@@ -210,7 +210,9 @@ export default function BoardManufacturersCRUDPage() {
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {new Date(manufacturer.created_at).toLocaleDateString()}
+                      {new Date(
+                        manufacturer.created_at as string,
+                      ).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                       <button
@@ -220,7 +222,7 @@ export default function BoardManufacturersCRUDPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(manufacturer.id)}
+                        onClick={() => handleDelete(manufacturer.id as string)}
                         className={`${
                           deleteConfirm === manufacturer.id
                             ? "text-red-900 font-bold"

@@ -41,7 +41,7 @@ export type GPUFormData = z.infer<typeof gpuFormSchema>;
 
 // CPU Specs Schema
 export const cpuSpecsSchema = z.object({
-  component_id: z.string().uuid().nullable().optional(),
+  component_id: z.string().uuid().optional(),
   chip_series: z.string().max(50).nullable().optional(),
   chip_model: z.string().max(50).nullable().optional(),
   socket_type: z.string().max(50).nullable().optional(),

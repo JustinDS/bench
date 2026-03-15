@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 type ChipBrand = {
-  id: string;
+  id: string | null;
   name: string;
   logo_url: string | null;
-  created_at: string;
+  created_at: string | null;
 };
 
 export default function ChipBrandsCRUDPage() {
@@ -74,7 +74,7 @@ export default function ChipBrandsCRUDPage() {
             name: formData.name.trim(),
             logo_url: formData.logo_url.trim() || null,
           })
-          .eq("id", editingBrand.id);
+          .eq("id", editingBrand.id as string);
 
         if (error) throw error;
       } else {
@@ -225,7 +225,9 @@ export default function ChipBrandsCRUDPage() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {new Date(brand.created_at).toLocaleDateString()}
+                      {new Date(
+                        brand.created_at as string,
+                      ).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                       <button
@@ -235,7 +237,7 @@ export default function ChipBrandsCRUDPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(brand.id)}
+                        onClick={() => handleDelete(brand.id as string)}
                         className={`${
                           deleteConfirm === brand.id
                             ? "text-red-900 font-bold"
