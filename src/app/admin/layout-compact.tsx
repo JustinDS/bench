@@ -1,28 +1,32 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-export default function AdminLayoutCompact({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+export default function AdminLayoutCompact({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
 
   const navItems = [
-    { 
-      href: '/admin/chip-brands', 
-      label: 'Chip Brands',
-      icon: '🔷'
+    {
+      href: "/admin/chip-brands",
+      label: "Chip Brands",
+      icon: "🔷",
     },
-    { 
-      href: '/admin/board-manufacturers', 
-      label: 'Manufacturers',
-      icon: '🏭'
+    {
+      href: "/admin/board-manufacturers",
+      label: "Manufacturers",
+      icon: "🏭",
     },
-    { 
-      href: '/admin/manufacturer-series', 
-      label: 'Series',
-      icon: '📋'
+    {
+      href: "/admin/manufacturer-series",
+      label: "Series",
+      icon: "📋",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,21 +45,21 @@ export default function AdminLayoutCompact({ children }: { children: React.React
             {/* Pill Navigation */}
             <nav className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
               {navItems.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
                   </Link>
-                )
+                );
               })}
             </nav>
           </div>
@@ -63,9 +67,7 @@ export default function AdminLayoutCompact({ children }: { children: React.React
       </div>
 
       {/* Main Content */}
-      <main>
-        {children}
-      </main>
+      <main>{children}</main>
     </div>
-  )
+  );
 }
